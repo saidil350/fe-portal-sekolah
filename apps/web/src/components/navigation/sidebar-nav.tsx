@@ -3,12 +3,42 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import * as LucideIcons from 'lucide-react';
+import {
+  Activity,
+  BarChart3,
+  Bell,
+  BookOpen,
+  CalendarCheck,
+  CreditCard,
+  FileText,
+  LayoutDashboard,
+  School,
+  Settings,
+  ShieldAlert,
+  User,
+  Users,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '../../stores/auth-store';
 import { useSidebarStore } from '../../stores/sidebar-store';
 import { NAV_CONFIG, NavItem } from './nav-config';
 import { getRoleFromDashboardPath } from './role-from-path';
+
+const ICON_MAP = {
+  Activity,
+  BarChart3,
+  Bell,
+  BookOpen,
+  CalendarCheck,
+  CreditCard,
+  FileText,
+  LayoutDashboard,
+  School,
+  Settings,
+  ShieldAlert,
+  User,
+  Users,
+} satisfies Record<NavItem['iconName'], React.ComponentType<{ className?: string }>>;
 
 export function SidebarNav() {
   const pathname = usePathname();
@@ -21,8 +51,7 @@ export function SidebarNav() {
   return (
     <nav className="flex flex-col gap-1.5 p-3">
       {menuItems.map((item: NavItem) => {
-        // Dinamis memetakan nama string ke komponen Lucide Icon
-        const IconComponent = LucideIcons[item.iconName as keyof typeof LucideIcons] as React.ComponentType<{ className?: string }>;
+        const IconComponent = ICON_MAP[item.iconName];
         const isRoleRoot = item.href.split('/').filter(Boolean).length === 2;
         const isActive = pathname === item.href || (!isRoleRoot && pathname.startsWith(`${item.href}/`));
 

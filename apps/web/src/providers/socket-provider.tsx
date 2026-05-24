@@ -1,9 +1,9 @@
 'use client';
 
 import * as React from 'react';
+import { useToast } from '@portal-sekolah/ui';
 import { useAuthStore } from '../stores/auth-store';
 import { useNotificationStore } from '../stores/notification-store';
-import { useToast } from './toast-provider';
 
 export function SocketProvider({ children }: { children: React.ReactNode }) {
   const { user, session, isAuthenticated } = useAuthStore();

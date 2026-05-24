@@ -6,6 +6,19 @@ import {
   DashboardRow,
   StatusBadge,
 } from '@/components/dashboard/dashboard-route-page';
+import { PageHeader } from '@/components/shared/page-header';
+import {
+  Button,
+  Card,
+  CardContent,
+  Input,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@portal-sekolah/ui';
 import {
   Activity,
   Award,
@@ -56,6 +69,69 @@ function status(row: DashboardRow, key = 'status') {
       : 'outline';
 
   return <StatusBadge label={value} variant={variant} />;
+}
+
+type AttendanceStatus = 'Datang' | 'Sakit' | 'Alpa';
+
+interface AttendanceStudentRow {
+  id: string;
+  student: string;
+  className: string;
+  subject: string;
+  daily: Record<string, AttendanceStatus>;
+}
+
+const attendanceDays = ['20 Mei', '21 Mei', '22 Mei', '23 Mei', '24 Mei'];
+
+const initialAttendanceRows: AttendanceStudentRow[] = [
+  {
+    id: 'adit-pratama',
+    student: 'Adit Pratama',
+    className: 'XI IPA 1',
+    subject: 'Kimia',
+    daily: { '20 Mei': 'Datang', '21 Mei': 'Datang', '22 Mei': 'Datang', '23 Mei': 'Datang', '24 Mei': 'Datang' },
+  },
+  {
+    id: 'lulu-nurhaliza',
+    student: 'Lulu Nurhaliza',
+    className: 'XI IPA 1',
+    subject: 'Kimia',
+    daily: { '20 Mei': 'Datang', '21 Mei': 'Sakit', '22 Mei': 'Datang', '23 Mei': 'Datang', '24 Mei': 'Datang' },
+  },
+  {
+    id: 'rendra-setiawan',
+    student: 'Rendra Setiawan',
+    className: 'XI IPA 1',
+    subject: 'Kimia',
+    daily: { '20 Mei': 'Datang', '21 Mei': 'Datang', '22 Mei': 'Datang', '23 Mei': 'Datang', '24 Mei': 'Datang' },
+  },
+  {
+    id: 'maya-putri',
+    student: 'Maya Putri',
+    className: 'XI IPA 1',
+    subject: 'Kimia',
+    daily: { '20 Mei': 'Sakit', '21 Mei': 'Datang', '22 Mei': 'Datang', '23 Mei': 'Alpa', '24 Mei': 'Alpa' },
+  },
+  {
+    id: 'fajar-ramadhan',
+    student: 'Fajar Ramadhan',
+    className: 'XI IPA 1',
+    subject: 'Kimia',
+    daily: { '20 Mei': 'Datang', '21 Mei': 'Datang', '22 Mei': 'Datang', '23 Mei': 'Datang', '24 Mei': 'Alpa' },
+  },
+];
+
+function attendanceStatusBadge(statusValue: AttendanceStatus) {
+  const variant = statusValue === 'Datang' ? 'success' : statusValue === 'Sakit' ? 'secondary' : 'destructive';
+  return <StatusBadge label={statusValue} variant={variant} />;
+}
+
+function getAttendanceSummary(row: AttendanceStudentRow) {
+  const statuses = Object.values(row.daily);
+  const datang = statuses.filter((value) => value === 'Datang').length;
+  const sakit = statuses.filter((value) => value === 'Sakit').length;
+  const alpa = statuses.filter((value) => value === 'Alpa').length;
+  return `${datang} datang / ${sakit} sakit / ${alpa} alpa`;
 }
 
 export function SuperAdminTenantsPage() {
@@ -112,7 +188,7 @@ export function SuperAdminStatsPage() {
         { title: 'Transaksi SPP', value: 'Rp 1,8 M', description: 'Lintas tenant bulan ini', icon: CreditCard, color: blue },
       ]}
       insights={[
-        { title: 'Peak traffic', value: '07.00-08.30', description: 'Mayoritas check-in siswa terjadi sebelum jam pertama.', badge: 'Harian' },
+        { title: 'Peak traffic', value: '07.00-08.30', description: 'Mayoritas input kehadiran siswa terjadi sebelum jam pertama.', badge: 'Harian' },
         { title: 'API latency', value: '182 ms', description: 'Rata-rata p95 untuk request dashboard summary.', badge: 'Stabil', badgeVariant: 'success' },
         { title: 'Adopsi fitur', value: '76%', description: 'Tenant aktif sudah memakai modul presensi dan pembayaran.', badge: 'Baik' },
       ]}
@@ -310,7 +386,7 @@ export function AdminAttendancePage() {
       ]}
       insights={[
         { title: 'Kelas terbaik', value: 'XI IPA 2', description: 'Kehadiran 100% selama tiga hari berturut-turut.', badge: 'Apresiasi', badgeVariant: 'success' },
-        { title: 'Jam ramai', value: '06.45', description: 'Puncak check-in siswa melalui presensi mandiri.', badge: 'Insight' },
+        { title: 'Jam ramai', value: '06.45', description: 'Puncak input kehadiran siswa oleh guru piket dan guru mapel.', badge: 'Insight' },
         { title: 'Perlu tindak lanjut', value: '8 siswa', description: 'Tidak hadir tanpa keterangan lebih dari dua kali.', badge: 'Prioritas' },
       ]}
       table={{
@@ -348,7 +424,7 @@ export function AdminSettingsPage() {
         { title: 'Template Aktif', value: '6 Template', description: 'Notifikasi dan invoice', icon: Bell, color: amber },
       ]}
       insights={[
-        { title: 'Radius presensi', value: '150 meter', description: 'Diterapkan untuk check-in siswa dan guru.', badge: 'GPS' },
+        { title: 'Radius presensi', value: '150 meter', description: 'Diterapkan untuk check-in guru dan validasi area sekolah.', badge: 'GPS' },
         { title: 'Jam masuk', value: '07.00 WIB', description: 'Lewat jam ini ditandai terlambat otomatis.', badge: 'Aktif' },
         { title: 'Verifikasi SPP', value: 'Manual', description: 'Staff tetap memvalidasi transfer sebelum lunas.', badge: 'Keuangan' },
       ]}
@@ -645,42 +721,260 @@ export function HeadmasterReportsPage() {
 }
 
 export function TeacherAttendancePage() {
+  const [rows, setRows] = React.useState<AttendanceStudentRow[]>(initialAttendanceRows);
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [query, setQuery] = React.useState('');
+  const [selectedDay, setSelectedDay] = React.useState(attendanceDays[attendanceDays.length - 1]);
+  const [selectedStudentIds, setSelectedStudentIds] = React.useState<string[]>([]);
+  const filteredRows = rows.filter((row) =>
+    [row.student, row.className, row.subject].some((value) => value.toLowerCase().includes(query.toLowerCase()))
+  );
+  const filteredStudentIds = filteredRows.map((row) => row.id);
+  const isAllFilteredSelected =
+    filteredStudentIds.length > 0 && filteredStudentIds.every((id) => selectedStudentIds.includes(id));
+
+  const updateAttendance = (studentId: string, day: string, statusValue: AttendanceStatus) => {
+    setRows((currentRows) =>
+      currentRows.map((row) =>
+        row.id === studentId
+          ? {
+              ...row,
+              daily: {
+                ...row.daily,
+                [day]: statusValue,
+              },
+            }
+          : row
+      )
+    );
+  };
+
+  const toggleStudentSelection = (studentId: string) => {
+    setSelectedStudentIds((currentIds) =>
+      currentIds.includes(studentId) ? currentIds.filter((id) => id !== studentId) : [...currentIds, studentId]
+    );
+  };
+
+  const toggleAllFilteredSelection = () => {
+    setSelectedStudentIds((currentIds) => {
+      if (isAllFilteredSelected) {
+        return currentIds.filter((id) => !filteredStudentIds.includes(id));
+      }
+      return Array.from(new Set([...currentIds, ...filteredStudentIds]));
+    });
+  };
+
+  const updateSelectedAttendance = (statusValue: AttendanceStatus) => {
+    if (selectedStudentIds.length === 0) return;
+    setRows((currentRows) =>
+      currentRows.map((row) =>
+        selectedStudentIds.includes(row.id)
+          ? {
+              ...row,
+              daily: {
+                ...row.daily,
+                [selectedDay]: statusValue,
+              },
+            }
+          : row
+      )
+    );
+    setIsEditing(true);
+  };
+
   return (
-    <DashboardRoutePage
-      title="Kehadiran Kelas"
-      description="Kelola presensi kelas yang Anda ampu dan pantau siswa yang terlambat atau belum hadir."
-      actionLabel="Input Presensi"
-      actionIcon={CalendarCheck}
-      stats={[
-        { title: 'Hadir Hari Ini', value: '98.5%', description: '118 dari 120 siswa', icon: CalendarCheck, color: green },
-        { title: 'Belum Check-in', value: '2 Siswa', description: 'Menunggu konfirmasi', icon: Clock, color: amber },
-        { title: 'Kelas Diampu', value: '4 Rombel', description: 'Kimia XI IPA', icon: BookOpen, color: violet },
-      ]}
-      insights={[
-        { title: 'Kelas terbaik', value: 'XI IPA 2', description: 'Presensi lengkap di jam pertama.', badge: '100%', badgeVariant: 'success' },
-        { title: 'Siswa terlambat', value: '3 siswa', description: 'Perlu catatan sebelum akhir pekan.', badge: 'Catatan' },
-        { title: 'Sinkron wali kelas', value: 'Aktif', description: 'Rekap dapat dilihat kepala sekolah.', badge: 'Realtime' },
-      ]}
-      table={{
-        title: 'Presensi Kelas Hari Ini',
-        icon: CalendarCheck,
-        searchKey: 'student',
-        searchPlaceholder: 'Cari siswa...',
-        data: [
-          { student: 'Adit Pratama', className: 'XI IPA 1', time: '06:48', method: 'GPS Mobile', status: 'Hadir' },
-          { student: 'Lulu Nurhaliza', className: 'XI IPA 2', time: '06:55', method: 'GPS Mobile', status: 'Hadir' },
-          { student: 'Rendra Setiawan', className: 'XI IPA 1', time: '07:14', method: 'Manual Guru', status: 'Terlambat' },
-          { student: 'Maya Putri', className: 'XI IPA 2', time: '-', method: 'Belum ada', status: 'Belum Hadir' },
-        ],
-        columns: [
-          { header: 'Siswa', accessorKey: 'student' },
-          { header: 'Kelas', accessorKey: 'className' },
-          { header: 'Jam', accessorKey: 'time' },
-          { header: 'Metode', accessorKey: 'method' },
-          { header: 'Status', render: status },
-        ],
-      }}
-    />
+    <div className="space-y-6">
+      <PageHeader
+        title="Kehadiran Kelas"
+        description="Guru berhak mengisi absensi setiap murid hanya pada jam jadwal pelajaran yang dia ampu."
+      />
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <Card className="border-border/60">
+          <CardContent className="p-5">
+            <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">Jadwal Aktif</p>
+            <p className="mt-3 text-2xl font-black">Kimia Jam 1</p>
+            <p className="mt-2 text-sm font-medium text-muted-foreground">XI IPA 1, Senin 08.00-09.30</p>
+          </CardContent>
+        </Card>
+        <Card className="border-border/60">
+          <CardContent className="p-5">
+            <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">Hak Input Guru</p>
+            <p className="mt-3 text-2xl font-black">Sesuai Jadwal</p>
+            <p className="mt-2 text-sm font-medium text-muted-foreground">Hanya pada pertemuan mapel yang dia ampu.</p>
+          </CardContent>
+        </Card>
+        <Card className="border-border/60">
+          <CardContent className="p-5">
+            <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">Status Input</p>
+            <p className="mt-3 text-2xl font-black">{isEditing ? 'Mode Edit' : 'Tersimpan'}</p>
+            <p className="mt-2 text-sm font-medium text-muted-foreground">Pilih datang, sakit, atau alpa untuk tiap siswa.</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="border-border/70">
+        <CardContent className="flex flex-col gap-4 p-5">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="text-left">
+              <h3 className="text-base font-bold">Rekap Absensi Harian Siswa</h3>
+              <p className="text-xs text-muted-foreground">
+                Centang siswa secara massal atau manual, pilih tanggal, lalu tetapkan status absensinya.
+              </p>
+            </div>
+            <div className="flex w-full flex-col gap-2 lg:w-auto lg:flex-row lg:items-center">
+              <Input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Cari siswa..."
+                className="w-full lg:w-72"
+              />
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  className="gap-2 rounded-xl text-xs font-semibold"
+                  onClick={() => setIsEditing((current) => !current)}
+                >
+                  <CalendarCheck className="h-4 w-4" />
+                  {isEditing ? 'Simpan Absensi' : 'Absensi Siswa'}
+                </Button>
+                {isEditing && (
+                  <Button variant="outline" className="rounded-xl text-xs font-semibold" onClick={() => setIsEditing(false)}>
+                    Batal
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {isEditing && (
+            <div className="flex flex-col gap-3 rounded-xl border bg-muted/20 p-3 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Tanggal absensi</span>
+                <select
+                  value={selectedDay}
+                  onChange={(event) => setSelectedDay(event.target.value)}
+                  className="h-9 rounded-lg border bg-background px-3 text-sm font-semibold"
+                >
+                  {attendanceDays.map((day) => (
+                    <option key={day} value={day}>
+                      {day}
+                    </option>
+                  ))}
+                </select>
+                <span className="text-xs font-semibold text-muted-foreground">
+                  {selectedStudentIds.length} siswa dipilih
+                </span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="rounded-xl text-xs font-semibold"
+                  onClick={() => updateSelectedAttendance('Datang')}
+                  disabled={selectedStudentIds.length === 0}
+                >
+                  Set Datang
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="rounded-xl text-xs font-semibold"
+                  onClick={() => updateSelectedAttendance('Sakit')}
+                  disabled={selectedStudentIds.length === 0}
+                >
+                  Set Sakit
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="rounded-xl text-xs font-semibold"
+                  onClick={() => updateSelectedAttendance('Alpa')}
+                  disabled={selectedStudentIds.length === 0}
+                >
+                  Set Alpa
+                </Button>
+              </div>
+            </div>
+          )}
+
+          <div className="overflow-hidden rounded-xl border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  {isEditing && (
+                    <TableHead className="w-12">
+                      <input
+                        type="checkbox"
+                        checked={isAllFilteredSelected}
+                        onChange={toggleAllFilteredSelection}
+                        aria-label="Pilih semua siswa yang tampil"
+                        className="h-4 w-4 rounded border-input accent-primary"
+                      />
+                    </TableHead>
+                  )}
+                  <TableHead className="min-w-48">Siswa</TableHead>
+                  <TableHead>Kelas</TableHead>
+                  <TableHead>Mapel</TableHead>
+                  {attendanceDays.map((day) => (
+                    <TableHead key={day} className="min-w-36 text-center">
+                      {day}
+                    </TableHead>
+                  ))}
+                  <TableHead className="min-w-44">Rekap</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredRows.map((row) => (
+                  <TableRow key={row.id}>
+                    {isEditing && (
+                      <TableCell>
+                        <input
+                          type="checkbox"
+                          checked={selectedStudentIds.includes(row.id)}
+                          onChange={() => toggleStudentSelection(row.id)}
+                          aria-label={`Pilih ${row.student}`}
+                          className="h-4 w-4 rounded border-input accent-primary"
+                        />
+                      </TableCell>
+                    )}
+                    <TableCell className="font-semibold">{row.student}</TableCell>
+                    <TableCell>{row.className}</TableCell>
+                    <TableCell>{row.subject}</TableCell>
+                    {attendanceDays.map((day) => (
+                      <TableCell key={`${row.id}-${day}`} className="text-center">
+                        {isEditing ? (
+                          <div className="inline-flex rounded-lg border bg-muted/30 p-1">
+                            {(['Datang', 'Sakit', 'Alpa'] as AttendanceStatus[]).map((statusValue) => (
+                              <button
+                                key={statusValue}
+                                type="button"
+                                onClick={() => updateAttendance(row.id, day, statusValue)}
+                                className={`rounded-md px-2.5 py-1 text-xs font-bold transition-colors ${
+                                  row.daily[day] === statusValue
+                                    ? 'bg-primary text-primary-foreground shadow-sm'
+                                    : 'text-muted-foreground hover:bg-background hover:text-foreground'
+                                }`}
+                              >
+                                {statusValue}
+                              </button>
+                            ))}
+                          </div>
+                        ) : (
+                          attendanceStatusBadge(row.daily[day])
+                        )}
+                      </TableCell>
+                    ))}
+                    <TableCell className="text-sm font-semibold text-muted-foreground">
+                      {getAttendanceSummary(row)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 
@@ -771,14 +1065,12 @@ export function TeacherClassesPage() {
       actionLabel="Lihat Jadwal Mengajar"
       actionIcon={BookOpen}
       stats={[
-        { title: 'Rombel Diampu', value: '4 Kelas', description: 'XI IPA dan kelas lintas minat', icon: BookOpen, color: violet },
-        { title: 'Total Siswa', value: '120 Siswa', description: 'Semua aktif semester ini', icon: Users, color: indigo },
-        { title: 'Kelas Lengkap', value: '3/4', description: 'Satu kelas perlu update roster', icon: UserCheck, color: green },
-      ]}
-      insights={[
-        { title: 'Kelas aktif', value: 'XI IPA 2', description: 'Pengumpulan tugas paling lengkap.', badge: 'Unggul', badgeVariant: 'success' },
-        { title: 'Roster', value: '1 pending', description: 'Mutasi siswa belum masuk jadwal mapel.', badge: 'Cek' },
-        { title: 'Jadwal padat', value: 'Rabu', description: 'Tiga sesi mengajar berurutan.', badge: 'Info' },
+        { title: 'Kelas', value: 'XI IPA 1', description: 'Kimia', icon: BookOpen, color: violet },
+        { title: 'Kelas', value: 'XI IPA 2', description: 'Kimia', icon: BookOpen, color: violet },
+        { title: 'Kelas', value: 'X IPA 1', description: 'Kimia Dasar', icon: BookOpen, color: violet },
+        { title: 'Kelas', value: 'XII IPA 3', description: 'Praktikum', icon: BookOpen, color: violet },
+        { title: 'Kelas', value: 'XI IPS 1', description: 'Kimia Lintas Minat', icon: BookOpen, color: violet },
+        { title: 'Kelas', value: 'XII IPA 1', description: 'Kimia', icon: BookOpen, color: violet },
       ]}
       table={{
         title: 'Daftar Kelas Diampu',
@@ -903,7 +1195,7 @@ export function StaffAttendancePage() {
         data: [
           { student: 'Rendra Setiawan', className: 'X IPS 1', note: 'Izin keluarga', source: 'Wali kelas', status: 'Pending' },
           { student: 'Maya Putri', className: 'XII Bahasa', note: 'Surat sakit', source: 'Upload orang tua', status: 'Pending' },
-          { student: 'Fajar Ramadhan', className: 'XI IPA 1', note: 'Check-in manual', source: 'Guru piket', status: 'Hadir' },
+          { student: 'Fajar Ramadhan', className: 'XI IPA 1', note: 'Input manual guru', source: 'Guru piket', status: 'Hadir' },
           { student: 'Nabila Safira', className: 'X IPA 2', note: 'Tanpa keterangan', source: 'Sistem', status: 'Belum Hadir' },
         ],
         columns: [
@@ -1035,9 +1327,9 @@ export function StaffProfilePage() {
 export function StudentAttendancePage() {
   return (
     <DashboardRoutePage
-      title="Presensi Mandiri"
-      description="Lihat status presensi pribadi, riwayat check-in, dan catatan keterlambatan Anda."
-      actionLabel="Check-in Simulasi"
+      title="Kehadiran Saya"
+      description="Lihat riwayat kehadiran yang diinput oleh guru pada setiap pertemuan jam mata pelajaran."
+      actionLabel="Ajukan Izin"
       actionIcon={MapPin}
       stats={[
         { title: 'Kehadiran Bulan Ini', value: '98.2%', description: '1 kali izin tercatat', icon: CalendarCheck, color: green },
@@ -1045,25 +1337,25 @@ export function StudentAttendancePage() {
         { title: 'Streak Hadir', value: '12 Hari', description: 'Pertahankan sampai akhir bulan', icon: Sparkles, color: violet },
       ]}
       insights={[
-        { title: 'Status hari ini', value: 'Sudah hadir', description: 'Check-in tercatat pukul 06:52 WIB.', badge: 'Hadir', badgeVariant: 'success' },
-        { title: 'Lokasi', value: 'Area sekolah', description: 'Presensi berada dalam radius valid.', badge: 'GPS' },
+        { title: 'Status hari ini', value: 'Hadir', description: 'Kehadiran sudah diinput oleh guru mapel.', badge: 'Hadir', badgeVariant: 'success' },
+        { title: 'Sumber data', value: 'Guru mapel', description: 'Setiap pertemuan dicatat oleh guru yang mengajar.', badge: 'Mapel' },
         { title: 'Catatan BK', value: 'Tidak ada', description: 'Tidak ada pelanggaran presensi aktif.', badge: 'Aman', badgeVariant: 'success' },
       ]}
       table={{
-        title: 'Riwayat Presensi Saya',
+        title: 'Riwayat Kehadiran Saya',
         icon: CalendarCheck,
         searchKey: 'date',
         data: [
-          { date: '24 Mei 2026', checkIn: '06:52', checkOut: '14:30', method: 'GPS Mobile', status: 'Hadir' },
-          { date: '23 Mei 2026', checkIn: '06:49', checkOut: '14:28', method: 'GPS Mobile', status: 'Hadir' },
-          { date: '22 Mei 2026', checkIn: '07:08', checkOut: '14:31', method: 'GPS Mobile', status: 'Terlambat' },
-          { date: '21 Mei 2026', checkIn: '-', checkOut: '-', method: 'Surat izin', status: 'Izin' },
+          { date: '24 Mei 2026', subject: 'Kimia', meeting: 'Jam 1', inputBy: 'Budi Santoso', status: 'Hadir' },
+          { date: '23 Mei 2026', subject: 'Matematika', meeting: 'Jam 3', inputBy: 'Sari Wulandari', status: 'Hadir' },
+          { date: '22 Mei 2026', subject: 'Bahasa Indonesia', meeting: 'Jam 2', inputBy: 'Rina Marlina', status: 'Terlambat' },
+          { date: '21 Mei 2026', subject: 'Fisika', meeting: 'Jam 4', inputBy: 'Surat izin diverifikasi', status: 'Izin' },
         ],
         columns: [
           { header: 'Tanggal', accessorKey: 'date' },
-          { header: 'Masuk', accessorKey: 'checkIn' },
-          { header: 'Pulang', accessorKey: 'checkOut' },
-          { header: 'Metode', accessorKey: 'method' },
+          { header: 'Mapel', accessorKey: 'subject' },
+          { header: 'Pertemuan', accessorKey: 'meeting' },
+          { header: 'Diinput Oleh', accessorKey: 'inputBy' },
           { header: 'Status', render: status },
         ],
       }}

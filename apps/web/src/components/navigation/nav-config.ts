@@ -50,7 +50,7 @@ export const NAV_CONFIG: Record<Role, NavItem[]> = {
   ],
   SISWA: [
     { title: 'Dashboard', href: '/dashboard/siswa', iconName: 'LayoutDashboard' },
-    { title: 'Presensi Mandiri', href: '/dashboard/siswa/attendance', iconName: 'CalendarCheck' },
+    { title: 'Riwayat Kehadiran', href: '/dashboard/siswa/attendance', iconName: 'CalendarCheck' },
     { title: 'Daftar Tugas', href: '/dashboard/siswa/assignments', iconName: 'FileText' },
     { title: 'Riwayat Pembayaran', href: '/dashboard/siswa/payments', iconName: 'CreditCard' },
     { title: 'Notifikasi', href: '/dashboard/siswa/notifications', iconName: 'Bell' },

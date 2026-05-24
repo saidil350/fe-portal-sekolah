@@ -1,14 +1,15 @@
 'use client';
 
 import * as React from 'react';
+import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/components/shared/page-header';
 import { DataTable } from '@/components/shared/data-table';
 import { Card, CardHeader, CardContent, CardTitle, Badge, Button, useToast, Dialog } from '@portal-sekolah/ui';
-import { CalendarCheck, FileText, CreditCard, Clock, QrCode } from 'lucide-react';
+import { CalendarCheck, FileText, CreditCard, QrCode } from 'lucide-react';
 
 export default function SiswaDashboard() {
+  const router = useRouter();
   const { toast } = useToast();
-  const [isCheckedIn, setIsCheckedIn] = React.useState(false);
   const [isQrisOpen, setIsQrisOpen] = React.useState(false);
   const [selectedInvoice, setSelectedInvoice] = React.useState<any>(null);
 
@@ -23,15 +24,6 @@ export default function SiswaDashboard() {
     { title: 'Ulangan Harian: Stoikiometri Larutan', subject: 'Kimia', due: 'Lulus Nilai: 92', status: 'SELESAI' },
   ];
 
-  const handleCheckIn = () => {
-    setIsCheckedIn(true);
-    toast({
-      title: 'Presensi Berhasil!',
-      description: 'Anda terdeteksi melakukan check-in pada pukul ' + new Date().toLocaleTimeString('id-ID'),
-      type: 'success',
-    });
-  };
-
   const handleOpenQris = (invoice: any) => {
     setSelectedInvoice(invoice);
     setIsQrisOpen(true);
@@ -41,15 +33,13 @@ export default function SiswaDashboard() {
     <div className="space-y-6">
       <PageHeader
         title="Dashboard Siswa"
-        description="Pantau presensi mandiri Anda hari ini, unduh modul pengumpulan tugas, dan bayar SPP bulanan via QRIS."
+        description="Pantau status kehadiran Anda hari ini, unduh modul pengumpulan tugas, dan bayar SPP bulanan via QRIS."
         action={
           <Button
-            onClick={handleCheckIn}
-            disabled={isCheckedIn}
+            onClick={() => router.push('/dashboard/siswa/attendance')}
             className="rounded-xl gap-2 text-xs font-semibold py-5 shadow-lg shadow-emerald-500/20"
-            variant={isCheckedIn ? 'outline' : 'default'}
           >
-            <Clock className="h-4 w-4" /> {isCheckedIn ? 'Sudah Presensi Hari Ini' : 'Lakukan Presensi Masuk'}
+            <CalendarCheck className="h-4 w-4" /> Lihat Status Kehadiran
           </Button>
         }
       />

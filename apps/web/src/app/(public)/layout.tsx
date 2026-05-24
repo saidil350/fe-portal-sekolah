@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { LoginProviders } from '../../providers/login-providers';
 
 export default function PublicLayout({
   children,
@@ -7,7 +8,7 @@ export default function PublicLayout({
 }) {
   return (
     <div className="min-h-screen bg-muted/10 font-sans antialiased">
-      {children}
+      <LoginProviders>{children}</LoginProviders>
     </div>
   );
 }

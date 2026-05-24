@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import { ArrowUpRight, LucideIcon } from 'lucide-react';
 import { Card, CardContent, Badge } from '@portal-sekolah/ui';
 import { cn } from '@/lib/utils';
@@ -22,16 +21,11 @@ export interface DashboardMetric {
 export function InteractiveMetricGrid({ metrics }: { metrics: DashboardMetric[] }) {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-      {metrics.map((metric, index) => {
+      {metrics.map((metric) => {
         const Icon = metric.icon;
 
         return (
-          <motion.div
-            key={metric.id}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2, delay: index * 0.03 }}
-          >
+          <div key={metric.id} className="animate-in fade-in slide-in-from-bottom-2 duration-200">
             <Link href={metric.href} className="group block">
               <Card className="h-full border-border/70 bg-card/95 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md">
                 <CardContent className="flex h-full flex-col gap-5 p-5">
@@ -58,7 +52,7 @@ export function InteractiveMetricGrid({ metrics }: { metrics: DashboardMetric[] 
                 </CardContent>
               </Card>
             </Link>
-          </motion.div>
+          </div>
         );
       })}
     </div>

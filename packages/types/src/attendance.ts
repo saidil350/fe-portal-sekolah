@@ -11,6 +11,8 @@ export interface AttendanceRecord extends BaseEntity {
   notes?: string;
   locationLatitude?: number;
   locationLongitude?: number;
+  selfieUrl?: string;
+  faceVerified?: boolean;
   deviceInfo?: string;
   isRealtimeCheckedIn?: boolean;
 }
@@ -18,5 +20,7 @@ export interface AttendanceRecord extends BaseEntity {
 export interface CheckInPayload {
   latitude?: number;
   longitude?: number;
+  selfieUrl?: string;
+  faceVerified?: boolean;
   notes?: string;
 }
