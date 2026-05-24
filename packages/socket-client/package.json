@@ -1,0 +1,21 @@
+{
+  "name": "@portal-sekolah/socket-client",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@portal-sekolah/config": "0.0.0",
+    "@portal-sekolah/constants": "0.0.0",
+    "@portal-sekolah/types": "0.0.0",
+    "socket.io-client": "^4.7.5"
+  },
+  "devDependencies": {
+    "@portal-sekolah/ts-config": "0.0.0",
+    "typescript": "^5.4.5"
+  }
+}

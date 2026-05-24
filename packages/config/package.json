@@ -1,0 +1,18 @@
+{
+  "name": "@portal-sekolah/config",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@portal-sekolah/ts-config": "0.0.0",
+    "typescript": "^5.4.5"
+  }
+}

@@ -1,0 +1,338 @@
+'use client';
+
+import * as React from 'react';
+import { PageHeader } from '@/components/shared/page-header';
+import {
+  Badge,
+  BadgeProps,
+  Button,
+  Card,
+  CardContent,
+  Dialog,
+} from '@portal-sekolah/ui';
+import { ArrowUpRight, LucideIcon, Sparkles } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { AnalyticsExplorer, AnalyticsPoint } from './analytics-explorer';
+import { EnterpriseDataTable, DashboardTableColumn } from './enterprise-data-table';
+import { EntitySidePanel } from './entity-side-panel';
+import { InteractiveMetricGrid, DashboardMetric as InteractiveDashboardMetric } from './interactive-metric-grid';
+import { MasterDetailPanel } from './master-detail-panel';
+import { DashboardTabs } from './dashboard-tabs';
+import { DashboardEntity } from '@/stores/dashboard-store';
+
+export type DashboardRow = Record<string, unknown>;
+
+export interface DashboardStat {
+  title: string;
+  value: string;
+  description?: string;
+  icon: LucideIcon;
+  color: string;
+}
+
+export interface DashboardColumn {
+  header: string;
+  accessorKey?: string;
+  render?: (row: DashboardRow) => React.ReactNode;
+}
+
+export interface DashboardTableSection {
+  title: string;
+  icon: LucideIcon;
+  data: DashboardRow[];
+  columns: DashboardColumn[];
+  searchKey?: string;
+  searchPlaceholder?: string;
+}
+
+export interface DashboardInsight {
+  title: string;
+  value: string;
+  description: string;
+  badge?: string;
+  badgeVariant?: BadgeProps['variant'];
+}
+
+export interface DashboardRoutePageProps {
+  title: string;
+  description: string;
+  actionLabel: string;
+  actionIcon: LucideIcon;
+  stats: DashboardStat[];
+  table: DashboardTableSection;
+  insights?: DashboardInsight[];
+}
+
+function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/rp\s?/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+    .slice(0, 48);
+}
+
+function currentRouteBase(pathname: string) {
+  return pathname.split('/').filter(Boolean).join('/').replace(/^/, '/');
+}
+
+function metricHref(pathname: string, stat: DashboardStat) {
+  const base = currentRouteBase(pathname);
+  return `${base}/analytics?metric=${slugify(stat.title)}`;
+}
+
+function rowHref(pathname: string, row: DashboardRow, index: number) {
+  const base = currentRouteBase(pathname);
+  const raw =
+    row.id ??
+    row.student ??
+    row.className ??
+    row.month ??
+    row.school ??
+    row.invoice ??
+    row.title ??
+    row.grade ??
+    row.unit ??
+    row.report ??
+    row.setting ??
+    `detail-${index + 1}`;
+  return `${base}/${slugify(String(raw))}`;
+}
+
+function rowTitle(row: DashboardRow) {
+  return String(
+    row.student ??
+      row.name ??
+      row.className ??
+      row.month ??
+      row.school ??
+      row.invoice ??
+      row.title ??
+      row.grade ??
+      row.unit ??
+      row.report ??
+      row.setting ??
+      'Detail'
+  );
+}
+
+function rowSubtitle(row: DashboardRow) {
+  const subtitle =
+    row.className ??
+    row.email ??
+    row.domain ??
+    row.subject ??
+    row.owner ??
+    row.module ??
+    row.period ??
+    row.note ??
+    row.value ??
+    row.target;
+  return String(subtitle ?? 'Klik untuk membuka detail dan konteks lengkap.');
+}
+
+function rowMetrics(row: DashboardRow) {
+  return Object.fromEntries(
+    Object.entries(row)
+      .filter(([, value]) => typeof value === 'string' || typeof value === 'number')
+      .slice(0, 4)
+      .map(([key, value]) => [key, String(value)])
+  );
+}
+
+export function StatusBadge({
+  label,
+  variant = 'secondary',
+}: {
+  label: string;
+  variant?: BadgeProps['variant'];
+}) {
+  return <Badge variant={variant}>{label}</Badge>;
+}
+
+export function DashboardStatCards({ stats }: { stats: DashboardStat[] }) {
+  const pathname = usePathname();
+  const metrics: InteractiveDashboardMetric[] = stats.map((stat) => ({
+    id: slugify(stat.title),
+    title: stat.title,
+    value: stat.value,
+    description: stat.description,
+    delta: stat.value.includes('%') ? '+2.4%' : undefined,
+    href: metricHref(pathname, stat),
+    chartKey: slugify(stat.title),
+    detailType: 'analytics',
+    icon: stat.icon,
+    color: stat.color,
+  }));
+
+  return <InteractiveMetricGrid metrics={metrics} />;
+}
+
+export function DashboardSectionCard({ section }: { section: DashboardTableSection }) {
+  const pathname = usePathname();
+  const entities = section.data.map((row, index): DashboardEntity & DashboardRow => {
+    const href = rowHref(pathname, row, index);
+
+    return {
+      ...row,
+      id: slugify(`${rowTitle(row)}-${index}`),
+      type: section.title,
+      title: rowTitle(row),
+      subtitle: rowSubtitle(row),
+      href,
+      status: typeof row.status === 'string' ? row.status : undefined,
+      metrics: rowMetrics(row),
+      preview: {
+        title: rowTitle(row),
+        description: `${rowTitle(row)} memiliki detail operasional, histori, dan konteks analitik yang dapat dieksplorasi lebih lanjut.`,
+        meta: rowMetrics(row),
+      },
+    };
+  });
+
+  const columns: DashboardTableColumn<DashboardEntity & DashboardRow>[] = section.columns.map((column) => ({
+    header: column.header,
+    accessorKey: column.accessorKey as keyof (DashboardEntity & DashboardRow),
+    cell: ({ row }) => (column.render ? column.render(row.original) : String(row.original[column.accessorKey ?? 'title'] ?? '')),
+  }));
+
+  return (
+    <EnterpriseDataTable
+      title={section.title}
+      data={entities}
+      columns={columns}
+      searchPlaceholder={section.searchPlaceholder}
+    />
+  );
+}
+
+export function DashboardInsights({ insights = [] }: { insights?: DashboardInsight[] }) {
+  if (insights.length === 0) return null;
+
+  return (
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      {insights.map((insight) => (
+        <Card key={insight.title} className="border-border/60 bg-card/80">
+          <CardContent className="space-y-3 p-5 text-left">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+                {insight.title}
+              </p>
+              {insight.badge && (
+                <Badge variant={insight.badgeVariant ?? 'secondary'}>{insight.badge}</Badge>
+              )}
+            </div>
+            <p className="text-2xl font-black">{insight.value}</p>
+            <p className="text-sm font-medium leading-relaxed text-muted-foreground">
+              {insight.description}
+            </p>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+export function DashboardRoutePage({
+  title,
+  description,
+  actionLabel,
+  actionIcon: ActionIcon,
+  stats,
+  table,
+  insights,
+}: DashboardRoutePageProps) {
+  const pathname = usePathname();
+  const [activeTab, setActiveTab] = React.useState('overview');
+  const [isActionOpen, setIsActionOpen] = React.useState(false);
+  const analyticsData: AnalyticsPoint[] = stats.map((stat, index) => ({
+    id: slugify(stat.title),
+    label: stat.title.split(' ').slice(0, 2).join(' '),
+    value: Number(String(stat.value).replace(/[^0-9.]/g, '').slice(0, 5)) || (index + 1) * 24,
+    secondary: index % 2 === 0 ? (index + 1) * 18 : (index + 1) * 12,
+    href: metricHref(pathname, stat),
+  }));
+  const masterEntities = table.data.slice(0, 4).map((row, index): DashboardEntity => ({
+    id: slugify(`${rowTitle(row)}-${index}`),
+    type: table.title,
+    title: rowTitle(row),
+    subtitle: rowSubtitle(row),
+    href: rowHref(pathname, row, index),
+    status: typeof row.status === 'string' ? row.status : undefined,
+    metrics: rowMetrics(row),
+    preview: {
+      title: rowTitle(row),
+      description: `${rowTitle(row)} siap dieksplorasi lewat master-detail, preview cepat, dan halaman detail.`,
+      meta: rowMetrics(row),
+    },
+  }));
+
+  return (
+    <div className="space-y-6">
+      <PageHeader
+        title={title}
+        description={description}
+        action={
+          <Button className="gap-2 rounded-xl text-xs font-semibold" onClick={() => setIsActionOpen(true)}>
+            <ActionIcon className="h-4 w-4" /> {actionLabel}
+          </Button>
+        }
+      />
+
+      <DashboardTabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        items={[
+          { id: 'overview', label: 'Overview' },
+          { id: 'analytics', label: 'Analytics' },
+          { id: 'details', label: 'Master Detail' },
+        ]}
+      />
+
+      <DashboardStatCards stats={stats} />
+
+      {activeTab === 'overview' && (
+        <>
+          <DashboardInsights insights={insights} />
+          <DashboardSectionCard section={table} />
+        </>
+      )}
+
+      {activeTab === 'analytics' && (
+        <AnalyticsExplorer
+          title={`Analytics ${title}`}
+          description="Klik titik chart atau tombol periode untuk masuk ke detail eksplorasi yang lebih spesifik."
+          data={analyticsData}
+        />
+      )}
+
+      {activeTab === 'details' && <MasterDetailPanel title={table.title} items={masterEntities} />}
+
+      <EntitySidePanel />
+
+      <Dialog
+        isOpen={isActionOpen}
+        onClose={() => setIsActionOpen(false)}
+        title={actionLabel}
+        description="Aksi ini disiapkan sebagai modal enterprise agar workflow dashboard terasa stateful."
+      >
+        <div className="flex flex-col gap-4 text-left">
+          <div className="rounded-xl border bg-muted/30 p-4">
+            <div className="flex items-start gap-3">
+              <Sparkles className="size-5 text-primary" />
+              <div>
+                <p className="text-sm font-bold">Workflow siap dilanjutkan</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Dari sini implementasi berikutnya dapat menghubungkan form, export, atau create flow ke API.
+                </p>
+              </div>
+            </div>
+          </div>
+          <Button className="self-end gap-2 rounded-xl" onClick={() => setIsActionOpen(false)}>
+            Tutup <ArrowUpRight className="size-4" />
+          </Button>
+        </div>
+      </Dialog>
+    </div>
+  );
+}

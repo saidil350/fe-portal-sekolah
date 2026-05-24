@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./next.json",
+  "compilerOptions": {
+    "baseUrl": "../../apps/web",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  }
+}
