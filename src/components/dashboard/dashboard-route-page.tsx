@@ -219,7 +219,7 @@ export function DashboardSectionCard({
       href,
       status: typeof row.status === 'string' ? row.status : undefined,
       isActive: typeof row.isActive === 'boolean' ? row.isActive : undefined,
-      onToggleStatus: typeof row.onToggleStatus === 'function' ? row.onToggleStatus : undefined,
+      onToggleStatus: typeof row.onToggleStatus === 'function' ? (row.onToggleStatus as () => void) : undefined,
       metrics: rowMetrics(row),
       preview: {
         title: rowTitle(row),
