@@ -184,7 +184,7 @@ export function DashboardStatCards({ stats }: { stats: DashboardStat[] }) {
     value: stat.value,
     description: stat.description,
     delta: stat.value.includes('%') ? '+2.4%' : undefined,
-    href: metricHref(pathname, stat),
+    href: slugify(stat.title) === 'total-siswa' ? undefined : metricHref(pathname, stat),
     chartKey: slugify(stat.title),
     detailType: 'analytics',
     icon: stat.icon,

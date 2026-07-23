@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Skeleton, Avatar, AvatarFallback, Input, Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui';
-import { Receipt, Search, ChevronLeft, ChevronRight, Filter, RefreshCw } from 'lucide-react';
+import { Receipt, Search, ChevronLeft, ChevronRight, Filter, RefreshCw, Eye } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
 
 export interface InvoiceItem {
@@ -13,7 +13,18 @@ export interface InvoiceItem {
   status?: string;
   dueDate?: string;
   createdAt?: string;
+  orderId?: string;
+  paymentMethod?: string;
 }
+
+const getMonthName = (monthNum?: number) => {
+  if (!monthNum) return '';
+  const months = [
+    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+    "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+  ];
+  return months[monthNum - 1] || '';
+};
 
 export function PaymentWidgets() {
   const [loading, setLoading] = useState(true);
@@ -26,6 +37,12 @@ export function PaymentWidgets() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [syncingId, setSyncingId] = useState<string | null>(null);
+
+  const currentMonth = new Date().getMonth() + 1;
+  const currentYear = new Date().getFullYear();
+  const [selectedMonth, setSelectedMonth] = useState<number>(currentMonth);
+  const [selectedYear, setSelectedYear] = useState<number>(currentYear);
+  const [selectedInvoiceDetails, setSelectedInvoiceDetails] = useState<InvoiceItem | null>(null);
 
   const handleSync = async (invoiceId: string) => {
     try {
@@ -69,6 +86,8 @@ export function PaymentWidgets() {
         params.set('limit', itemsPerPage.toString());
         if (debouncedSearch) params.set('search', debouncedSearch);
         if (statusFilter !== 'ALL') params.set('status', statusFilter);
+        params.set('month', selectedMonth.toString());
+        params.set('year', selectedYear.toString());
         
         const result = await apiClient.get<any>(`/admin/payments/invoices?${params.toString()}`);
         if (result.success && result.data) {
@@ -92,7 +111,7 @@ export function PaymentWidgets() {
       }
     }
     fetchData();
-  }, [currentPage, itemsPerPage, debouncedSearch, statusFilter]);
+  }, [currentPage, itemsPerPage, debouncedSearch, statusFilter, selectedMonth, selectedYear]);
 
   const paginatedInvoices = invoices;
   const totalPages = Math.ceil(totalInvoices / itemsPerPage) || 1;
@@ -146,15 +165,70 @@ export function PaymentWidgets() {
 
   return (
     <div className="grid gap-4">
-      {/* Invoice Terbaru */}
+      {/* Pembayaran SPP Bulan Ini */}
       <Card>
         <CardHeader className="space-y-4 sm:space-y-0 pb-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <CardTitle className="text-base font-semibold">Invoice Terbaru</CardTitle>
-              <Badge variant="outline" className="font-normal text-xs">
-                Total: {totalInvoices} Invoice
-              </Badge>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-base font-semibold">Pembayaran SPP</CardTitle>
+                <Badge variant="outline" className="font-normal text-xs">
+                  Total: {totalInvoices} Siswa
+                </Badge>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Select
+                  value={selectedMonth.toString()}
+                  onValueChange={(val) => {
+                    setSelectedMonth(parseInt(val, 10));
+                    setCurrentPage(1);
+                  }}
+                >
+                  <SelectTrigger className="h-8 w-[110px] text-xs">
+                    <SelectValue placeholder="Bulan" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[
+                      { val: 1, label: "Januari" },
+                      { val: 2, label: "Februari" },
+                      { val: 3, label: "Maret" },
+                      { val: 4, label: "April" },
+                      { val: 5, label: "Mei" },
+                      { val: 6, label: "Juni" },
+                      { val: 7, label: "Juli" },
+                      { val: 8, label: "Agustus" },
+                      { val: 9, label: "September" },
+                      { val: 10, label: "Oktober" },
+                      { val: 11, label: "November" },
+                      { val: 12, label: "Desember" }
+                    ].map(m => (
+                      <SelectItem key={m.val} value={m.val.toString()} className="text-xs">
+                        {m.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select
+                  value={selectedYear.toString()}
+                  onValueChange={(val) => {
+                    setSelectedYear(parseInt(val, 10));
+                    setCurrentPage(1);
+                  }}
+                >
+                  <SelectTrigger className="h-8 w-[80px] text-xs">
+                    <SelectValue placeholder="Tahun" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 5 }, (_, i) => currentYear - 2 + i).map(y => (
+                      <SelectItem key={y} value={y.toString()} className="text-xs">
+                        {y}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             
             {/* Direct Link to full invoice / history page if needed */}
@@ -235,7 +309,7 @@ export function PaymentWidgets() {
                           </div>
                         </TableCell>
                         <TableCell className="text-xs text-muted-foreground">
-                          {invoice.month && invoice.year ? `${invoice.month}/${invoice.year}` : '-'}
+                          {invoice.month && invoice.year ? `${getMonthName(invoice.month)} ${invoice.year}` : '-'}
                         </TableCell>
                         <TableCell className="text-xs font-semibold text-foreground">
                           {formatCurrency(invoice.amount)}
@@ -252,6 +326,17 @@ export function PaymentWidgets() {
                               title="Sinkronisasi status Midtrans"
                             >
                               <RefreshCw className={`h-3.5 w-3.5 ${syncingId === invoice.id ? 'animate-spin' : ''}`} />
+                            </Button>
+                          )}
+                          {invoice.status === 'PAID' && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7"
+                              onClick={() => setSelectedInvoiceDetails(invoice)}
+                              title="Lihat Detail Transaksi"
+                            >
+                              <Eye className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
                             </Button>
                           )}
                         </TableCell>
@@ -338,6 +423,51 @@ export function PaymentWidgets() {
           )}
         </CardContent>
       </Card>
+
+      {/* Modal Detail Transaksi */}
+      {selectedInvoiceDetails && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-sm transition-opacity duration-300">
+          <Card className="w-full max-w-md bg-background border shadow-2xl scale-100 animate-in fade-in zoom-in-95 duration-150">
+            <CardHeader className="pb-3 border-b">
+              <CardTitle className="text-base font-semibold flex items-center gap-2">
+                <Receipt className="h-5 w-5 text-green-600" /> Detail Pembayaran
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 pt-4">
+              <div className="space-y-3">
+                <div className="flex justify-between text-xs py-1.5 border-b border-dashed">
+                  <span className="text-muted-foreground">No. Invoice:</span>
+                  <span className="font-semibold font-mono">{selectedInvoiceDetails.invoiceNumber || '-'}</span>
+                </div>
+                <div className="flex justify-between text-xs py-1.5 border-b border-dashed">
+                  <span className="text-muted-foreground">Nama Siswa:</span>
+                  <span className="font-semibold">{selectedInvoiceDetails.studentName || '-'}</span>
+                </div>
+                <div className="flex justify-between text-xs py-1.5 border-b border-dashed">
+                  <span className="text-muted-foreground">ID Order (Midtrans):</span>
+                  <span className="font-semibold font-mono text-muted-foreground">{selectedInvoiceDetails.orderId || '-'}</span>
+                </div>
+                <div className="flex justify-between text-xs py-1.5 border-b border-dashed">
+                  <span className="text-muted-foreground">Metode Pembayaran:</span>
+                  <span className="font-semibold uppercase bg-secondary px-1.5 py-0.5 rounded text-[10px]">{selectedInvoiceDetails.paymentMethod || '-'}</span>
+                </div>
+                <div className="flex justify-between text-xs py-1.5 border-b border-dashed">
+                  <span className="text-muted-foreground">Jumlah Dibayar:</span>
+                  <span className="font-bold text-green-600 text-sm">{formatCurrency(selectedInvoiceDetails.amount)}</span>
+                </div>
+              </div>
+              <div className="flex justify-end pt-2">
+                <Button 
+                  onClick={() => setSelectedInvoiceDetails(null)} 
+                  className="h-8 text-xs font-semibold px-4"
+                >
+                  Tutup
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
