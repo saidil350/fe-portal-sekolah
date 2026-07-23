@@ -12,6 +12,7 @@ export interface DashboardMetric {
   description?: string;
   delta?: string;
   href?: string;
+  onClick?: () => void;
   chartKey?: string;
   detailType: string;
   icon: LucideIcon;
@@ -23,15 +24,16 @@ export function InteractiveMetricGrid({ metrics }: { metrics: DashboardMetric[] 
     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
       {metrics.map((metric) => {
         const Icon = metric.icon;
+        const isClickable = Boolean(metric.href || metric.onClick);
 
         const cardContent = (
-          <Card className="h-full transition-colors hover:bg-accent/40">
+          <Card className={`h-full transition-colors ${isClickable ? 'hover:bg-accent/40 cursor-pointer' : ''}`}>
             <CardContent className="flex h-full flex-col gap-4 p-5">
               <div className="flex items-start justify-between gap-4">
                 <div className="rounded-md bg-muted p-2.5 text-foreground">
                   <Icon className="size-4" />
                 </div>
-                {metric.href && (
+                {isClickable && (
                   <ArrowUpRight className="size-4 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground" />
                 )}
               </div>
@@ -59,6 +61,10 @@ export function InteractiveMetricGrid({ metrics }: { metrics: DashboardMetric[] 
               <Link href={metric.href} className="group block">
                 {cardContent}
               </Link>
+            ) : metric.onClick ? (
+              <div onClick={metric.onClick} className="group block">
+                {cardContent}
+              </div>
             ) : (
               <div className="block cursor-default">
                 {cardContent}

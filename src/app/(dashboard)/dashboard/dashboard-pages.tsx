@@ -34,6 +34,8 @@ import {
   CheckCircle,
   Clock,
   CreditCard,
+  Eye,
+  EyeOff,
   FileCog,
   FileText,
   GraduationCap,
@@ -293,24 +295,55 @@ export function SuperAdminSettingsPage() {
 export function AdminUsersPage() {
   const [users, setUsers] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [togglingId, setTogglingId] = React.useState<string | null>(null);
   
   // State for Add User
   const [isAddOpen, setIsAddOpen] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [formData, setFormData] = React.useState({ name: '', email: '', role: 'SISWA' });
+  const [formData, setFormData] = React.useState({ name: '', email: '', phoneNumber: '', password: '', confirmPassword: '', role: 'SISWA' });
+
+  const handleToggleStatus = React.useCallback(async (user: any) => {
+    const newStatus = !user.isActive;
+    const actionText = newStatus ? 'mengaktifkan' : 'menonaktifkan';
+    if (!confirm(`Apakah Anda yakin ingin ${actionText} akun ${user.name}?`)) return;
+
+    setTogglingId(user.id);
+    try {
+      const res = await apiClient.patch<any>(`/users/${user.id}`, { isActive: newStatus });
+      if (res.success) {
+        fetchUsers();
+      } else {
+        alert(res.message || `Gagal ${actionText} akun`);
+      }
+    } catch (err: any) {
+      alert('Error: ' + err.message);
+    } finally {
+      setTogglingId(null);
+    }
+  }, []);
 
   const fetchUsers = React.useCallback(async () => {
     setLoading(true);
     try {
       const res = await apiClient.get<any>('/users?limit=50');
       if (res.success && res.data && res.data.items) {
-        const mapped = res.data.items.map((u: any) => ({
-          name: u.name,
-          email: u.email,
-          role: u.role,
-          group: u.role === 'SISWA' ? 'Siswa' : 'Staff',
-          status: u.isActive ? 'Aktif' : 'Belum Aktif',
-        }));
+        const mapped = res.data.items.map((u: any, idx: number) => {
+          const mockClasses = ['Kelas 10 IPA 1', 'Kelas 11 IPA 1', 'Kelas 12 IPS 2', 'Kelas 10 IPS 1', 'Kelas 11 IPA 2'];
+          const assignedClass = u.role === 'SISWA' ? (u.className || mockClasses[idx % mockClasses.length]) : (u.role === 'GURU' ? 'Tenaga Pengajar' : 'Staff Administrasi');
+          const userObj = {
+            id: u.id,
+            name: u.name,
+            email: u.email,
+            role: u.role,
+            group: assignedClass,
+            className: assignedClass,
+            isActive: u.isActive,
+            status: u.isActive ? 'Aktif' : 'Nonaktif',
+            onToggleStatus: () => {},
+          };
+          userObj.onToggleStatus = () => handleToggleStatus(userObj);
+          return userObj;
+        });
         setUsers(mapped);
       }
     } catch (err) {
@@ -318,7 +351,7 @@ export function AdminUsersPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [handleToggleStatus]);
 
   React.useEffect(() => {
     fetchUsers();
@@ -326,12 +359,26 @@ export function AdminUsersPage() {
 
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (formData.password.length < 8) {
+      alert('Kata sandi harus minimal 8 karakter!');
+      return;
+    }
+    if (!/[A-Za-z]/.test(formData.password) || !/[0-9]/.test(formData.password)) {
+      alert('Kata sandi harus mengandung kombinasi huruf dan angka!');
+      return;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      alert('Konfirmasi kata sandi tidak cocok!');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      const res = await apiClient.post<any>('/users', formData);
+      const { confirmPassword, ...payload } = formData;
+      const res = await apiClient.post<any>('/users', payload);
       if (res.success) {
         setIsAddOpen(false);
-        setFormData({ name: '', email: '', role: 'SISWA' });
+        setFormData({ name: '', email: '', phoneNumber: '', password: '', confirmPassword: '', role: 'SISWA' });
         fetchUsers();
       } else {
         alert(res.message || 'Gagal menambahkan pengguna');
@@ -345,7 +392,22 @@ export function AdminUsersPage() {
 
   const totalSiswa = users.filter(u => u.role === 'SISWA').length;
   const totalGuruStaff = users.filter(u => u.role === 'GURU' || u.role === 'STAFF').length;
-  const nonaktif = users.filter(u => u.status === 'Belum Aktif').length;
+  const nonaktif = users.filter(u => u.status === 'Nonaktif').length;
+
+  const [selectedCategory, setSelectedCategory] = React.useState<'ALL' | 'SISWA' | 'GURU_STAFF' | 'NONAKTIF'>('ALL');
+
+  const filteredUsers = React.useMemo(() => {
+    if (selectedCategory === 'SISWA') {
+      return users.filter(u => u.role === 'SISWA');
+    }
+    if (selectedCategory === 'GURU_STAFF') {
+      return users.filter(u => u.role === 'GURU' || u.role === 'STAFF');
+    }
+    if (selectedCategory === 'NONAKTIF') {
+      return users.filter(u => u.isActive === false || u.status === 'Nonaktif');
+    }
+    return users;
+  }, [users, selectedCategory]);
 
   return (
     <>
@@ -356,17 +418,35 @@ export function AdminUsersPage() {
         actionIcon={Users}
         onAction={() => setIsAddOpen(true)}
       stats={[
-        { title: 'Total Siswa', value: loading ? '...' : totalSiswa.toString(), description: 'Siswa terdaftar', icon: GraduationCap },
-        { title: 'Guru & Staff', value: loading ? '...' : totalGuruStaff.toString(), description: 'Aktif di sistem', icon: UserCheck },
-        { title: 'Akun Nonaktif', value: loading ? '...' : nonaktif.toString(), description: 'Perlu verifikasi', icon: Lock },
+        { 
+          title: 'Total Siswa', 
+          value: loading ? '...' : totalSiswa.toString(), 
+          description: selectedCategory === 'SISWA' ? 'Filter Aktif (Klik untuk reset)' : 'Siswa terdaftar', 
+          icon: GraduationCap,
+          onClick: () => setSelectedCategory(prev => prev === 'SISWA' ? 'ALL' : 'SISWA'),
+        },
+        { 
+          title: 'Guru & Staff', 
+          value: loading ? '...' : totalGuruStaff.toString(), 
+          description: selectedCategory === 'GURU_STAFF' ? 'Filter Aktif (Klik untuk reset)' : 'Aktif di sistem', 
+          icon: UserCheck,
+          onClick: () => setSelectedCategory(prev => prev === 'GURU_STAFF' ? 'ALL' : 'GURU_STAFF'),
+        },
+        { 
+          title: 'Akun Nonaktif', 
+          value: loading ? '...' : nonaktif.toString(), 
+          description: selectedCategory === 'NONAKTIF' ? 'Filter Aktif (Klik untuk reset)' : 'Perlu verifikasi', 
+          icon: Lock,
+          onClick: () => setSelectedCategory(prev => prev === 'NONAKTIF' ? 'ALL' : 'NONAKTIF'),
+        },
       ]}
 
       table={{
-        title: 'Daftar Pengguna Terbaru',
+        title: selectedCategory === 'SISWA' ? 'Daftar Siswa' : selectedCategory === 'GURU_STAFF' ? 'Daftar Guru & Staff' : selectedCategory === 'NONAKTIF' ? 'Daftar Akun Nonaktif' : 'Daftar Pengguna Terbaru',
         icon: Users,
         searchKey: 'name',
         searchPlaceholder: 'Cari nama pengguna...',
-        data: users,
+        data: filteredUsers,
         columns: [
           { header: 'Nama', accessorKey: 'name' },
           { header: 'Email', accessorKey: 'email' },
@@ -378,45 +458,93 @@ export function AdminUsersPage() {
     />
 
       <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Tambah Pengguna Baru</DialogTitle>
+        <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="pb-2 border-b">
+            <DialogTitle className="text-xl font-bold">Tambah Pengguna Baru</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleAddUser} className="space-y-4 mt-2">
-            <div className="space-y-2">
-              <label className="text-sm font-semibold">Nama Lengkap</label>
-              <Input 
-                required 
-                placeholder="Masukkan nama pengguna..."
-                value={formData.name} 
-                onChange={e => setFormData({ ...formData, name: e.target.value })}
-              />
+          <form onSubmit={handleAddUser} className="space-y-4 mt-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold">Nama Lengkap</label>
+                <Input 
+                  required 
+                  placeholder="Masukkan nama pengguna..."
+                  value={formData.name} 
+                  onChange={e => setFormData({ ...formData, name: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold">Email</label>
+                <Input 
+                  required 
+                  type="email" 
+                  placeholder="Masukkan alamat email..."
+                  value={formData.email} 
+                  onChange={e => setFormData({ ...formData, email: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold">Nomor Telepon</label>
+                <Input 
+                  type="tel" 
+                  placeholder="Contoh: 081234567890"
+                  value={formData.phoneNumber} 
+                  onChange={e => setFormData({ ...formData, phoneNumber: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold">Peran (Role)</label>
+                <select 
+                  required 
+                  value={formData.role} 
+                  onChange={e => setFormData({ ...formData, role: e.target.value })}
+                  className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="SISWA">Siswa</option>
+                  <option value="GURU">Guru</option>
+                  <option value="STAFF">Staff</option>
+                  <option value="KEPALA_SEKOLAH">Kepala Sekolah</option>
+                  <option value="ADMIN_IT">Admin IT</option>
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold">Kata Sandi (Password)</label>
+                <Input 
+                  required 
+                  type="password" 
+                  minLength={8}
+                  placeholder="Minimal 8 karakter..."
+                  value={formData.password} 
+                  onChange={e => setFormData({ ...formData, password: e.target.value })}
+                />
+                <p className="text-[11px] text-muted-foreground leading-tight">
+                  Minimal 8 karakter, kombinasi huruf & angka.
+                </p>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold">Konfirmasi Kata Sandi</label>
+                <Input 
+                  required 
+                  type="password" 
+                  minLength={8}
+                  placeholder="Ulangi kata sandi..."
+                  value={formData.confirmPassword} 
+                  onChange={e => setFormData({ ...formData, confirmPassword: e.target.value })}
+                />
+                {formData.confirmPassword.length > 0 && (
+                  <p className={`text-[11px] font-medium leading-tight ${formData.password === formData.confirmPassword ? 'text-emerald-600' : 'text-rose-500'}`}>
+                    {formData.password === formData.confirmPassword ? '✓ Kata sandi cocok' : '✕ Kata sandi belum cocok'}
+                  </p>
+                )}
+              </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-semibold">Email</label>
-              <Input 
-                required 
-                type="email" 
-                placeholder="Masukkan alamat email..."
-                value={formData.email} 
-                onChange={e => setFormData({ ...formData, email: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-semibold">Peran (Role)</label>
-              <select 
-                required 
-                value={formData.role} 
-                onChange={e => setFormData({ ...formData, role: e.target.value })}
-                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option value="SISWA">Siswa</option>
-                <option value="GURU">Guru</option>
-                <option value="STAFF">Staff</option>
-                <option value="ADMIN_IT">Admin IT</option>
-              </select>
-            </div>
-            <div className="flex justify-end gap-3 mt-4">
+
+            <div className="flex justify-end gap-3 pt-4 border-t mt-4">
               <Button type="button" variant="outline" onClick={() => setIsAddOpen(false)}>
                 Batal
               </Button>

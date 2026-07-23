@@ -13,6 +13,8 @@ export interface DashboardEntity {
   subtitle: string;
   href: string;
   status?: string;
+  isActive?: boolean;
+  onToggleStatus?: () => void;
   metrics?: Record<string, string>;
   preview?: DashboardPreview;
 }

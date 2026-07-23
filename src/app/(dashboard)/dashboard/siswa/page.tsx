@@ -25,10 +25,12 @@ import {
 import { formatCurrency } from '@/lib/utils';
 import { apiClient } from '@/lib/api-client/client';
 import { useAuth } from '@/hooks/use-auth';
+import { useTenant } from '@/hooks/use-tenant';
 
 export default function SiswaDashboard() {
   const router = useRouter();
   const { user } = useAuth();
+  const { academicYear, semester } = useTenant();
   const [loading, setLoading] = React.useState(true);
   const [activeInvoices, setActiveInvoices] = React.useState<any[]>([]);
   const [isPaying, setIsPaying] = React.useState(false);
@@ -38,7 +40,7 @@ export default function SiswaDashboard() {
     name: user?.name ?? 'Siswa',
     nisn: '0054819203',
     currentClass: 'Kelas 11 IPA 1',
-    academicYear: '2025/2026',
+    academicYear: `${academicYear} (Semester ${semester})`,
     sppCategory: 'Beasiswa Prestasi',
     monthlySpp: 350000,
   };

@@ -16,62 +16,76 @@ export function EntitySidePanel() {
         if (!open) closeSidePanel();
       }}
     >
-      <SheetContent side="right">
-        <SheetHeader>
-          <SheetTitle>{selectedEntity?.title ?? 'Detail'}</SheetTitle>
+      <SheetContent side="right" className="sm:max-w-md overflow-y-auto">
+        <SheetHeader className="pb-2 border-b">
+          <Badge variant="secondary" className="w-fit mb-1">
+            {selectedEntity?.type ?? 'Detail'}
+          </Badge>
+          <SheetTitle className="text-xl font-bold">{selectedEntity?.title ?? 'Detail Pengguna'}</SheetTitle>
         </SheetHeader>
+
         {selectedEntity && (
-        <div className="flex flex-col gap-5 text-left">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex flex-col gap-2">
-              <Badge variant="secondary">{selectedEntity.type}</Badge>
-              <div className="flex flex-col gap-1">
-                <h3 className="text-lg font-bold">{selectedEntity.title}</h3>
-                <p className="text-sm leading-relaxed text-muted-foreground">
-                  {selectedEntity.preview?.description ?? selectedEntity.subtitle}
-                </p>
+          <div className="flex flex-col gap-5 pt-4 text-left">
+            {selectedEntity.preview?.description && (
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                {selectedEntity.preview.description}
+              </p>
+            )}
+
+            {selectedEntity.status && (
+              <div className="flex items-center justify-between gap-3 rounded-xl border bg-muted/30 p-4 shadow-sm">
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Status Akun</p>
+                  <p className={`mt-0.5 text-sm font-semibold ${selectedEntity.isActive ? 'text-emerald-600' : 'text-rose-600'}`}>
+                    {selectedEntity.status}
+                  </p>
+                </div>
+                {selectedEntity.onToggleStatus && (
+                  <Button
+                    type="button"
+                    variant={selectedEntity.isActive ? 'destructive' : 'default'}
+                    size="sm"
+                    className="font-medium"
+                    onClick={selectedEntity.onToggleStatus}
+                  >
+                    {selectedEntity.isActive ? 'Nonaktifkan Akun' : 'Aktifkan Akun'}
+                  </Button>
+                )}
               </div>
-            </div>
-            <Button variant="ghost" size="icon" onClick={closeSidePanel} aria-label="Tutup panel">
-              <X className="size-4" />
+            )}
+
+            {selectedEntity.metrics && (
+              <div className="flex flex-col gap-3">
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Informasi Akun</h4>
+                <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                  {Object.entries(selectedEntity.metrics).map(([label, value]) => (
+                    <div key={label} className="rounded-lg border bg-card p-3 shadow-xs">
+                      <p className="text-xs font-medium capitalize text-muted-foreground">{label}</p>
+                      <p className="mt-1 text-sm font-semibold break-all">{value}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {selectedEntity.preview?.meta && (
+              <div className="flex flex-col gap-2 rounded-lg border bg-card p-4 shadow-xs">
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Metadata</h4>
+                {Object.entries(selectedEntity.preview.meta).map(([label, value]) => (
+                  <div key={label} className="flex items-center justify-between gap-3 text-sm border-b last:border-0 pb-1.5 last:pb-0">
+                    <span className="text-xs text-muted-foreground capitalize">{label}</span>
+                    <span className="font-semibold text-xs break-all">{value}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <Button asChild className="gap-2 mt-2 w-full">
+              <Link href={selectedEntity.href} onClick={closeSidePanel}>
+                Buka Detail Penuh <ArrowUpRight className="size-4" />
+              </Link>
             </Button>
           </div>
-
-          {selectedEntity.status && (
-            <div className="rounded-lg border bg-muted/40 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Status</p>
-              <p className="mt-1 text-sm font-bold">{selectedEntity.status}</p>
-            </div>
-          )}
-
-          {selectedEntity.metrics && (
-            <div className="grid grid-cols-2 gap-3">
-              {Object.entries(selectedEntity.metrics).map(([label, value]) => (
-                <div key={label} className="rounded-lg border bg-card p-4">
-                  <p className="text-xs font-medium text-muted-foreground">{label}</p>
-                  <p className="mt-1 text-base font-bold">{value}</p>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {selectedEntity.preview?.meta && (
-            <div className="flex flex-col gap-2 rounded-lg border bg-card p-4">
-              {Object.entries(selectedEntity.preview.meta).map(([label, value]) => (
-                <div key={label} className="flex items-center justify-between gap-3 text-sm">
-                  <span className="text-muted-foreground">{label}</span>
-                  <span className="font-medium">{value}</span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <Button asChild className="gap-2">
-            <Link href={selectedEntity.href} onClick={closeSidePanel}>
-              Buka detail penuh <ArrowUpRight className="size-4" />
-            </Link>
-          </Button>
-        </div>
         )}
       </SheetContent>
     </Sheet>

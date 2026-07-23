@@ -8,6 +8,7 @@ import { apiClient } from '@/lib/api-client';
 interface ClassItem {
   id: string;
   name: string;
+  level: number;
   isActive: boolean;
   homeroomTeacherId?: string;
   homeroomTeacherName?: string;
@@ -18,13 +19,20 @@ interface ClassItem {
 export default function AdminSettingsPage() {
   // Config state
   const [schoolName, setSchoolName] = useState('Portal Sekolah');
-  const [sppDueDate, setSppDueDate] = useState('10');
+  const [academicYear, setAcademicYear] = useState('2025/2026');
+  const [semester, setSemester] = useState('Genap');
   const [isSavingConfig, setIsSavingConfig] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedName = localStorage.getItem('portal_school_name');
       if (storedName) setSchoolName(storedName);
+      
+      const storedYear = localStorage.getItem('portal_academic_year');
+      if (storedYear) setAcademicYear(storedYear);
+      
+      const storedSemester = localStorage.getItem('portal_semester');
+      if (storedSemester) setSemester(storedSemester);
     }
   }, []);
 
@@ -36,16 +44,19 @@ export default function AdminSettingsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingClass, setEditingClass] = useState<ClassItem | null>(null);
   const [formName, setFormName] = useState('');
+  const [formLevel, setFormLevel] = useState('1');
+  const [formIsActive, setFormIsActive] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Fetch classes
   const fetchData = async () => {
     try {
       setLoadingClasses(true);
       const classRes = await apiClient.get<any>('/admin/classes');
 
-      if (classRes.success && classRes.data) {
+      if (classRes && Array.isArray(classRes.data)) {
         setClassesList(classRes.data);
+      } else if (Array.isArray(classRes)) {
+        setClassesList(classRes);
       }
     } catch (error) {
       console.error('Failed to fetch settings data:', error);
@@ -61,12 +72,16 @@ export default function AdminSettingsPage() {
   const handleOpenAddModal = () => {
     setEditingClass(null);
     setFormName('');
+    setFormLevel('1');
+    setFormIsActive(true);
     setIsModalOpen(true);
   };
 
   const handleOpenEditModal = (cls: ClassItem) => {
     setEditingClass(cls);
     setFormName(cls.name);
+    setFormLevel(cls.level?.toString() || '1');
+    setFormIsActive(cls.isActive !== false);
     setIsModalOpen(true);
   };
 
@@ -78,7 +93,10 @@ export default function AdminSettingsPage() {
     
     if (typeof window !== 'undefined') {
       localStorage.setItem('portal_school_name', schoolName);
+      localStorage.setItem('portal_academic_year', academicYear);
+      localStorage.setItem('portal_semester', semester);
       window.dispatchEvent(new Event('schoolNameChanged'));
+      window.dispatchEvent(new Event('configChanged'));
     }
     
     setIsSavingConfig(false);
@@ -94,8 +112,11 @@ export default function AdminSettingsPage() {
 
     try {
       setIsSubmitting(true);
+      const parsedLevel = parseInt(formLevel, 10);
       const payload = {
-        name: formName,
+        name: formName.trim(),
+        level: isNaN(parsedLevel) || parsedLevel < 1 ? 1 : parsedLevel,
+        isActive: formIsActive,
       };
 
       let res;
@@ -167,8 +188,8 @@ export default function AdminSettingsPage() {
             </div>
             <div>
               <p className="text-xs font-medium text-muted-foreground">Tahun Ajaran</p>
-              <h3 className="text-lg font-bold">2025/2026</h3>
-              <p className="text-[10px] text-muted-foreground mt-0.5">Semester genap aktif</p>
+              <h3 className="text-lg font-bold">{academicYear}</h3>
+              <p className="text-[10px] text-muted-foreground mt-0.5">Semester {semester.toLowerCase()} aktif</p>
             </div>
           </CardContent>
         </Card>
@@ -205,17 +226,30 @@ export default function AdminSettingsPage() {
                   className="text-xs" 
                 />
               </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-muted-foreground">Batas Hari Bayar SPP Bulanan</label>
-                <Input 
-                  type="number"
-                  value={sppDueDate} 
-                  onChange={(e) => setSppDueDate(e.target.value)} 
-                  placeholder="Batas Tanggal bayar" 
-                  className="text-xs" 
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-muted-foreground">Tahun Ajaran</label>
+                  <Input 
+                    value={academicYear} 
+                    onChange={(e) => setAcademicYear(e.target.value)} 
+                    placeholder="Contoh: 2025/2026" 
+                    className="text-xs" 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-muted-foreground">Semester Aktif</label>
+                  <select 
+                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-xs shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    value={semester}
+                    onChange={(e) => setSemester(e.target.value)}
+                  >
+                    <option value="Ganjil">Ganjil</option>
+                    <option value="Genap">Genap</option>
+                  </select>
+                </div>
               </div>
+
+
               <Button type="submit" disabled={isSavingConfig} className="w-full text-xs h-9 gap-1.5 mt-2">
                 {isSavingConfig ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -256,6 +290,7 @@ export default function AdminSettingsPage() {
                 <Table>
                   <TableHeader className="bg-muted/50">
                     <TableRow>
+                      <TableHead className="text-xs">Tingkat</TableHead>
                       <TableHead className="text-xs">Nama Kelas</TableHead>
                       <TableHead className="text-xs">Status</TableHead>
                       <TableHead className="text-xs text-right">Aksi</TableHead>
@@ -264,6 +299,7 @@ export default function AdminSettingsPage() {
                   <TableBody>
                     {classesList.map((cls) => (
                       <TableRow key={cls.id}>
+                        <TableCell className="text-xs font-semibold">{cls.level || 1}</TableCell>
                         <TableCell className="text-xs font-semibold">{cls.name}</TableCell>
                         <TableCell>
                           <Badge variant={cls.isActive ? 'default' : 'secondary'} className="text-[10px] px-1.5 py-0.5">
@@ -313,6 +349,17 @@ export default function AdminSettingsPage() {
             <form onSubmit={handleSubmitClass}>
               <CardContent className="space-y-4 pt-4">
                 <div className="space-y-2">
+                  <label className="text-xs font-semibold text-muted-foreground">Tingkat (Level)</label>
+                  <Input 
+                    type="number"
+                    value={formLevel} 
+                    onChange={(e) => setFormLevel(e.target.value)} 
+                    placeholder="Contoh: 1, 2, 3 atau 10, 11, 12" 
+                    className="text-xs"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
                   <label className="text-xs font-semibold text-muted-foreground">Nama Kelas (kustom)</label>
                   <Input 
                     value={formName} 
@@ -329,11 +376,11 @@ export default function AdminSettingsPage() {
                     <input 
                       type="checkbox" 
                       id="isActive"
-                      checked={editingClass.isActive}
-                      onChange={(e) => setEditingClass({ ...editingClass, isActive: e.target.checked })}
-                      className="rounded border-input text-primary"
+                      checked={formIsActive}
+                      onChange={(e) => setFormIsActive(e.target.checked)}
+                      className="rounded border-input text-primary h-4 w-4"
                     />
-                    <label htmlFor="isActive" className="text-xs font-semibold text-muted-foreground">Kelas Aktif</label>
+                    <label htmlFor="isActive" className="text-xs font-semibold text-muted-foreground cursor-pointer">Kelas Aktif</label>
                   </div>
                 )}
                 

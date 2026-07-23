@@ -52,6 +52,8 @@ export interface DashboardStat {
   description?: string;
   icon: LucideIcon;
   color?: string;
+  href?: string;
+  onClick?: () => void;
 }
 
 export interface DashboardColumn {
@@ -108,8 +110,10 @@ function metricHref(pathname: string, stat: DashboardStat) {
 
 function rowHref(pathname: string, row: DashboardRow, index: number) {
   const base = currentRouteBase(pathname);
+  if (row.id) {
+    return `${base}/${String(row.id)}`;
+  }
   const raw =
-    row.id ??
     row.student ??
     row.className ??
     row.month ??
@@ -184,7 +188,8 @@ export function DashboardStatCards({ stats }: { stats: DashboardStat[] }) {
     value: stat.value,
     description: stat.description,
     delta: stat.value.includes('%') ? '+2.4%' : undefined,
-    href: slugify(stat.title) === 'total-siswa' ? undefined : metricHref(pathname, stat),
+    href: stat.onClick ? undefined : stat.href !== undefined ? stat.href : metricHref(pathname, stat),
+    onClick: stat.onClick,
     chartKey: slugify(stat.title),
     detailType: 'analytics',
     icon: stat.icon,
@@ -213,6 +218,8 @@ export function DashboardSectionCard({
       subtitle: rowSubtitle(row),
       href,
       status: typeof row.status === 'string' ? row.status : undefined,
+      isActive: typeof row.isActive === 'boolean' ? row.isActive : undefined,
+      onToggleStatus: typeof row.onToggleStatus === 'function' ? row.onToggleStatus : undefined,
       metrics: rowMetrics(row),
       preview: {
         title: rowTitle(row),
