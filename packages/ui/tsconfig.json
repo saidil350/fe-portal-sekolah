@@ -1,8 +1,0 @@
-{
-  "extends": "@portal-sekolah/ts-config/react-library.json",
-  "compilerOptions": {
-    "rootDir": "src",
-    "declaration": true
-  },
-  "include": ["src/**/*"]
-}

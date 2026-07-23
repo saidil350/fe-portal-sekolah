@@ -1,0 +1,26 @@
+import { Session } from '@/types';
+
+// Helper ringan untuk memeriksa sesi statis di sisi klien/server (jika cookie di-parsing manual)
+export function isAuthenticated(session: Session | null): boolean {
+  if (!session) return false;
+  
+  // Periksa apakah token kadaluarsa
+  const expiry = new Date(session.expiresAt).getTime();
+  const now = new Date().getTime();
+  
+  return expiry > now;
+}
+
+export function isSessionExpired(session: Session | null): boolean {
+  return !isAuthenticated(session);
+}
+
+export function extractTenantFromDomain(hostname: string): string | null {
+  // Misal: sekolah1.portalsekolah.id -> sekolah1
+  // localhost -> null
+  const parts = hostname.split('.');
+  if (parts.length > 2) {
+    return parts[0];
+  }
+  return null;
+}
