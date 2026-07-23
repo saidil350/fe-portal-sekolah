@@ -7,7 +7,9 @@ export interface NavItem {
 }
 
 export const NAV_CONFIG: Record<Role, NavItem[]> = {
-
+  SUPER_ADMIN: [
+    { title: 'Dashboard Platform', href: '/dashboard/super-admin', iconName: 'LayoutDashboard' },
+  ],
   ADMIN_IT: [
     { title: 'Dashboard', href: '/dashboard/admin', iconName: 'LayoutDashboard' },
     { title: 'Kelola Pengguna', href: '/dashboard/admin/users', iconName: 'Users' },
@@ -28,7 +30,10 @@ export const NAV_CONFIG: Record<Role, NavItem[]> = {
     { title: 'Notifikasi', href: '/dashboard/guru/notifications', iconName: 'Bell' },
     { title: 'Profil Saya', href: '/dashboard/guru/profile', iconName: 'User' },
   ],
-
+  STAFF: [
+    { title: 'Dashboard', href: '/dashboard/staff', iconName: 'LayoutDashboard' },
+    { title: 'Monitoring Pembayaran', href: '/dashboard/staff/payments', iconName: 'CreditCard' },
+  ],
   SISWA: [
     { title: 'Dashboard', href: '/dashboard/siswa', iconName: 'LayoutDashboard' },
     { title: 'Riwayat Pembayaran', href: '/dashboard/siswa/payments', iconName: 'CreditCard' },

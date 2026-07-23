@@ -67,7 +67,7 @@ export default function LoginPage() {
       ADMIN_IT: 'admin.it@sekolah1.sch.id',
       KEPALA_SEKOLAH: 'kepsek@sekolah1.sch.id',
       GURU: 'guru.budi@sekolah1.sch.id',
-      STAFF: 'staff.keuangan@sekolah1.sch.id',
+      STAFF: 'staff@sekolah1.sch.id',
       SISWA: 'siswa.putra@sekolah1.sch.id',
     };
     methods.setValue('email', emailMap[role]);
@@ -127,10 +127,8 @@ export default function LoginPage() {
                   options={[
                     { label: 'Siswa / Murid', value: 'SISWA' },
                     { label: 'Guru / Pengajar', value: 'GURU' },
-                    { label: 'Staff Administrasi', value: 'STAFF' },
                     { label: 'Kepala Sekolah', value: 'KEPALA_SEKOLAH' },
                     { label: 'Admin IT Sekolah', value: 'ADMIN_IT' },
-                    { label: 'Super Admin Platform', value: 'SUPER_ADMIN' },
                   ]}
                 />
 
@@ -145,8 +143,8 @@ export default function LoginPage() {
               <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block mb-3 text-center">
                 Simulator Akun Demo (Uji Coba Cepat)
               </span>
-              <div className="grid grid-cols-3 gap-1.5 text-[10px]">
-                {(['SISWA', 'GURU', 'STAFF', 'KEPALA_SEKOLAH', 'ADMIN_IT', 'SUPER_ADMIN'] as Role[]).map((r) => (
+              <div className="grid grid-cols-2 gap-1.5 text-[10px]">
+                {(['SISWA', 'GURU', 'KEPALA_SEKOLAH', 'ADMIN_IT'] as Role[]).map((r) => (
                   <button
                     key={r}
                     type="button"

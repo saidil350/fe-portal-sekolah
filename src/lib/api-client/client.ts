@@ -101,6 +101,10 @@ export const apiClient = {
     const res = await api.post<T>(url, data, config);
     return res.data;
   },
+  put: async <T>(url: string, data = {}, config = {}): Promise<T> => {
+    const res = await api.put<T>(url, data, config);
+    return res.data;
+  },
   patch: async <T>(url: string, data = {}, config = {}): Promise<T> => {
     const res = await api.patch<T>(url, data, config);
     return res.data;
