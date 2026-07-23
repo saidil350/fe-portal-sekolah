@@ -17,9 +17,16 @@ interface ClassItem {
 
 export default function AdminSettingsPage() {
   // Config state
-  const [schoolName, setSchoolName] = useState('SMA Negeri 1 Jakarta');
+  const [schoolName, setSchoolName] = useState('Portal Sekolah');
   const [sppDueDate, setSppDueDate] = useState('10');
   const [isSavingConfig, setIsSavingConfig] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedName = localStorage.getItem('portal_school_name');
+      if (storedName) setSchoolName(storedName);
+    }
+  }, []);
 
   // Classes state
   const [classesList, setClassesList] = useState<ClassItem[]>([]);
@@ -68,6 +75,12 @@ export default function AdminSettingsPage() {
     setIsSavingConfig(true);
     // Mock save configurations
     await new Promise(resolve => setTimeout(resolve, 800));
+    
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('portal_school_name', schoolName);
+      window.dispatchEvent(new Event('schoolNameChanged'));
+    }
+    
     setIsSavingConfig(false);
     alert('Pengaturan sekolah berhasil disimpan!');
   };
