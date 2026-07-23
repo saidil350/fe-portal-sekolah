@@ -8,10 +8,16 @@ interface AuthState {
   session: Session | null;
   tenantId: string | null;
   isAuthenticated: boolean;
-  
+
   setAuth: (user: User, session: Session) => void;
   setTenant: (tenantId: string | null) => void;
   clearAuth: () => void;
+}
+
+export function clearAuthCookies() {
+  document.cookie = 'portal_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Lax';
+  document.cookie = 'portal_user_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Lax';
+  document.cookie = 'portal_user_tenant=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Lax';
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -41,6 +47,7 @@ export const useAuthStore = create<AuthState>()(
       clearAuth: () => {
         setAuthToken(null);
         setTenantId(null);
+        clearAuthCookies();
         set({
           user: null,
           session: null,

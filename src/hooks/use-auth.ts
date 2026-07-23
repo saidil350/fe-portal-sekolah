@@ -9,16 +9,15 @@ export function useAuth() {
     const response = await authApi.login(payload);
     if (response.success && response.data) {
       const sess = response.data;
-      
+
       // Setel cookie agar middleware Next.js dapat melacak otentikasi di Server Side
-      // Simulasikan cookie berdurasi 7 hari
       const expiry = new Date(sess.expiresAt).toUTCString();
       document.cookie = `portal_session=${sess.token}; path=/; expires=${expiry}; SameSite=Lax`;
       document.cookie = `portal_user_role=${sess.user.role}; path=/; expires=${expiry}; SameSite=Lax`;
       if (sess.user.tenantId) {
         document.cookie = `portal_user_tenant=${sess.user.tenantId}; path=/; expires=${expiry}; SameSite=Lax`;
       }
-      
+
       setAuth(sess.user, sess);
       return sess;
     }
@@ -28,14 +27,10 @@ export function useAuth() {
   const logout = async () => {
     try {
       await authApi.logout();
-    } catch (_e) {
+    } catch {
       // Abaikan error jaringan saat logout
     } finally {
-      // Hapus cookie
-      document.cookie = 'portal_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Lax';
-      document.cookie = 'portal_user_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Lax';
-      document.cookie = 'portal_user_tenant=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Lax';
-      
+      // clearAuth() sekarang juga menghapus cookies secara otomatis
       clearAuth();
       window.location.href = '/login';
     }

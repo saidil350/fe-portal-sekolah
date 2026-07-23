@@ -21,17 +21,19 @@ export function middleware(request: NextRequest) {
 
   // Ekstrak subdomain tenant (jika ada)
   const tenantDomain = extractTenantFromDomain(hostname);
-  
-  // Ambil sesi user dari cookie (simulasi JWT/Better-Auth session cookie)
+
+  // Ambil sesi user dari cookie
   const token = request.cookies.get('portal_session')?.value;
   const userRoleCookie = request.cookies.get('portal_user_role')?.value as Role | undefined;
   const userTenantCookie = request.cookies.get('portal_user_tenant')?.value;
 
-  const isPublicPath = PUBLIC_PATHS.some((path) => 
+  const isPublicPath = PUBLIC_PATHS.some((path) =>
     path === '/' ? pathname === '/' : pathname.startsWith(path)
   );
 
   // 1. Jika rute dilindungi dan tidak ada token -> Arahkan ke Login
+  // Middleware hanya cek cookie existence sebagai first-pass gate.
+  // Client-side AuthProvider menangani validasi token dan redirect jika sudah login.
   if (!token && !isPublicPath) {
     const loginUrl = new URL('/login', request.url);
     if (tenantDomain) {
@@ -40,28 +42,20 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // 2. Jika sudah login dan mencoba masuk ke login page -> Redirect ke dashboard
-  if (token && pathname === '/login') {
-    const targetDashboard = getRoleDashboard(userRoleCookie || 'SISWA');
-    return NextResponse.redirect(new URL(targetDashboard, request.url));
-  }
+  // 2. Jika sudah punya token dan di /login, BIARKAN render login page.
+  // AuthProvider di client-side akan validate session dan redirect ke dashboard jika valid.
+  // Ini menghindari auto-skip yang terjadi karena cookie stale/expired.
 
   // 3. Validasi Tenant Multi-Tenant untuk rute dashboard
   if (token && pathname.startsWith('/dashboard')) {
     // ADMIN_IT bebas dari tenant check (karena sekarang bertindak global)
     if (userRoleCookie !== 'ADMIN_IT') {
-      // Jika pengguna adalah user sekolah biasa, pastikan domain sekolah di url cocok dengan tenant pengguna
       if (tenantDomain && userTenantCookie && tenantDomain !== userTenantCookie) {
-        // Domain mismatch! Kembalikan error / unauthorized
         return new NextResponse('Unauthorized: Tenant Mismatch', { status: 403 });
       }
     }
 
     // 4. Validasi Peran Rute (Role-Based Route Guard)
-    // /dashboard/admin -> Hanya ADMIN_IT
-    // /dashboard/kepala-sekolah -> Hanya KEPALA_SEKOLAH
-    // /dashboard/guru -> Hanya GURU
-    // /dashboard/siswa -> Hanya SISWA
     if (pathname.startsWith('/dashboard/admin') && userRoleCookie !== 'ADMIN_IT') {
       return NextResponse.redirect(new URL(getRoleDashboard(userRoleCookie || 'SISWA'), request.url));
     }
