@@ -2,16 +2,34 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm, FormProvider } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { GraduationCap } from 'lucide-react';
+import { GraduationCap, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { ROLE_DASHBOARD_PATH } from '@/lib/role-dashboard-path';
-import { FormInput, FormSelect, Button, Card, CardHeader, CardContent, CardTitle, CardDescription, useToast } from '@/components/ui';
+import { useToast } from '@/components/ui/hooks/use-toast';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/components/card';
+import { Button } from '@/components/ui/components/button';
+import { Input } from '@/components/ui/components/input';
+import { Label } from '@/components/ui/components/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/components/select';
+import { Separator } from '@/components/ui/components/separator';
 import { Role } from '@/types';
 
-// Zod login schema
 const loginSchema = z.object({
   email: z.string().email({ message: 'Alamat email tidak valid' }),
   password: z.string().min(6, { message: 'Kata sandi minimal 6 karakter' }),
@@ -34,6 +52,16 @@ export default function LoginPage() {
       role: 'SISWA',
     },
   });
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = methods;
+
+  const selectedRole = watch('role');
 
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
@@ -60,7 +88,6 @@ export default function LoginPage() {
     }
   };
 
-  // Helper pengisian demo cepat untuk testing
   const fillDemoAccount = (role: Role) => {
     const emailMap: Record<Role, string> = {
       SUPER_ADMIN: 'superadmin@portalsekolah.id',
@@ -70,94 +97,104 @@ export default function LoginPage() {
       STAFF: 'staff@sekolah1.sch.id',
       SISWA: 'siswa.putra@sekolah1.sch.id',
     };
-    methods.setValue('email', emailMap[role]);
-    methods.setValue('password', 'Password123');
-    methods.setValue('role', role);
+    setValue('email', emailMap[role]);
+    setValue('password', 'Password123');
+    setValue('role', role, { shouldValidate: true });
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">
-      
-      {/* Background patterns */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent pointer-events-none" />
-      
-      <div className="w-full max-w-md z-10">
-        {/* Brand logo header */}
-        <div className="flex flex-col items-center mb-8 select-none">
-          <div className="p-3.5 bg-primary/10 rounded-2xl mb-3 border border-primary/20 shadow-inner">
-            <GraduationCap className="h-10 w-10 text-primary animate-bounce" />
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="w-full max-w-sm">
+        <div className="flex flex-col items-center mb-6">
+          <div className="rounded-full bg-primary p-2 text-primary-foreground mb-3">
+            <GraduationCap className="h-6 w-6" />
           </div>
-          <h2 className="text-3xl font-black tracking-tight bg-gradient-to-r from-primary to-indigo-600 bg-clip-text text-transparent">
-            Portal Sekolah
-          </h2>
-          <p className="text-xs text-muted-foreground font-semibold tracking-wider uppercase mt-1">
-            SaaS Multi-Tenant SaaS Platform
-          </p>
+          <h1 className="text-2xl font-semibold tracking-tight">Portal Sekolah</h1>
+          <p className="text-sm text-muted-foreground">SaaS Multi-Tenant Platform</p>
         </div>
 
-        <Card className="border-border/60 bg-card/60 backdrop-blur-md shadow-xl rounded-3xl overflow-hidden">
-          <CardHeader className="text-center pb-2">
-            <CardTitle className="text-xl font-bold">Selamat Datang</CardTitle>
-            <CardDescription className="font-medium text-xs">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Selamat Datang</CardTitle>
+            <CardDescription>
               Masukkan kredensial akun Anda untuk mengakses dashboard
             </CardDescription>
           </CardHeader>
-          <CardContent className="p-6 pt-2">
-            <FormProvider {...methods}>
-              <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4">
-                <FormInput
-                  name="email"
-                  label="Alamat Email"
-                  placeholder="name@school.sch.id"
+          <CardContent>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Alamat Email</Label>
+                <Input
+                  id="email"
                   type="email"
-                  required
+                  placeholder="name@school.sch.id"
+                  {...register('email')}
                 />
-                
-                <FormInput
-                  name="password"
-                  label="Kata Sandi"
-                  placeholder="••••••••"
-                  type="password"
-                  required
-                />
-
-                <FormSelect
-                  name="role"
-                  label="Pilih Peran Akun"
-                  options={[
-                    { label: 'Siswa / Murid', value: 'SISWA' },
-                    { label: 'Guru / Pengajar', value: 'GURU' },
-                    { label: 'Kepala Sekolah', value: 'KEPALA_SEKOLAH' },
-                    { label: 'Admin IT Sekolah', value: 'ADMIN_IT' },
-                  ]}
-                />
-
-                <Button type="submit" className="w-full rounded-xl py-6 font-bold shadow-lg shadow-primary/25 mt-2" disabled={isLoading}>
-                  {isLoading ? 'Menghubungkan...' : 'Masuk ke Sistem'}
-                </Button>
-              </form>
-            </FormProvider>
-
-            {/* DEMO ACCOUNTS QUICK FILL (Premium feature) */}
-            <div className="mt-8 pt-6 border-t">
-              <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block mb-3 text-center">
-                Simulator Akun Demo (Uji Coba Cepat)
-              </span>
-              <div className="grid grid-cols-2 gap-1.5 text-[10px]">
-                {(['SISWA', 'GURU', 'KEPALA_SEKOLAH', 'ADMIN_IT'] as Role[]).map((r) => (
-                  <button
-                    key={r}
-                    type="button"
-                    onClick={() => fillDemoAccount(r)}
-                    className="py-2 px-1 border border-border/80 rounded-lg bg-background hover:bg-primary hover:text-white hover:border-primary transition-all font-semibold uppercase text-center truncate"
-                  >
-                    {r.replace('_', ' ')}
-                  </button>
-                ))}
+                {errors.email && (
+                  <p className="text-sm text-destructive">{errors.email.message}</p>
+                )}
               </div>
-            </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="password">Kata Sandi</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  {...register('password')}
+                />
+                {errors.password && (
+                  <p className="text-sm text-destructive">{errors.password.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label>Pilih Peran Akun</Label>
+                <Select
+                  value={selectedRole ?? ''}
+                  onValueChange={(val) => setValue('role', val as Role, { shouldValidate: true })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pilih opsi..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="SISWA">Siswa / Murid</SelectItem>
+                    <SelectItem value="GURU">Guru / Pengajar</SelectItem>
+                    <SelectItem value="KEPALA_SEKOLAH">Kepala Sekolah</SelectItem>
+                    <SelectItem value="ADMIN_IT">Admin IT Sekolah</SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors.role && (
+                  <p className="text-sm text-destructive">{errors.role.message}</p>
+                )}
+              </div>
+
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isLoading ? 'Menghubungkan...' : 'Masuk ke Sistem'}
+              </Button>
+            </form>
           </CardContent>
+          <CardFooter className="flex flex-col">
+            <Separator className="mb-4" />
+            <p className="text-xs text-muted-foreground text-center mb-3">
+              Simulator Akun Demo (Uji Coba Cepat)
+            </p>
+            <div className="grid grid-cols-2 gap-2 w-full">
+              {(['SISWA', 'GURU', 'KEPALA_SEKOLAH', 'ADMIN_IT'] as Role[]).map((r) => (
+                <Button
+                  key={r}
+                  variant="outline"
+                  size="sm"
+                  type="button"
+                  onClick={() => fillDemoAccount(r)}
+                  className="font-medium"
+                >
+                  {r.replace('_', ' ')}
+                </Button>
+              ))}
+            </div>
+          </CardFooter>
         </Card>
       </div>
     </div>

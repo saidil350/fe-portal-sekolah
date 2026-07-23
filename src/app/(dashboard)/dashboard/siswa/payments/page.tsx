@@ -305,10 +305,8 @@ export default function StudentPaymentsPage() {
                     <span>
                       Nominal Tagihan: <strong className="text-foreground">{formatCurrency(item.amount)}</strong>
                     </span>
-                    {item.status === 'PAID' ? (
+                    {item.status === 'PAID' && (
                       <span>Dibayar: {item.paidAt} ({item.method})</span>
-                    ) : (
-                      <span>Jatuh Tempo: {item.dueDate}</span>
                     )}
                   </div>
                 </div>

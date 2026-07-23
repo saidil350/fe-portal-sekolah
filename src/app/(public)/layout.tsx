@@ -7,8 +7,6 @@ export default function PublicLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-muted/10 font-sans antialiased">
-      <LoginProviders>{children}</LoginProviders>
-    </div>
+    <LoginProviders>{children}</LoginProviders>
   );
 }

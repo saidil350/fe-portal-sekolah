@@ -187,7 +187,7 @@ export default function SiswaDashboard() {
                 {loading ? 'Memuat...' : (currentUnpaid ? formatCurrency(currentUnpaid.amount) : 'Lunas')}
               </h2>
               <p className="text-xs text-muted-foreground">
-                {loading ? '...' : (currentUnpaid ? `Jatuh tempo: ${currentUnpaid.dueDate}` : 'Pembayaran tepat waktu')}
+                {loading ? '...' : (currentUnpaid ? 'Menunggu pembayaran' : 'Pembayaran tepat waktu')}
               </p>
             </div>
             <div className="p-3 rounded-md bg-muted text-muted-foreground">
