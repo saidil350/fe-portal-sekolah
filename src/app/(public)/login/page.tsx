@@ -20,20 +20,12 @@ import {
 import { Button } from '@/components/ui/components/button';
 import { Input } from '@/components/ui/components/input';
 import { Label } from '@/components/ui/components/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/components/select';
 import { Separator } from '@/components/ui/components/separator';
 import { Role } from '@/types';
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'Alamat email tidak valid' }),
   password: z.string().min(6, { message: 'Kata sandi minimal 6 karakter' }),
-  role: z.custom<Role>(),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -44,24 +36,18 @@ export default function LoginPage() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = React.useState(false);
 
-  const methods = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-      role: 'SISWA',
-    },
-  });
-
   const {
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors },
-  } = methods;
-
-  const selectedRole = watch('role');
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
 
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
@@ -99,7 +85,6 @@ export default function LoginPage() {
     };
     setValue('email', emailMap[role]);
     setValue('password', 'Password123');
-    setValue('role', role, { shouldValidate: true });
   };
 
   return (
@@ -145,27 +130,6 @@ export default function LoginPage() {
                 />
                 {errors.password && (
                   <p className="text-sm text-destructive">{errors.password.message}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label>Pilih Peran Akun</Label>
-                <Select
-                  value={selectedRole ?? ''}
-                  onValueChange={(val) => setValue('role', val as Role, { shouldValidate: true })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pilih opsi..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="SISWA">Siswa / Murid</SelectItem>
-                    <SelectItem value="GURU">Guru / Pengajar</SelectItem>
-                    <SelectItem value="KEPALA_SEKOLAH">Kepala Sekolah</SelectItem>
-                    <SelectItem value="ADMIN_IT">Admin IT Sekolah</SelectItem>
-                  </SelectContent>
-                </Select>
-                {errors.role && (
-                  <p className="text-sm text-destructive">{errors.role.message}</p>
                 )}
               </div>
 
