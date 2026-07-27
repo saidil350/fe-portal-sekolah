@@ -15,9 +15,7 @@ function clearCookies() {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { session, user, clearAuth, isAuthenticated } = useAuthStore();
-  const [isLoaded, setIsLoaded] = React.useState(false);
-  const [isValidating, setIsValidating] = React.useState(false);
+  const { clearAuth } = useAuthStore();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -33,10 +31,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Validate session on mount — call getMe() to verify token with backend
   React.useEffect(() => {
     const validateSession = async () => {
+      const { isAuthenticated, session, user, clearAuth } = useAuthStore.getState();
+
       if (isAuthenticated && session?.token) {
-        setIsValidating(true);
         try {
-          // Verify token validity with backend
           const response = await authApi.getMe();
 
           if (response.success && response.data) {
@@ -57,25 +55,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Network error or 401 — clear auth state
           clearAuth();
           clearCookies();
-        } finally {
-          setIsValidating(false);
         }
       } else if (!isAuthenticated) {
         // No auth state — clear stale cookies if any
         clearCookies();
       }
-
-      setIsLoaded(true);
     };
 
     validateSession();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Run only on mount
+  }, [pathname, router]);
 
-  // Show nothing while validating to prevent flash of wrong content
-  if (!isLoaded || isValidating) {
-    return null;
-  }
-
+  // Always render children — don't block the UI during auth validation
   return <>{children}</>;
 }

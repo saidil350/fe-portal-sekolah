@@ -88,18 +88,18 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-muted/40">
       <div className="w-full max-w-sm">
         <div className="flex flex-col items-center mb-6">
-          <div className="rounded-full bg-primary p-2 text-primary-foreground mb-3">
+          <div className="rounded-full bg-primary p-2.5 text-primary-foreground mb-3">
             <GraduationCap className="h-6 w-6" />
           </div>
-          <h1 className="text-2xl font-semibold tracking-tight">Portal Sekolah</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Portal Sekolah</h1>
           <p className="text-sm text-muted-foreground">SaaS Multi-Tenant Platform</p>
         </div>
 
         <Card>
-          <CardHeader>
+          <CardHeader className="text-center">
             <CardTitle className="text-lg">Selamat Datang</CardTitle>
             <CardDescription>
               Masukkan kredensial akun Anda untuk mengakses dashboard

@@ -20,15 +20,15 @@ export function Sidebar() {
       )}
     >
       {/* Brand Header */}
-      <div className="flex h-16 items-center border-b px-4 gap-2.5">
-        <GraduationCap className="h-7 w-7 text-primary shrink-0 transition-transform duration-300 hover:rotate-12" />
-        
+      <div className="flex h-14 items-center border-b px-4 gap-2.5">
+        <GraduationCap className="h-6 w-6 text-primary shrink-0" />
+
         {!isCollapsed && (
           <div className="flex flex-col text-left animate-in fade-in duration-300">
-            <span className="text-sm font-black leading-tight tracking-wider bg-gradient-to-r from-primary to-violet-500 bg-clip-text text-transparent uppercase">
+            <span className="text-sm font-bold leading-tight tracking-tight text-foreground">
               Portal Sekolah
             </span>
-            <span className="text-[10px] font-semibold text-muted-foreground uppercase leading-none">
+            <span className="text-[10px] font-medium text-muted-foreground leading-none">
               SaaS Multi-Tenant
             </span>
           </div>

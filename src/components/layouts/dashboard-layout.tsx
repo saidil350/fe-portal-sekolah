@@ -20,7 +20,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         <Topbar />
 
         {/* Dynamic Content Pane */}
-        <main className="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-6 bg-muted/20">
+        <main className="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-6 bg-muted/40">
           <div className="max-w-7xl mx-auto w-full animate-in fade-in duration-300">
             {children}
           </div>
