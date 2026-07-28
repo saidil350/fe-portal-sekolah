@@ -263,30 +263,37 @@ export default function AdminSettingsPage() {
         </Card>
 
         {/* Right Side: Classes list / management */}
-        <Card className="md:col-span-2">
+        <Card className="md:col-span-2 relative opacity-85">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between gap-4">
-              <CardTitle className="text-base font-semibold flex items-center gap-2">
-                <School className="h-4 w-4 text-primary" /> Daftar Kelas Kustom
-              </CardTitle>
-              <Button onClick={handleOpenAddModal} size="sm" className="h-8 text-xs gap-1.5">
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-base font-semibold flex items-center gap-2">
+                  <School className="h-4 w-4 text-primary" /> Daftar Kelas Kustom
+                </CardTitle>
+                <Badge variant="outline" className="text-[10px] bg-amber-500/10 text-amber-600 border-amber-500/30 dark:text-amber-400">
+                  Dalam Pengembangan
+                </Badge>
+              </div>
+              <Button disabled size="sm" className="h-8 text-xs gap-1.5 opacity-50 cursor-not-allowed">
                 <Plus className="h-3.5 w-3.5" /> Tambah Kelas
               </Button>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
+            <div className="rounded-md bg-muted/60 p-4 text-center border border-dashed">
+              <School className="h-8 w-8 mx-auto mb-2 text-muted-foreground/60" />
+              <p className="text-sm font-medium text-foreground">Fitur Manajemen Kelas Kustom Sedang Dalam Pengembangan</p>
+              <p className="text-xs text-muted-foreground mt-1 max-w-md mx-auto">
+                Modul ini sedang disiapkan untuk mendukung pengelolaan tingkat dan pembuatan kelas kustom sekolah pada rilis mendatang.
+              </p>
+            </div>
+
             {loadingClasses ? (
-              <div className="flex justify-center items-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <div className="flex justify-center items-center py-6">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
               </div>
-            ) : classesList.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground border rounded-lg border-dashed">
-                <School className="h-10 w-10 mx-auto mb-2 opacity-20" />
-                <p className="text-sm font-semibold">Belum ada kelas kustom</p>
-                <p className="text-xs opacity-75">Gunakan tombol tambah kelas untuk membuat kelas kustom baru.</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto rounded-md border">
+            ) : classesList.length > 0 && (
+              <div className="overflow-x-auto rounded-md border opacity-50 pointer-events-none select-none">
                 <Table>
                   <TableHeader className="bg-muted/50">
                     <TableRow>
@@ -311,16 +318,16 @@ export default function AdminSettingsPage() {
                             <Button 
                               variant="ghost" 
                               size="icon" 
-                              className="h-7 w-7 text-muted-foreground hover:text-foreground"
-                              onClick={() => handleOpenEditModal(cls)}
+                              disabled
+                              className="h-7 w-7 text-muted-foreground"
                             >
                               <Edit className="h-3.5 w-3.5" />
                             </Button>
                             <Button 
                               variant="ghost" 
                               size="icon" 
-                              className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                              onClick={() => handleDeleteClass(cls.id)}
+                              disabled
+                              className="h-7 w-7 text-muted-foreground"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
                             </Button>

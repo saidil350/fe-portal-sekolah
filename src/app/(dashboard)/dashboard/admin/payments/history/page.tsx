@@ -82,7 +82,7 @@ export default function PaymentHistoryPage() {
   };
 
   return (
-    <div className="flex-1 space-y-6 p-6 sm:p-8">
+    <div className="flex-1 space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Riwayat Pembayaran</h2>

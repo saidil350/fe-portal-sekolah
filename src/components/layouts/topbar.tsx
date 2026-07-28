@@ -11,6 +11,7 @@ import { Breadcrumbs } from '../navigation/breadcrumbs';
 import { getRoleFromDashboardPath } from '../navigation/role-from-path';
 import { Avatar, AvatarImage, AvatarFallback, Button, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, Badge } from '@/components/ui';
 import { usePathname } from 'next/navigation';
+import { notificationsApi } from '@/lib/api-client';
 
 export function Topbar() {
   const { user, logout } = useAuth();
@@ -21,6 +22,17 @@ export function Topbar() {
   const { theme, setTheme } = useTheme();
   const fallbackRole = getRoleFromDashboardPath(pathname);
   const displayRole = user?.role || fallbackRole;
+  const setNotifications = useNotificationStore(state => state.setNotifications);
+
+  React.useEffect(() => {
+    if (user) {
+      notificationsApi.getNotifications({ limit: 10 }).then(res => {
+        if (res.success && res.data) {
+          setNotifications(res.data.items);
+        }
+      }).catch(err => console.error('Failed to fetch notifications:', err));
+    }
+  }, [user, setNotifications]);
 
   return (
     <header className="sticky top-0 z-30 flex h-14 w-full items-center justify-between border-b bg-background px-4 md:px-6">

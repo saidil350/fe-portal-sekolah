@@ -49,7 +49,12 @@ export function SidebarNav() {
   const menuItems = NAV_CONFIG[role] || [];
 
   return (
-    <nav className="flex flex-col gap-1.5 p-3">
+    <nav
+      className={cn('flex flex-col gap-1.5 py-4 transition-all duration-300', {
+        'px-3': !isCollapsed,
+        'px-2 items-center': isCollapsed,
+      })}
+    >
       {menuItems.map((item: NavItem) => {
         const IconComponent = ICON_MAP[item.iconName];
         const isRoleRoot = item.href.split('/').filter(Boolean).length === 2;
@@ -65,7 +70,7 @@ export function SidebarNav() {
               {
                 'bg-accent text-accent-foreground font-semibold': isActive,
                 'text-muted-foreground hover:bg-muted hover:text-foreground': !isActive,
-                'justify-center px-2': isCollapsed,
+                'justify-center w-10 h-10 p-0': isCollapsed,
               }
             )}
           >
@@ -87,7 +92,7 @@ export function SidebarNav() {
 
             {/* Hover Tooltip saat collapse */}
             {isCollapsed && (
-              <div className="absolute left-full ml-2 z-50 rounded-md border bg-popover px-2.5 py-1.5 text-xs text-popover-foreground shadow-md opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity whitespace-nowrap">
+              <div className="absolute left-full ml-3 z-50 rounded-md border bg-popover px-2.5 py-1.5 text-xs font-medium text-popover-foreground shadow-md opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity whitespace-nowrap">
                 {item.title}
               </div>
             )}

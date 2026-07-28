@@ -449,9 +449,8 @@ export function AdminUsersPage() {
         columns: [
           { header: 'Nama', accessorKey: 'name' },
           { header: 'Email', accessorKey: 'email' },
-          { header: 'Role', render: (row: any) => <StatusBadge label={row.role || ''} /> },
-          { header: 'Kelas/Unit', accessorKey: 'group' },
-          { header: 'Status', render: status },
+          { header: 'Role', accessorKey: 'role', render: (row: any) => <StatusBadge label={row.role || ''} /> },
+          { header: 'Status', accessorKey: 'status', render: status },
         ],
       }}
     />
@@ -587,7 +586,6 @@ export function AdminClassesPage() {
           { className: 'XII Bahasa', homeroom: 'Nadia Putri, S.Pd', students: '28 Siswa', program: 'Bahasa', status: 'Aktif' },
         ],
         columns: [
-          { header: 'Kelas', accessorKey: 'className' },
           { header: 'Wali Kelas', accessorKey: 'homeroom' },
           { header: 'Jumlah Siswa', accessorKey: 'students' },
           { header: 'Program', accessorKey: 'program' },
@@ -626,7 +624,6 @@ export function AdminAttendancePage() {
           { className: 'XII Bahasa', present: '27/28', late: '1', absent: '1', status: 'Hadir Baik' },
         ],
         columns: [
-          { header: 'Kelas', accessorKey: 'className' },
           { header: 'Hadir', accessorKey: 'present' },
           { header: 'Terlambat', accessorKey: 'late' },
           { header: 'Tidak Hadir', accessorKey: 'absent' },
@@ -915,7 +912,6 @@ export function HeadmasterAttendancePage() {
           { unit: 'Guru & Staff', attendance: '98.8%', late: '2 orang', absence: '1 orang', status: 'Hadir Baik' },
         ],
         columns: [
-          { header: 'Unit', accessorKey: 'unit' },
           { header: 'Kehadiran', accessorKey: 'attendance' },
           { header: 'Terlambat', accessorKey: 'late' },
           { header: 'Tidak Hadir', accessorKey: 'absence' },
@@ -1262,7 +1258,7 @@ export function TeacherAttendancePage() {
                     </TableHead>
                   )}
                   <TableHead className="min-w-48">Siswa</TableHead>
-                  <TableHead>Kelas</TableHead>
+
                   <TableHead>Mapel</TableHead>
                   {attendanceDays.map((day) => (
                     <TableHead key={day} className="min-w-36 text-center">
@@ -1287,7 +1283,7 @@ export function TeacherAttendancePage() {
                       </TableCell>
                     )}
                     <TableCell className="font-semibold">{row.student}</TableCell>
-                    <TableCell>{row.className}</TableCell>
+
                     <TableCell>{row.subject}</TableCell>
                     {attendanceDays.map((day) => (
                       <TableCell key={`${row.id}-${day}`} className="text-center">
@@ -1357,7 +1353,6 @@ export function TeacherAssignmentsPage() {
         ],
         columns: [
           { header: 'Judul', accessorKey: 'title' },
-          { header: 'Kelas', accessorKey: 'className' },
           { header: 'Deadline', accessorKey: 'due' },
           { header: 'Terkumpul', accessorKey: 'submitted' },
           { header: 'Status', render: status },
@@ -1416,7 +1411,6 @@ export function TeacherGradesPage() {
         ],
         columns: [
           { header: 'Siswa', accessorKey: 'student' },
-          { header: 'Kelas', accessorKey: 'className' },
           { header: 'Penilaian', accessorKey: 'assignment' },
           { header: 'Nilai', accessorKey: 'score' },
           { header: 'Status', render: status },
@@ -1452,7 +1446,6 @@ export function TeacherClassesPage() {
           { className: 'XII IPA 3', subject: 'Praktikum', students: '26 Siswa', schedule: 'Kamis 09.30', status: 'Proses' },
         ],
         columns: [
-          { header: 'Kelas', accessorKey: 'className' },
           { header: 'Mapel', accessorKey: 'subject' },
           { header: 'Jumlah Siswa', accessorKey: 'students' },
           { header: 'Jadwal', accessorKey: 'schedule' },
@@ -1464,6 +1457,25 @@ export function TeacherClassesPage() {
 }
 
 export function TeacherNotificationsPage() {
+  const [data, setData] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    async function fetchData() {
+      try {
+        const res = await apiClient.get<any>('/notifications');
+        if (res.success && res.data && res.data.items) {
+          setData(res.data.items);
+        }
+      } catch (err) {
+        console.error('Error fetching notifications:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
   return (
     <DashboardRoutePage
       title="Notifikasi"
@@ -1471,9 +1483,9 @@ export function TeacherNotificationsPage() {
       actionLabel="Buat Pengumuman Kelas"
       actionIcon={Bell}
       stats={[
-        { title: 'Belum Dibaca', value: '5 Pesan', description: 'Mayoritas dari admin sekolah', icon: Bell },
-        { title: 'Pengumuman Kelas', value: '12 Pesan', description: 'Dikirim semester ini', icon: FileText },
-        { title: 'Reminder Tugas', value: '4 Aktif', description: 'Deadline 7 hari ke depan', icon: Clock },
+        { title: 'Total Notifikasi', value: loading ? '...' : `${data.length} Pesan`, description: 'Semua notifikasi', icon: Bell },
+        { title: 'Belum Dibaca', value: loading ? '...' : `${data.filter(n => !n.isRead).length} Pesan`, description: 'Perlu diperhatikan', icon: FileText },
+        { title: 'Tipe Peringatan', value: loading ? '...' : `${data.filter(n => n.type === 'WARNING').length} Aktif`, description: 'Warning alert', icon: Clock },
       ]}
       insights={[
         { title: 'Pesan prioritas', value: 'Jadwal ujian', description: 'Butuh konfirmasi distribusi materi.', badge: 'Prioritas' },
@@ -1484,17 +1496,12 @@ export function TeacherNotificationsPage() {
         title: 'Riwayat Notifikasi Guru',
         icon: Bell,
         searchKey: 'title',
-        data: [
-          { title: 'Jadwal Ujian Semester', source: 'Admin IT', audience: 'Guru', status: 'Belum Dibaca' },
-          { title: 'Deadline Input Nilai', source: 'Kurikulum', audience: 'Guru Mapel', status: 'Aktif' },
-          { title: 'Pengumuman Praktikum', source: 'Anda', audience: 'XI IPA 2', status: 'Selesai' },
-          { title: 'Reminder Tugas Redoks', source: 'Sistem', audience: 'XI IPA 1', status: 'Aktif' },
-        ],
+        data: data,
         columns: [
           { header: 'Judul', accessorKey: 'title' },
-          { header: 'Sumber', accessorKey: 'source' },
-          { header: 'Audiens', accessorKey: 'audience' },
-          { header: 'Status', render: status },
+          { header: 'Pesan', accessorKey: 'message' },
+          { header: 'Tipe', render: (row: any) => <StatusBadge label={row.type || 'INFO'} /> },
+          { header: 'Status', render: (row: any) => status({ status: row.isRead ? 'Selesai' : 'Belum Dibaca' }) },
         ],
       }}
     />
@@ -1609,7 +1616,6 @@ export function StaffAttendancePage() {
         ],
         columns: [
           { header: 'Siswa', accessorKey: 'student' },
-          { header: 'Kelas', accessorKey: 'className' },
           { header: 'Catatan', accessorKey: 'note' },
           { header: 'Sumber', accessorKey: 'source' },
           { header: 'Status', render: status },
@@ -1658,6 +1664,25 @@ export function StaffSettingsPage() {
 }
 
 export function StaffNotificationsPage() {
+  const [data, setData] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    async function fetchData() {
+      try {
+        const res = await apiClient.get<any>('/notifications');
+        if (res.success && res.data && res.data.items) {
+          setData(res.data.items);
+        }
+      } catch (err) {
+        console.error('Error fetching notifications:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
   return (
     <DashboardRoutePage
       title="Notifikasi"
@@ -1665,9 +1690,9 @@ export function StaffNotificationsPage() {
       actionLabel="Tandai Semua Dibaca"
       actionIcon={Bell}
       stats={[
-        { title: 'Belum Dibaca', value: '7 Pesan', description: 'Keuangan dan operasional', icon: Bell },
-        { title: 'Reminder Invoice', value: '18 Aktif', description: 'Butuh follow-up pembayaran', icon: Receipt },
-        { title: 'Pengumuman Sekolah', value: '4 Pesan', description: 'Dalam tujuh hari terakhir', icon: FileText },
+        { title: 'Total Notifikasi', value: loading ? '...' : `${data.length} Pesan`, description: 'Semua notifikasi', icon: Bell },
+        { title: 'Belum Dibaca', value: loading ? '...' : `${data.filter(n => !n.isRead).length} Pesan`, description: 'Perlu diperhatikan', icon: FileText },
+        { title: 'Tipe Peringatan', value: loading ? '...' : `${data.filter(n => n.type === 'WARNING').length} Aktif`, description: 'Warning alert', icon: Clock },
       ]}
       insights={[
         { title: 'Prioritas', value: 'Verifikasi manual', description: '8 pembayaran menunggu konfirmasi.', badge: 'Keuangan' },
@@ -1678,17 +1703,12 @@ export function StaffNotificationsPage() {
         title: 'Riwayat Notifikasi Staff',
         icon: Bell,
         searchKey: 'title',
-        data: [
-          { title: 'Pembayaran manual masuk', source: 'Sistem Pembayaran', category: 'Keuangan', status: 'Pending' },
-          { title: 'Reminder SPP H-3', source: 'Sistem', category: 'Invoice', status: 'Aktif' },
-          { title: 'Rekap presensi harian', source: 'Admin IT', category: 'Operasional', status: 'Selesai' },
-          { title: 'Validasi data wali siswa', source: 'Tata Usaha', category: 'Data', status: 'Proses' },
-        ],
+        data: data,
         columns: [
           { header: 'Judul', accessorKey: 'title' },
-          { header: 'Sumber', accessorKey: 'source' },
-          { header: 'Kategori', accessorKey: 'category' },
-          { header: 'Status', render: status },
+          { header: 'Pesan', accessorKey: 'message' },
+          { header: 'Tipe', render: (row: any) => <StatusBadge label={row.type || 'INFO'} /> },
+          { header: 'Status', render: (row: any) => status({ status: row.isRead ? 'Selesai' : 'Belum Dibaca' }) },
         ],
       }}
     />
@@ -1966,6 +1986,25 @@ export function StudentPaymentsPage() {
 }
 
 export function StudentNotificationsPage() {
+  const [data, setData] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    async function fetchData() {
+      try {
+        const res = await apiClient.get<any>('/notifications');
+        if (res.success && res.data && res.data.items) {
+          setData(res.data.items);
+        }
+      } catch (err) {
+        console.error('Error fetching notifications:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
   return (
     <DashboardRoutePage
       title="Notifikasi"
@@ -1973,9 +2012,9 @@ export function StudentNotificationsPage() {
       actionLabel="Tandai Semua Dibaca"
       actionIcon={Bell}
       stats={[
-        { title: 'Belum Dibaca', value: '4 Pesan', description: 'Tugas dan pembayaran', icon: Bell },
-        { title: 'Reminder Tugas', value: '2 Aktif', description: 'Deadline minggu ini', icon: FileText },
-        { title: 'Info Pembayaran', value: '1 Invoice', description: 'SPP Mei 2026', icon: CreditCard },
+        { title: 'Total Notifikasi', value: loading ? '...' : `${data.length} Pesan`, description: 'Semua notifikasi', icon: Bell },
+        { title: 'Belum Dibaca', value: loading ? '...' : `${data.filter(n => !n.isRead).length} Pesan`, description: 'Perlu diperhatikan', icon: FileText },
+        { title: 'Tipe Peringatan', value: loading ? '...' : `${data.filter(n => n.type === 'WARNING').length} Aktif`, description: 'Warning alert', icon: Clock },
       ]}
       insights={[
         { title: 'Prioritas', value: 'Tugas Kimia', description: 'Deadline 28 Mei 2026.', badge: 'Segera' },
@@ -1986,17 +2025,12 @@ export function StudentNotificationsPage() {
         title: 'Riwayat Notifikasi Saya',
         icon: Bell,
         searchKey: 'title',
-        data: [
-          { title: 'Deadline Tugas Kimia', source: 'Guru Kimia', category: 'Tugas', status: 'Aktif' },
-          { title: 'Tagihan SPP Mei 2026', source: 'Keuangan', category: 'Pembayaran', status: 'Belum Lunas' },
-          { title: 'Jadwal Ujian Akhir', source: 'Admin Sekolah', category: 'Akademik', status: 'Selesai' },
-          { title: 'Presensi Hari Ini', source: 'Sistem', category: 'Presensi', status: 'Hadir' },
-        ],
+        data: data,
         columns: [
           { header: 'Judul', accessorKey: 'title' },
-          { header: 'Sumber', accessorKey: 'source' },
-          { header: 'Kategori', accessorKey: 'category' },
-          { header: 'Status', render: status },
+          { header: 'Pesan', accessorKey: 'message' },
+          { header: 'Tipe', render: (row: any) => <StatusBadge label={row.type || 'INFO'} /> },
+          { header: 'Status', render: (row: any) => status({ status: row.isRead ? 'Selesai' : 'Belum Dibaca' }) },
         ],
       }}
     />

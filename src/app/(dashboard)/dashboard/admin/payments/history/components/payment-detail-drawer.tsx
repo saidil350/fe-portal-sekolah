@@ -56,7 +56,7 @@ export function PaymentDetailDrawer({ open, onOpenChange, payment }: PaymentDeta
             Detail Pembayaran
           </SheetTitle>
           <SheetDescription>
-            Order ID: <span className="font-mono text-xs">{payment.orderId || payment.id}</span>
+            No. Invoice: <span className="font-mono text-xs font-semibold">{payment.invoiceNumber || '-'}</span>
           </SheetDescription>
         </SheetHeader>
 
@@ -97,10 +97,6 @@ export function PaymentDetailDrawer({ open, onOpenChange, payment }: PaymentDeta
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Siswa</span>
                 <span className="font-medium">{payment.studentName}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">ID Siswa</span>
-                <span className="font-medium font-mono text-xs">{payment.studentId?.substring(0, 8)}...</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">No. Invoice</span>

@@ -100,11 +100,6 @@ function currentRouteBase(pathname: string) {
   return pathname.split('/').filter(Boolean).join('/').replace(/^/, '/');
 }
 
-function metricHref(pathname: string, stat: DashboardStat) {
-  const base = currentRouteBase(pathname);
-  return `${base}/analytics?metric=${slugify(stat.title)}`;
-}
-
 function rowHref(pathname: string, row: DashboardRow, index: number) {
   const base = currentRouteBase(pathname);
   if (row.id) {
@@ -178,14 +173,13 @@ export function StatusBadge({
 }
 
 export function DashboardStatCards({ stats }: { stats: DashboardStat[] }) {
-  const pathname = usePathname();
   const metrics: InteractiveDashboardMetric[] = stats.map((stat) => ({
     id: slugify(stat.title),
     title: stat.title,
     value: stat.value,
     description: stat.description,
     delta: stat.value.includes('%') ? '+2.4%' : undefined,
-    href: stat.onClick ? undefined : stat.href !== undefined ? stat.href : metricHref(pathname, stat),
+    href: stat.onClick ? undefined : stat.href,
     onClick: stat.onClick,
     chartKey: slugify(stat.title),
     detailType: 'analytics',
@@ -281,7 +275,6 @@ export function DashboardRoutePage({
   table,
   insights,
 }: DashboardRoutePageProps) {
-  const pathname = usePathname();
   const [isActionOpen, setIsActionOpen] = React.useState(false);
 
   const [searchQuery, setSearchQuery] = React.useState('');

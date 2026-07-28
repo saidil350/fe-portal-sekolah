@@ -171,12 +171,12 @@ export function TariffDialog({ open, onOpenChange, tariff, onSave, saving }: Tar
 
           {type === 'siswa' && (
             <div className="space-y-2">
-              <label className="text-sm font-medium">ID Siswa</label>
+              <label className="text-sm font-medium">Siswa (NISN / Nama)</label>
               <Input 
                 name="studentId" 
                 value={formData.studentId} 
                 onChange={handleChange} 
-                placeholder="Masukkan ID/UUID Siswa" 
+                placeholder="Masukkan NISN atau Nama Siswa" 
                 required 
               />
             </div>

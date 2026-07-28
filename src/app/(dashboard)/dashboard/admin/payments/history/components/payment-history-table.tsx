@@ -65,8 +65,7 @@ export function PaymentHistoryTable({ data, loading, onViewDetail }: PaymentHist
       <Table className="whitespace-nowrap">
         <TableHeader className="bg-muted/50">
           <TableRow>
-            <TableHead className="text-xs">Order ID</TableHead>
-            <TableHead className="text-xs">Invoice</TableHead>
+            <TableHead className="text-xs">No. Invoice</TableHead>
             <TableHead className="text-xs">Siswa</TableHead>
             <TableHead className="text-xs">Nominal</TableHead>
             <TableHead className="text-xs">Metode</TableHead>
@@ -78,7 +77,6 @@ export function PaymentHistoryTable({ data, loading, onViewDetail }: PaymentHist
         <TableBody>
           {data.map((payment) => (
             <TableRow key={payment.id} className="hover:bg-muted/40 transition-colors">
-              <TableCell className="font-mono text-xs text-muted-foreground">{payment.orderId}</TableCell>
               <TableCell className="text-xs font-mono font-medium">{payment.invoiceNumber}</TableCell>
               <TableCell>
                 <div className="flex items-center gap-2">
