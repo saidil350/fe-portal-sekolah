@@ -42,7 +42,7 @@ export default function SiswaDashboard() {
     currentClass: 'Kelas 11 IPA 1',
     academicYear: `${academicYear} (Semester ${semester})`,
     sppCategory: 'Beasiswa Prestasi',
-    monthlySpp: 350000,
+    monthlySpp: 500000,
   };
 
   React.useEffect(() => {
@@ -184,10 +184,22 @@ export default function SiswaDashboard() {
                 SPP Bulan Ini
               </p>
               <h2 className="text-xl font-bold text-foreground">
-                {loading ? 'Memuat...' : (currentUnpaid ? formatCurrency(currentUnpaid.amount) : 'Lunas')}
+                {loading
+                  ? 'Memuat...'
+                  : activeInvoices.length === 0
+                  ? 'Belum Ada Tagihan'
+                  : currentUnpaid
+                  ? formatCurrency(currentUnpaid.amount)
+                  : 'Lunas'}
               </h2>
               <p className="text-xs text-muted-foreground">
-                {loading ? '...' : (currentUnpaid ? 'Menunggu pembayaran' : 'Pembayaran tepat waktu')}
+                {loading
+                  ? '...'
+                  : activeInvoices.length === 0
+                  ? 'Belum ada tagihan SPP diterbitkan'
+                  : currentUnpaid
+                  ? 'Menunggu pembayaran'
+                  : 'Pembayaran tepat waktu'}
               </p>
             </div>
             <div className="p-3 rounded-md bg-muted text-muted-foreground">
