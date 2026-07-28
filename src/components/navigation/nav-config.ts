@@ -15,14 +15,12 @@ export const NAV_CONFIG: Record<Role, NavItem[]> = {
     { title: 'Kelola Pengguna', href: '/dashboard/admin/users', iconName: 'Users' },
     { title: 'Monitoring Pembayaran', href: '/dashboard/admin/payments', iconName: 'CreditCard' },
     { title: 'Notifikasi Sekolah', href: '/dashboard/admin/notifications', iconName: 'Bell' },
-    { title: 'Laporan Sekolah', href: '/dashboard/admin/reports', iconName: 'FileText' },
     { title: 'Pengaturan Sekolah', href: '/dashboard/admin/settings', iconName: 'Settings' },
     { title: 'Profil Saya', href: '/dashboard/admin/profile', iconName: 'User' },
   ],
   KEPALA_SEKOLAH: [
     { title: 'Dashboard', href: '/dashboard/kepala-sekolah', iconName: 'LayoutDashboard' },
     { title: 'Monitoring Pembayaran', href: '/dashboard/kepala-sekolah/payments', iconName: 'CreditCard' },
-    { title: 'Laporan Sekolah', href: '/dashboard/kepala-sekolah/reports', iconName: 'FileText' },
     { title: 'Profil Saya', href: '/dashboard/kepala-sekolah/profile', iconName: 'User' },
   ],
   GURU: [

@@ -39,6 +39,5 @@ export type Permission =
   | 'notifications.broadcast'
   | 'notifications.read'
 
-  // Dashboard & Reports
-  | 'dashboard.view'
-  | 'reports.view';
+  // Dashboard
+  | 'dashboard.view';

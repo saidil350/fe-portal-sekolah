@@ -35,12 +35,9 @@ export function PageHeader({
 }
 import { ArrowUpRight, LucideIcon, Sparkles } from 'lucide-react';
 import { usePathname } from 'next/navigation';
-import { AnalyticsExplorer, AnalyticsPoint } from './analytics-explorer';
 import { EnterpriseDataTable, DashboardTableColumn } from './enterprise-data-table';
 import { EntitySidePanel } from './entity-side-panel';
 import { InteractiveMetricGrid, DashboardMetric as InteractiveDashboardMetric } from './interactive-metric-grid';
-import { MasterDetailPanel } from './master-detail-panel';
-import { DashboardTabs } from './dashboard-tabs';
 import { FilterSection } from './filter-section';
 import { DashboardEntity } from '@/stores/dashboard-store';
 
@@ -285,7 +282,6 @@ export function DashboardRoutePage({
   insights,
 }: DashboardRoutePageProps) {
   const pathname = usePathname();
-  const [activeTab, setActiveTab] = React.useState('overview');
   const [isActionOpen, setIsActionOpen] = React.useState(false);
 
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -333,28 +329,6 @@ export function DashboardRoutePage({
     };
   }, [table, filteredData]);
 
-  const analyticsData: AnalyticsPoint[] = stats.map((stat, index) => ({
-    id: slugify(stat.title),
-    label: stat.title.split(' ').slice(0, 2).join(' '),
-    value: Number(String(stat.value).replace(/[^0-9.]/g, '').slice(0, 5)) || (index + 1) * 24,
-    secondary: index % 2 === 0 ? (index + 1) * 18 : (index + 1) * 12,
-    href: metricHref(pathname, stat),
-  }));
-
-  const masterEntities = filteredData.slice(0, 4).map((row, index): DashboardEntity => ({
-    id: slugify(`${rowTitle(row)}-${index}`),
-    type: table.title,
-    title: rowTitle(row),
-    subtitle: rowSubtitle(row),
-    href: rowHref(pathname, row, index),
-    status: typeof row.status === 'string' ? row.status : undefined,
-    metrics: rowMetrics(row),
-    preview: {
-      title: rowTitle(row),
-      description: `${rowTitle(row)} siap dieksplorasi lewat master-detail, preview cepat, dan halaman detail.`,
-      meta: rowMetrics(row),
-    },
-  }));
 
   return (
     <div className="space-y-6">
@@ -368,21 +342,9 @@ export function DashboardRoutePage({
         }
       />
 
-      <DashboardTabs
-        value={activeTab}
-        onValueChange={setActiveTab}
-        items={[
-          { id: 'overview', label: 'Overview' },
-          { id: 'analytics', label: 'Analytics' },
-          { id: 'details', label: 'Master Detail' },
-        ]}
-      />
-
       <DashboardStatCards stats={stats} />
 
-      {activeTab === 'overview' && (
-        <>
-          <DashboardInsights insights={insights} />
+      <DashboardInsights insights={insights} />
           
           <FilterSection
             searchQuery={searchQuery}
@@ -400,18 +362,7 @@ export function DashboardRoutePage({
           />
 
           <DashboardSectionCard section={filteredTable} searchQuery={searchQuery} />
-        </>
-      )}
 
-      {activeTab === 'analytics' && (
-        <AnalyticsExplorer
-          title={`Analytics ${title}`}
-          description="Klik titik chart atau tombol periode untuk masuk ke detail eksplorasi yang lebih spesifik."
-          data={analyticsData}
-        />
-      )}
-
-      {activeTab === 'details' && <MasterDetailPanel title={table.title} items={masterEntities} />}
 
       <EntitySidePanel />
 

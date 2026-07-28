@@ -61,7 +61,7 @@ export function PaymentWidgets() {
       }
     } catch (err: any) {
       console.error(err);
-      alert('Terjadi kesalahan saat menghubungi server.');
+      alert(err.message || 'Terjadi kesalahan saat menghubungi server.');
     } finally {
       setSyncingId(null);
     }

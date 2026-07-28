@@ -109,34 +109,30 @@ export default function AdminUserDetailPage() {
   ];
 
   const studentDetail = {
-    name: userData?.name || 'Rian Hidayat',
-    email: userData?.email || 'rian.hidayat@sekolah.sch.id',
-    role: userData?.role || 'SISWA',
+    name: userData?.name || '-',
+    email: userData?.email || '-',
+    role: userData?.role || '-',
     isActive: userData?.isActive ?? true,
-    nisn: '0054819203',
-    nis: '2026-1108',
-    gender: 'Laki-laki',
-    birthPlaceDate: 'Bandung, 14 Mei 2008',
-    phone: '0812-3456-7890',
-    currentClass: 'Kelas 11 IPA 1',
-    address: 'Jl. Merdeka No. 45, RT 02 / RW 05, Kel. Citarum, Kec. Bandung Wetan, Kota Bandung',
-    nik: '3273011405080002',
-    religion: 'Islam',
+    nisn: userData?.nisn || '-',
+    nis: userData?.nis || '-',
+    gender: userData?.gender || '-',
+    birthPlaceDate: userData?.birthPlaceDate || '-',
+    phone: userData?.phoneNumber || userData?.phone || '-',
+    currentClass: userData?.className || '-',
+    address: userData?.address || '-',
+    nik: userData?.nik || '-',
+    religion: userData?.religion || '-',
     
     // Data Orang Tua
-    fatherName: 'Budi Hidayat',
-    fatherOccupation: 'Karyawan Swasta',
-    fatherPhone: '0813-9876-5432',
-    motherName: 'Siti Aminah',
-    motherOccupation: 'Ibu Rumah Tangga',
-    guardianAddress: 'Jl. Merdeka No. 45, Kota Bandung',
+    fatherName: userData?.fatherName || '-',
+    fatherOccupation: userData?.fatherOccupation || '-',
+    fatherPhone: userData?.fatherPhone || '-',
+    motherName: userData?.motherName || '-',
+    motherOccupation: userData?.motherOccupation || '-',
+    guardianAddress: userData?.guardianAddress || '-',
 
     // Riwayat Akademik
-    academicHistory: [
-      { academicYear: '2025/2026', className: 'Kelas 11 IPA 1', semester: 'Semester Ganjil (Aktif)', status: 'Sedang Berjalan' },
-      { academicYear: '2024/2025', className: 'Kelas 10 IPA 1', semester: 'Semester Genap', status: 'Naik Kelas' },
-      { academicYear: '2024/2025', className: 'Kelas 10 IPA 1', semester: 'Semester Ganjil', status: 'Tuntas' },
-    ],
+    academicHistory: userData?.academicHistory || [],
   };
 
   return (
@@ -370,7 +366,7 @@ export default function AdminUserDetailPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {studentDetail.academicHistory.map((item, idx) => (
+                {studentDetail.academicHistory.map((item: any, idx: number) => (
                   <div key={idx} className="flex items-center justify-between p-3.5 rounded-lg border bg-muted/20">
                     <div>
                       <h4 className="font-semibold text-sm">{item.className}</h4>

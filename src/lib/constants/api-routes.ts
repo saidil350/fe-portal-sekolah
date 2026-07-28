@@ -22,7 +22,6 @@ export const API_ROUTES = {
     CHECK_IN: '/attendance/check-in',
     CHECK_OUT: '/attendance/check-out',
     HISTORY: '/attendance/history',
-    REPORTS: '/attendance/reports',
   },
   ASSIGNMENTS: {
     BASE: '/assignments',

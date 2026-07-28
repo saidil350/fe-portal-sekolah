@@ -14,8 +14,4 @@ export const attendanceApi = {
   getHistory: async (params?: Record<string, string | number | boolean>): Promise<ApiResponse<PaginatedResponse<AttendanceRecord>>> => {
     return apiClient.get<ApiResponse<PaginatedResponse<AttendanceRecord>>>(API_ROUTES.ATTENDANCE.HISTORY, { params });
   },
-  
-  getReports: async (params?: Record<string, string | number | boolean>): Promise<ApiResponse<unknown>> => {
-    return apiClient.get<ApiResponse<unknown>>(API_ROUTES.ATTENDANCE.REPORTS, { params });
-  },
 };

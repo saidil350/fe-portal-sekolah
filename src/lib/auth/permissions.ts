@@ -8,7 +8,7 @@ export const PERMISSION_MATRIX: Record<Role, Permission[]> = {
     'assignments.create', 'assignments.read', 'assignments.update', 'assignments.delete', 'assignments.submit', 'assignments.grade',
     'payments.create', 'payments.read', 'payments.read.all', 'payments.verify',
     'notifications.broadcast', 'notifications.read',
-    'dashboard.view', 'reports.view'
+    'dashboard.view'
   ],
   ADMIN_IT: [
     'users.create', 'users.read', 'users.update', 'users.delete',
@@ -17,7 +17,7 @@ export const PERMISSION_MATRIX: Record<Role, Permission[]> = {
     'assignments.read',
     'payments.read', 'payments.read.all',
     'notifications.broadcast', 'notifications.read',
-    'dashboard.view', 'reports.view'
+    'dashboard.view'
   ],
   KEPALA_SEKOLAH: [
     'users.read',
@@ -26,7 +26,7 @@ export const PERMISSION_MATRIX: Record<Role, Permission[]> = {
     'assignments.read',
     'payments.read', 'payments.read.all',
     'notifications.broadcast', 'notifications.read',
-    'dashboard.view', 'reports.view'
+    'dashboard.view'
   ],
   GURU: [
     'users.read',

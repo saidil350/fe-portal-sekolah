@@ -42,14 +42,6 @@ export default function KepalaSekolahDashboard() {
         description="Ringkasan pemantauan kualitas akademik, laporan rekapitulasi presensi, dan realisasi penerimaan SPP."
         action={
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              className="gap-2"
-              onClick={() => router.push('/dashboard/kepala-sekolah/reports')}
-            >
-              Lihat Laporan Lengkap
-              <ArrowRight className="h-4 w-4" />
-            </Button>
             <Button className="gap-2">
               <Download className="h-4 w-4" /> Export Laporan
             </Button>

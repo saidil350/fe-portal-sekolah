@@ -327,9 +327,8 @@ export function AdminUsersPage() {
     try {
       const res = await apiClient.get<any>('/users?limit=50');
       if (res.success && res.data && res.data.items) {
-        const mapped = res.data.items.map((u: any, idx: number) => {
-          const mockClasses = ['Kelas 10 IPA 1', 'Kelas 11 IPA 1', 'Kelas 12 IPS 2', 'Kelas 10 IPS 1', 'Kelas 11 IPA 2'];
-          const assignedClass = u.role === 'SISWA' ? (u.className || mockClasses[idx % mockClasses.length]) : (u.role === 'GURU' ? 'Tenaga Pengajar' : 'Staff Administrasi');
+        const mapped = res.data.items.map((u: any) => {
+          const assignedClass = u.className || (u.role === 'GURU' ? 'Tenaga Pengajar' : u.role === 'SISWA' ? '-' : 'Staff Administrasi');
           const userObj = {
             id: u.id,
             name: u.name,
@@ -739,32 +738,75 @@ export function AdminPaymentsPage() {
 }
 
 export function AdminNotificationsPage() {
+  const [data, setData] = React.useState<any[]>([]);
+  const [stats, setStats] = React.useState<any>(null);
+  const [loading, setLoading] = React.useState(true);
+  
+  const [isAddOpen, setIsAddOpen] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [formData, setFormData] = React.useState({ title: '', message: '', type: 'INFO', audience: 'ALL' });
+
+  const fetchData = React.useCallback(async () => {
+    try {
+      const res = await apiClient.get<any>('/admin/notifications');
+      if (res.success && res.data) {
+        setData(res.data.data || []);
+        setStats(res.data.stats || null);
+      }
+    } catch (err) {
+      console.error('Error fetching notifications admin data:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const handleAddNotification = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        title: formData.title,
+        message: formData.message,
+        type: formData.type,
+      };
+      
+      const res = await apiClient.post<any>('/notifications/broadcast', payload);
+      if (res.success) {
+        setIsAddOpen(false);
+        setFormData({ title: '', message: '', type: 'INFO', audience: 'ALL' });
+        fetchData();
+      } else {
+        alert(res.message || 'Gagal mengirim pengumuman');
+      }
+    } catch (err: any) {
+      alert('Error: ' + err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+
   return (
-    <DashboardRoutePage
+    <>
+      <DashboardRoutePage
       title="Notifikasi Sekolah"
       description="Kelola pengumuman massal, reminder pembayaran, dan riwayat notifikasi tenant sekolah."
       actionLabel="Kirim Pengumuman"
       actionIcon={Bell}
+      onAction={() => setIsAddOpen(true)}
       stats={[
-        { title: 'Terkirim Hari Ini', value: '1.284 Pesan', description: 'In-app, email, dan WhatsApp', icon: Bell },
-        { title: 'Template Aktif', value: '6 Template', description: 'Akademik dan pembayaran', icon: FileText },
-        { title: 'Gagal Terkirim', value: '12 Pesan', description: 'Nomor kontak perlu diperbarui', icon: ShieldAlert },
-      ]}
-      insights={[
-        { title: 'Reminder SPP', value: 'Aktif', description: 'Dikirim H-3 dan H+1 jatuh tempo.', badge: 'Otomatis' },
-        { title: 'Pengumuman kelas', value: '18 pesan', description: 'Dikirim guru melalui modul tugas.', badge: 'Akademik' },
-        { title: 'Rate sukses', value: '99.1%', description: 'Kanal in-app paling stabil.', badge: 'Baik', badgeVariant: 'default' },
+        { title: 'Total Pengumuman', value: loading ? '...' : `${data.length} Pesan`, description: 'Riwayat pengumuman broadcast', icon: Bell },
+        { title: 'Terkirim Hari Ini', value: loading ? '...' : `${stats?.sentToday || 0} Pesan`, description: 'In-app notifikasi', icon: FileText },
       ]}
       table={{
         title: 'Riwayat Notifikasi',
         icon: Bell,
         searchKey: 'title',
-        data: [
-          { title: 'Reminder SPP Mei', audience: 'Wali siswa', channel: 'In-app + WA', sent: '1.240', status: 'Selesai' },
-          { title: 'Jadwal Ujian Akhir', audience: 'Siswa kelas XII', channel: 'In-app', sent: '280', status: 'Selesai' },
-          { title: 'Validasi Data Siswa', audience: 'Wali kelas', channel: 'Email', sent: '36', status: 'Selesai' },
-          { title: 'Maintenance Sistem', audience: 'Guru & Staff', channel: 'In-app', sent: '86', status: 'Proses' },
-        ],
+        data: data,
         columns: [
           { header: 'Judul', accessorKey: 'title' },
           { header: 'Audiens', accessorKey: 'audience' },
@@ -774,44 +816,74 @@ export function AdminNotificationsPage() {
         ],
       }}
     />
-  );
-}
 
-export function AdminReportsPage() {
-  return (
-    <DashboardRoutePage
-      title="Laporan Sekolah"
-      description="Kompilasi laporan presensi, pembayaran, akademik, dan aktivitas operasional sekolah."
-      actionLabel="Unduh Paket Laporan"
-      actionIcon={FileText}
-      stats={[
-        { title: 'Laporan Siap', value: '12 Dokumen', description: 'Semester genap berjalan', icon: FileText },
-        { title: 'Data Lengkap', value: '96.8%', description: 'Presensi dan pembayaran tersinkron', icon: CheckCircle },
-        { title: 'Perlu Review', value: '3 Laporan', description: 'Menunggu validasi admin', icon: Clock },
-      ]}
-      insights={[
-        { title: 'Paket bulanan', value: 'Mei 2026', description: 'Presensi dan SPP sudah dapat diekspor.', badge: 'Ready', badgeVariant: 'default' },
-        { title: 'Data kurang', value: '4 kelas', description: 'Nilai akademik belum final.', badge: 'Review' },
-        { title: 'Tujuan laporan', value: 'Manajemen', description: 'Format ringkas untuk kepala sekolah.', badge: 'Internal' },
-      ]}
-      table={{
-        title: 'Daftar Laporan',
-        icon: FileText,
-        searchKey: 'report',
-        data: [
-          { report: 'Laporan Presensi Bulanan', period: 'Mei 2026', owner: 'Admin IT', status: 'Selesai' },
-          { report: 'Laporan Pembayaran SPP', period: 'Mei 2026', owner: 'Staff Keuangan', status: 'Selesai' },
-          { report: 'Laporan Akademik Tengah Semester', period: 'Genap 2026', owner: 'Kurikulum', status: 'Proses' },
-          { report: 'Laporan Aktivitas Sistem', period: 'Mingguan', owner: 'Admin IT', status: 'Selesai' },
-        ],
-        columns: [
-          { header: 'Laporan', accessorKey: 'report' },
-          { header: 'Periode', accessorKey: 'period' },
-          { header: 'Penanggung Jawab', accessorKey: 'owner' },
-          { header: 'Status', render: status },
-        ],
-      }}
-    />
+      <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Kirim Pengumuman Baru</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleAddNotification} className="space-y-4 mt-2">
+            <div className="space-y-1.5">
+              <label className="text-sm font-semibold">Judul Pengumuman</label>
+              <Input 
+                required 
+                placeholder="Contoh: Jadwal Ujian Akhir..."
+                value={formData.title} 
+                onChange={e => setFormData({ ...formData, title: e.target.value })}
+              />
+            </div>
+            
+            <div className="space-y-1.5">
+              <label className="text-sm font-semibold">Isi Pesan</label>
+              <textarea 
+                required
+                rows={4}
+                placeholder="Tulis pesan pengumuman..."
+                value={formData.message} 
+                onChange={e => setFormData({ ...formData, message: e.target.value })}
+                className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold">Tipe</label>
+                <select 
+                  value={formData.type} 
+                  onChange={e => setFormData({ ...formData, type: e.target.value })}
+                  className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="INFO">Informasi</option>
+                  <option value="WARNING">Peringatan</option>
+                  <option value="ALERT">Penting (Alert)</option>
+                  <option value="SUCCESS">Sukses</option>
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold">Audiens</label>
+                <select 
+                  value={formData.audience} 
+                  onChange={e => setFormData({ ...formData, audience: e.target.value })}
+                  className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="ALL">Semua Pengguna</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t mt-4">
+              <Button type="button" variant="outline" onClick={() => setIsAddOpen(false)}>
+                Batal
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Mengirim...' : 'Kirim'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
@@ -968,44 +1040,6 @@ export function HeadmasterEvaluationPage() {
           { header: 'Rata-rata Nilai', accessorKey: 'score' },
           { header: 'Tugas Tuntas', accessorKey: 'assignments' },
           { header: 'Area Risiko', accessorKey: 'risk' },
-          { header: 'Status', render: status },
-        ],
-      }}
-    />
-  );
-}
-
-export function HeadmasterReportsPage() {
-  return (
-    <DashboardRoutePage
-      title="Laporan Sekolah"
-      description="Gabungan laporan akademik, keuangan, dan kehadiran untuk kebutuhan keputusan kepala sekolah."
-      actionLabel="Unduh Ringkasan Eksekutif"
-      actionIcon={FileText}
-      stats={[
-        { title: 'Laporan Siap Dibaca', value: '9 Laporan', description: 'Update sampai hari ini', icon: FileText },
-        { title: 'Indikator Sehat', value: '14/18', description: 'Mayoritas target terpenuhi', icon: CheckCircle },
-        { title: 'Butuh Keputusan', value: '4 Item', description: 'Akademik dan pembayaran', icon: ShieldAlert },
-      ]}
-      insights={[
-        { title: 'Prioritas minggu ini', value: 'SPP tertunggak', description: '31 invoice perlu strategi follow-up.', badge: 'Keuangan' },
-        { title: 'Akademik', value: '3 rombel', description: 'Perlu program remedial terarah.', badge: 'Evaluasi' },
-        { title: 'Kehadiran', value: 'Membaik', description: 'Tren naik 2.4% dari bulan lalu.', badge: 'Positif', badgeVariant: 'default' },
-      ]}
-      table={{
-        title: 'Ringkasan Laporan Manajemen',
-        icon: FileText,
-        searchKey: 'topic',
-        data: [
-          { topic: 'Kehadiran Siswa', metric: '96.2%', owner: 'Wakasek Kesiswaan', status: 'Hadir Baik' },
-          { topic: 'Realisasi SPP', metric: '88.4%', owner: 'Staff Keuangan', status: 'Perlu Pantau' },
-          { topic: 'Rata-rata Akademik', metric: '84.8', owner: 'Kurikulum', status: 'Aktif' },
-          { topic: 'Kepatuhan Tugas', metric: '92.6%', owner: 'Koordinator Guru', status: 'Hadir Baik' },
-        ],
-        columns: [
-          { header: 'Topik', accessorKey: 'topic' },
-          { header: 'Metrik', accessorKey: 'metric' },
-          { header: 'Penanggung Jawab', accessorKey: 'owner' },
           { header: 'Status', render: status },
         ],
       }}

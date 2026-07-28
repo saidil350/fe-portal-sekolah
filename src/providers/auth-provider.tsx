@@ -35,13 +35,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (isAuthenticated && session?.token) {
         try {
+          // Restore token and tenant BEFORE making API requests so interceptors work
+          setAuthToken(session.token);
+          setTenantId(user?.tenantId || null);
+
           const response = await authApi.getMe();
 
           if (response.success && response.data) {
-            // Token valid — restore Axios headers
-            setAuthToken(session.token);
-            setTenantId(user?.tenantId || null);
-
             // If on login page with valid session, redirect to dashboard
             if (pathname === '/login') {
               router.replace(ROLE_DASHBOARD_PATH[response.data.role]);
