@@ -88,11 +88,21 @@ export default function StudentProfilePage() {
             name: u.name || prev.name,
             avatarUrl: u.avatarUrl || null,
             email: u.email || prev.email,
+            phone: u.phone || prev.phone,
+            address: u.address || prev.address,
             nis: sp?.nis || prev.nis,
             nisn: sp?.nisn || prev.nisn,
-            gender: sp?.gender || prev.gender,
+            gender: sp?.gender === 'L' ? 'Laki-laki' : sp?.gender === 'P' ? 'Perempuan' : sp?.gender || prev.gender,
             birthPlace: sp?.birthPlace || prev.birthPlace,
             birthDate: sp?.birthDate || prev.birthDate,
+            nik: sp?.nik || prev.nik,
+            religion: sp?.religion || prev.religion,
+            fatherName: sp?.fatherName || prev.fatherName,
+            fatherOccupation: sp?.fatherOccupation || prev.fatherOccupation,
+            motherName: sp?.motherName || prev.motherName,
+            motherOccupation: sp?.motherOccupation || prev.motherOccupation,
+            guardianName: sp?.guardianName || prev.guardianName,
+            guardianPhone: sp?.guardianPhone || prev.guardianPhone,
           }));
         }
       } catch (err) {
@@ -557,7 +567,15 @@ export default function StudentProfilePage() {
               address: data.address,
               birthPlace: data.birthPlace,
               birthDate: data.birthDate,
-              gender: data.gender,
+              gender: data.gender === 'Laki-laki' ? 'L' : data.gender === 'Perempuan' ? 'P' : data.gender,
+              nik: data.nik,
+              religion: data.religion,
+              fatherName: data.fatherName,
+              fatherOccupation: data.fatherOccupation,
+              motherName: data.motherName,
+              motherOccupation: data.motherOccupation,
+              guardianName: data.guardianName,
+              guardianPhone: data.guardianPhone,
             });
           } catch (err) {
             console.error('Gagal memperbarui profil di backend:', err);

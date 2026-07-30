@@ -12,6 +12,14 @@ export interface StudentProfileDetail {
   gender: string;
   birthPlace?: string;
   birthDate?: string;
+  nik?: string;
+  religion?: string;
+  fatherName?: string;
+  fatherOccupation?: string;
+  motherName?: string;
+  motherOccupation?: string;
+  guardianName?: string;
+  guardianPhone?: string;
 }
 
 export interface TeacherProfileDetail {
@@ -31,6 +39,8 @@ export interface UserProfileResponse {
   role: string;
   tenantId: string | null;
   avatarUrl: string | null;
+  phone?: string | null;
+  address?: string | null;
   isActive: boolean;
   studentProfile?: StudentProfileDetail | null;
   teacherProfile?: TeacherProfileDetail | null;
@@ -46,6 +56,14 @@ export interface UpdateProfilePayload {
   birthPlace?: string;
   birthDate?: string;
   gender?: string;
+  nik?: string;
+  religion?: string;
+  fatherName?: string;
+  fatherOccupation?: string;
+  motherName?: string;
+  motherOccupation?: string;
+  guardianName?: string;
+  guardianPhone?: string;
 }
 
 export const profileApi = {
