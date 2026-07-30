@@ -23,7 +23,7 @@ import {
   ArrowUpRight
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
-import { apiClient } from '@/lib/api-client/client';
+import { profileApi, apiClient } from '@/lib/api-client';
 import { useAuth } from '@/hooks/use-auth';
 import { useTenant } from '@/hooks/use-tenant';
 
@@ -35,11 +35,13 @@ export default function SiswaDashboard() {
   const [activeInvoices, setActiveInvoices] = React.useState<any[]>([]);
   const [isPaying, setIsPaying] = React.useState(false);
   const [processingInvoiceId, setProcessingInvoiceId] = React.useState<string | null>(null);
+  const [currentClass, setCurrentClass] = React.useState<string>('Kelas X-1');
+  const [studentNisn, setStudentNisn] = React.useState<string>('0054819203');
 
   const student = {
     name: user?.name ?? 'Siswa',
-    nisn: '0054819203',
-    currentClass: 'Kelas 11 IPA 1',
+    nisn: studentNisn,
+    currentClass: currentClass,
     academicYear: `${academicYear} (Semester ${semester})`,
     sppCategory: 'Beasiswa Prestasi',
     monthlySpp: 500000,
@@ -47,7 +49,27 @@ export default function SiswaDashboard() {
 
   React.useEffect(() => {
     fetchInvoices();
+    fetchProfileData();
   }, []);
+
+  const fetchProfileData = async () => {
+    try {
+      const res = await profileApi.getProfile();
+      if (res?.data) {
+        const u = res.data;
+        if (u.currentClass?.name) {
+          setCurrentClass(`Kelas ${u.currentClass.name}`);
+        } else if (u.studentProfile?.classId) {
+          setCurrentClass(`Kelas Terdaftar`);
+        }
+        if (u.studentProfile?.nisn) {
+          setStudentNisn(u.studentProfile.nisn);
+        }
+      }
+    } catch (err) {
+      console.error('Gagal mengambil data profil siswa di dashboard:', err);
+    }
+  };
 
   const fetchInvoices = async () => {
     try {
