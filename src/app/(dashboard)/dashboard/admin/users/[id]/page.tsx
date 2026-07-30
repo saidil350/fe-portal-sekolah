@@ -19,13 +19,15 @@ import {
   FileCheck,
   History,
   Building2,
-  Award
+  Award,
+  Eye
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/components/card';
 import { Button } from '@/components/ui/components/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/components/avatar';
 import { Badge } from '@/components/ui/components/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/components/tabs';
+import { toast } from '@/components/ui/hooks/use-toast';
 import { apiClient } from '@/lib/api-client';
 
 interface StudentDocument {
@@ -133,6 +135,36 @@ export default function AdminUserDetailPage() {
 
     // Riwayat Akademik
     academicHistory: userData?.academicHistory || [],
+  };
+
+  const handleViewDocument = (doc: StudentDocument) => {
+    if (doc.fileUrl) {
+      window.open(doc.fileUrl, '_blank');
+    } else {
+      const dummyContent = `=== DOKUMEN SISWA (ADMIN IT VIEW) ===\nNama Dokumen: ${doc.name}\nNama File: ${doc.fileName}\nTanggal Unggah: ${doc.uploadDate}\nNama Siswa: ${studentDetail.name}\nEmail: ${studentDetail.email}`;
+      const blob = new Blob([dummyContent], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    }
+  };
+
+  const handleDownloadDocument = (doc: StudentDocument) => {
+    const link = document.createElement('a');
+    if (doc.fileUrl) {
+      link.href = doc.fileUrl;
+    } else {
+      const dummyContent = `=== BERKAS SISWA (PORTAL SEKOLAH ADMIN IT) ===\nNama Dokumen: ${doc.name}\nNama File: ${doc.fileName}\nTanggal Unggah: ${doc.uploadDate}\nNama Siswa: ${studentDetail.name}`;
+      const blob = new Blob([dummyContent], { type: 'text/plain;charset=utf-8' });
+      link.href = URL.createObjectURL(blob);
+    }
+    link.download = doc.fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast({
+      title: 'Mengunduh Berkas Siswa',
+      description: `File ${doc.fileName} berhasil diunduh.`,
+    });
   };
 
   return (
@@ -299,7 +331,7 @@ export default function AdminUserDetailPage() {
                   Surat & Dokumen Persyaratan Siswa
                 </CardTitle>
                 <CardDescription>
-                  Berkas fisik seperti Akte Kelahiran, KK, Ijazah, dan KTP yang diunggah oleh siswa.
+                  Berkas fisik seperti Akte Kelahiran, KK, Ijazah, dan KTP yang diunggah oleh siswa dapat dilihat dan diunduh oleh Admin IT.
                 </CardDescription>
               </div>
             </CardHeader>
@@ -324,26 +356,25 @@ export default function AdminUserDetailPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-2 sm:pt-0">
-                      <Badge
-                        variant={
-                          doc.status === 'TERVERIFIKASI'
-                            ? 'default'
-                            : doc.status === 'MENUNGGU'
-                            ? 'secondary'
-                            : 'destructive'
-                        }
-                        className="text-xs gap-1"
+                    <div className="flex items-center gap-2 w-full sm:w-auto justify-end border-t sm:border-t-0 pt-2 sm:pt-0">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="gap-1.5 text-xs"
+                        onClick={() => handleViewDocument(doc)}
+                        title="Lihat Berkas"
                       >
-                        {doc.status === 'TERVERIFIKASI' ? (
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                        ) : (
-                          <Clock className="w-3.5 h-3.5 text-amber-500" />
-                        )}
-                        {doc.status}
-                      </Badge>
+                        <Eye className="w-3.5 h-3.5" />
+                        Lihat Berkas
+                      </Button>
 
-                      <Button size="sm" variant="outline" className="gap-1.5">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-1.5 text-xs"
+                        onClick={() => handleDownloadDocument(doc)}
+                        title="Unduh Berkas"
+                      >
                         <Download className="w-3.5 h-3.5" />
                         Unduh Berkas
                       </Button>

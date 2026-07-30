@@ -14,7 +14,10 @@ import {
   TrendingUp,
   Camera,
   Trash2,
-  Loader2
+  Loader2,
+  Eye,
+  Download,
+  FileText
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/components/card';
 import { Button } from '@/components/ui/components/button';
@@ -166,12 +169,18 @@ export default function StudentProfilePage() {
     }
   };
 
-  const [documents, setDocuments] = React.useState([
-    { id: '1', name: 'Akte Kelahiran', fileName: 'Akte_Kelahiran_Rian.pdf', status: 'TERVERIFIKASI', date: '12 Jul 2025' },
-    { id: '2', name: 'Kartu Keluarga (KK)', fileName: 'Kartu_Keluarga_Rian.pdf', status: 'TERVERIFIKASI', date: '12 Jul 2025' },
-    { id: '3', name: 'Ijazah SMP / SKL', fileName: 'Ijazah_SMP_Rian.pdf', status: 'TERVERIFIKASI', date: '14 Jul 2025' },
-    { id: '4', name: 'Pas Foto 3x4 (Latar Merah)', fileName: 'Pasfoto_Rian.jpg', status: 'TERVERIFIKASI', date: '15 Jul 2025' },
-    { id: '5', name: 'KTP Orang Tua / Wali', fileName: 'KTP_OrangTua.pdf', status: 'MENUNGGU', date: '16 Jul 2025' },
+  const [documents, setDocuments] = React.useState<Array<{
+    id: string;
+    name: string;
+    fileName: string;
+    date: string;
+    fileUrl?: string;
+  }>>([
+    { id: '1', name: 'Akte Kelahiran', fileName: 'Akte_Kelahiran_Rian.pdf', date: '12 Jul 2025' },
+    { id: '2', name: 'Kartu Keluarga (KK)', fileName: 'Kartu_Keluarga_Rian.pdf', date: '12 Jul 2025' },
+    { id: '3', name: 'Ijazah SMP / SKL', fileName: 'Ijazah_SMP_Rian.pdf', date: '14 Jul 2025' },
+    { id: '4', name: 'Pas Foto 3x4 (Latar Merah)', fileName: 'Pasfoto_Rian.jpg', date: '15 Jul 2025' },
+    { id: '5', name: 'KTP Orang Tua / Wali', fileName: 'KTP_OrangTua.pdf', date: '16 Jul 2025' },
   ]);
 
   const [editOpen, setEditOpen] = React.useState(false);
@@ -179,18 +188,53 @@ export default function StudentProfilePage() {
   const handleUploadSimulated = (docId: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      const fileUrl = URL.createObjectURL(file);
       setDocuments(prev => prev.map(doc => {
         if (doc.id === docId) {
           return {
             ...doc,
             fileName: file.name,
-            status: 'MENUNGGU',
+            fileUrl,
             date: 'Hari ini',
           };
         }
         return doc;
       }));
+      toast({
+        title: 'Berkas Diunggah',
+        description: `File ${file.name} telah disimpan.`,
+      });
     }
+  };
+
+  const handleViewDocument = (doc: { name: string; fileName: string; fileUrl?: string }) => {
+    if (doc.fileUrl) {
+      window.open(doc.fileUrl, '_blank');
+    } else {
+      const dummyContent = `=== PRATINJAU DOKUMEN SISWA ===\nNama Dokumen: ${doc.name}\nNama File: ${doc.fileName}\nDiunggah oleh: ${student.name} (${student.nisn})\nStatus: Berkas Persyaratan Terdaftar`;
+      const blob = new Blob([dummyContent], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    }
+  };
+
+  const handleDownloadDocument = (doc: { name: string; fileName: string; fileUrl?: string }) => {
+    const link = document.createElement('a');
+    if (doc.fileUrl) {
+      link.href = doc.fileUrl;
+    } else {
+      const dummyContent = `=== BERKAS PERSYARATAN SISWA ===\nNama Dokumen: ${doc.name}\nNama File: ${doc.fileName}\nDiunggah oleh: ${student.name} (${student.nisn})\nStatus: Berkas Persyaratan Terdaftar`;
+      const blob = new Blob([dummyContent], { type: 'text/plain;charset=utf-8' });
+      link.href = URL.createObjectURL(blob);
+    }
+    link.download = doc.fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast({
+      title: 'Mengunduh Berkas',
+      description: `File ${doc.fileName} berhasil diunduh.`,
+    });
   };
 
   return (
@@ -395,23 +439,47 @@ export default function StudentProfilePage() {
             <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-3">
               <CardTitle className="text-sm sm:text-base">Upload Berkas & Surat Persyaratan</CardTitle>
               <CardDescription className="text-xs">
-                Unggah dokumen penting seperti Akte Kelahiran, KK, dan Ijazah untuk diverifikasi oleh Panitia/Admin Sekolah.
+                Unggah dokumen penting seperti Akte Kelahiran, KK, dan Ijazah untuk dapat dilihat dan diunduh oleh Admin IT.
               </CardDescription>
             </CardHeader>
             <CardContent className="p-4 sm:p-6 pt-0 space-y-3">
               {documents.map((doc) => (
-                <div key={doc.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 border rounded-xl bg-card gap-3">
-                  <div>
-                    <h4 className="font-semibold text-xs sm:text-sm">{doc.name}</h4>
-                    <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 break-all">
-                      File: <strong className="text-foreground font-semibold">{doc.fileName}</strong> • Diunggah {doc.date}
-                    </p>
+                <div key={doc.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 border rounded-xl bg-card gap-3 hover:bg-muted/20 transition-colors">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-lg bg-primary/10 text-primary shrink-0 mt-0.5">
+                      <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-xs sm:text-sm">{doc.name}</h4>
+                      <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 break-all">
+                        File: <strong className="text-foreground font-semibold">{doc.fileName}</strong> • Diunggah {doc.date}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-2 sm:pt-0">
-                    <Badge variant={doc.status === 'TERVERIFIKASI' ? 'default' : 'secondary'} className="text-[10px] sm:text-xs">
-                      {doc.status}
-                    </Badge>
-                    <label className="cursor-pointer inline-flex items-center justify-center rounded-md text-xs font-semibold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3">
+                  <div className="flex items-center gap-2 w-full sm:w-auto justify-end border-t sm:border-t-0 pt-2 sm:pt-0">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-8 px-2.5 text-xs gap-1"
+                      onClick={() => handleViewDocument(doc)}
+                      title="Lihat Berkas"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Lihat</span>
+                    </Button>
+
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-8 px-2.5 text-xs gap-1"
+                      onClick={() => handleDownloadDocument(doc)}
+                      title="Unduh Berkas"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Unduh</span>
+                    </Button>
+
+                    <label className="cursor-pointer inline-flex items-center justify-center rounded-md text-xs font-semibold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-2.5">
                       Unggah Ulang
                       <input 
                         type="file" 
