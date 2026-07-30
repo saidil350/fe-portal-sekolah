@@ -15,6 +15,7 @@ import { toast } from '@/components/ui/hooks/use-toast';
 
 export interface StudentProfileData {
   name: string;
+  avatarUrl?: string | null;
   nisn: string;
   nis: string;
   email: string;

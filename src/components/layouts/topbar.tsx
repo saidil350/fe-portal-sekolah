@@ -12,6 +12,7 @@ import { getRoleFromDashboardPath } from '../navigation/role-from-path';
 import { Avatar, AvatarImage, AvatarFallback, Button, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, Badge } from '@/components/ui';
 import { usePathname } from 'next/navigation';
 import { notificationsApi } from '@/lib/api-client';
+import { getInitials } from '@/lib/utils/image-compression';
 
 export function Topbar() {
   const { user, logout } = useAuth();
@@ -132,7 +133,7 @@ export function Topbar() {
             <Button variant="ghost" className="p-0.5 rounded-full hover:bg-muted">
               <Avatar className="h-8 w-8">
                 {user?.avatarUrl && <AvatarImage src={user.avatarUrl} alt={user?.name} />}
-                <AvatarFallback>{user?.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
+                <AvatarFallback className="text-xs font-semibold">{getInitials(user?.name)}</AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
