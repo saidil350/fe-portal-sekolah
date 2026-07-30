@@ -9,7 +9,9 @@ import {
   Users, 
   Calendar, 
   BookOpen,
-  Plus
+  Plus,
+  CheckSquare,
+  Square
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/components/card';
 import { Button } from '@/components/ui/components/button';
@@ -34,6 +36,7 @@ interface StudentItem {
   id: string;
   name: string;
   nis?: string;
+  selected: boolean;
   action: 'PROMOTE' | 'RETAIN' | 'GRADUATE';
 }
 
@@ -126,8 +129,6 @@ export default function ClassPromotionPage() {
       setToClassId('');
     }
 
-    // Dummy/Mock data siswa rombel asal jika API get students dikembalikan
-    // Nanti bisa diambil via endpoint /admin/classes/:id/students
     fetchClassStudents(fromClassId, currentClass.level);
   }, [fromClassId, classesList]);
 
@@ -140,18 +141,18 @@ export default function ClassPromotionPage() {
             id: s.id,
             name: s.name,
             nis: s.nis || '10293' + s.id.slice(0, 3),
+            selected: true,
             action: level >= 12 ? 'GRADUATE' : 'PROMOTE',
           }))
         );
       } else {
-        // Mock fallback siswa jika backend belum memiliki data siswa terdaftar di rombel tersebut
         const isFinalLevel = level >= 12;
         setStudents([
-          { id: 'std-1', name: 'Ahmad Fauzi', nis: '20241001', action: isFinalLevel ? 'GRADUATE' : 'PROMOTE' },
-          { id: 'std-2', name: 'Budi Santoso', nis: '20241002', action: isFinalLevel ? 'GRADUATE' : 'PROMOTE' },
-          { id: 'std-3', name: 'Citra Dewi', nis: '20241003', action: isFinalLevel ? 'GRADUATE' : 'PROMOTE' },
-          { id: 'std-4', name: 'Dian Permana', nis: '20241004', action: isFinalLevel ? 'GRADUATE' : 'PROMOTE' },
-          { id: 'std-5', name: 'Eka Putri', nis: '20241005', action: isFinalLevel ? 'GRADUATE' : 'PROMOTE' },
+          { id: 'std-1', name: 'Ahmad Fauzi', nis: '20241001', selected: true, action: isFinalLevel ? 'GRADUATE' : 'PROMOTE' },
+          { id: 'std-2', name: 'Budi Santoso', nis: '20241002', selected: true, action: isFinalLevel ? 'GRADUATE' : 'PROMOTE' },
+          { id: 'std-3', name: 'Citra Dewi', nis: '20241003', selected: true, action: isFinalLevel ? 'GRADUATE' : 'PROMOTE' },
+          { id: 'std-4', name: 'Dian Permana', nis: '20241004', selected: true, action: isFinalLevel ? 'GRADUATE' : 'PROMOTE' },
+          { id: 'std-5', name: 'Eka Putri', nis: '20241005', selected: true, action: isFinalLevel ? 'GRADUATE' : 'PROMOTE' },
         ]);
       }
     } catch (err) {
@@ -162,6 +163,23 @@ export default function ClassPromotionPage() {
   const handleActionChange = (studentId: string, action: 'PROMOTE' | 'RETAIN' | 'GRADUATE') => {
     setStudents((prev) =>
       prev.map((s) => (s.id === studentId ? { ...s, action } : s))
+    );
+  };
+
+  const toggleStudentSelect = (studentId: string) => {
+    setStudents((prev) =>
+      prev.map((s) => (s.id === studentId ? { ...s, selected: !s.selected } : s))
+    );
+  };
+
+  const toggleSelectAll = () => {
+    const allSelected = students.length > 0 && students.every((s) => s.selected);
+    setStudents((prev) => prev.map((s) => ({ ...s, selected: !allSelected })));
+  };
+
+  const setBulkAction = (action: 'PROMOTE' | 'RETAIN' | 'GRADUATE') => {
+    setStudents((prev) =>
+      prev.map((s) => (s.selected ? { ...s, action } : s))
     );
   };
 
@@ -187,6 +205,12 @@ export default function ClassPromotionPage() {
   };
 
   const handleSubmitPromotion = async () => {
+    const selectedStudents = students.filter((s) => s.selected);
+    if (selectedStudents.length === 0) {
+      setMessage({ type: 'error', text: 'Harap pilih minimal 1 siswa yang akan dinaikkan kelasnya' });
+      return;
+    }
+
     if (!fromClassId || !selectedYearId) {
       setMessage({ type: 'error', text: 'Harap pilih Rombel Asal dan Tahun Ajaran Tujuan' });
       return;
@@ -200,7 +224,7 @@ export default function ClassPromotionPage() {
         fromClassId,
         toClassId: toClassId || undefined,
         academicYearId: selectedYearId,
-        promotions: students.map((s) => ({
+        promotions: selectedStudents.map((s) => ({
           studentId: s.id,
           action: s.action,
         })),
@@ -221,6 +245,8 @@ export default function ClassPromotionPage() {
   };
 
   const currentFromClass = classesList.find((c) => c.id === fromClassId);
+  const selectedCount = students.filter((s) => s.selected).length;
+  const allSelected = students.length > 0 && students.every((s) => s.selected);
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6 text-left">
@@ -381,44 +407,115 @@ export default function ClassPromotionPage() {
       {/* Student List & Action Table */}
       {fromClassId && (
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Users className="w-5 h-5 text-primary" />
-                Langkah 2: Daftar Siswa & Status Kenaikan ({students.length} Siswa)
+                Langkah 2: Pilih Siswa & Status Kenaikan ({selectedCount}/{students.length} Siswa Terpilih)
               </CardTitle>
               <CardDescription>
-                Sesuaikan status individual (Naik Kelas / Tinggal Kelas / Lulus) untuk setiap siswa.
+                Centang siswa yang akan dinaikkan kelasnya dan atur statusnya secara masal atau individual.
               </CardDescription>
             </div>
 
-            <Button
-              onClick={handleSubmitPromotion}
-              disabled={submitting}
-              className="gap-2 bg-primary text-primary-foreground"
-            >
-              <ArrowRight className="w-4 h-4" />
-              {submitting ? 'Memproses...' : 'Eksekusi Kenaikan Kelas'}
-            </Button>
+            <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+              <Button
+                onClick={handleSubmitPromotion}
+                disabled={submitting || selectedCount === 0}
+                className="gap-2 bg-primary text-primary-foreground"
+              >
+                <ArrowRight className="w-4 h-4" />
+                {submitting ? 'Memproses...' : `Naikkan ${selectedCount} Siswa Terpilih`}
+              </Button>
+            </div>
           </CardHeader>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
+          <CardContent className="space-y-4">
+            {/* Bulk Toolbar */}
+            <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-lg bg-muted/40 border">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={toggleSelectAll}
+                  className="flex items-center gap-1.5 text-xs font-semibold hover:text-primary transition-colors"
+                >
+                  {allSelected ? (
+                    <CheckSquare className="w-4 h-4 text-primary" />
+                  ) : (
+                    <Square className="w-4 h-4 text-muted-foreground" />
+                  )}
+                  {allSelected ? 'Batal Pilih Semua' : 'Pilih Semua Siswa'}
+                </button>
+                <Badge variant="secondary" className="text-xs">
+                  {selectedCount} Terpilih
+                </Badge>
+              </div>
+
+              {selectedCount > 0 && (
+                <div className="flex items-center gap-1 text-xs">
+                  <span className="text-muted-foreground mr-1 hidden sm:inline">Set Massal:</span>
+                  <button
+                    type="button"
+                    onClick={() => setBulkAction('PROMOTE')}
+                    className="px-2.5 py-1 rounded bg-green-600/10 text-green-700 dark:text-green-400 font-semibold hover:bg-green-600/20"
+                  >
+                    Naik Kelas
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBulkAction('RETAIN')}
+                    className="px-2.5 py-1 rounded bg-amber-600/10 text-amber-700 dark:text-amber-400 font-semibold hover:bg-amber-600/20"
+                  >
+                    Tinggal Kelas
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBulkAction('GRADUATE')}
+                    className="px-2.5 py-1 rounded bg-blue-600/10 text-blue-700 dark:text-blue-400 font-semibold hover:bg-blue-600/20"
+                  >
+                    Lulus
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="overflow-x-auto rounded-md border">
               <table className="w-full text-sm text-left">
-                <thead className="bg-muted/50 border-y text-muted-foreground">
+                <thead className="bg-muted/50 border-b text-muted-foreground">
                   <tr>
-                    <th className="p-4 font-semibold">No</th>
-                    <th className="p-4 font-semibold">NIS</th>
-                    <th className="p-4 font-semibold">Nama Siswa</th>
-                    <th className="p-4 font-semibold text-center">Status Keputusan</th>
+                    <th className="p-3.5 w-10 text-center">
+                      <input
+                        type="checkbox"
+                        checked={allSelected}
+                        onChange={toggleSelectAll}
+                        className="rounded border-gray-300 text-primary focus:ring-primary cursor-pointer w-4 h-4"
+                      />
+                    </th>
+                    <th className="p-3.5 font-semibold">No</th>
+                    <th className="p-3.5 font-semibold">NIS</th>
+                    <th className="p-3.5 font-semibold">Nama Siswa</th>
+                    <th className="p-3.5 font-semibold text-center">Status Keputusan</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
                   {students.map((student, index) => (
-                    <tr key={student.id} className="hover:bg-accent/30 transition-colors">
-                      <td className="p-4 font-medium text-muted-foreground">{index + 1}</td>
-                      <td className="p-4 font-mono text-xs">{student.nis}</td>
-                      <td className="p-4 font-semibold">{student.name}</td>
-                      <td className="p-4 text-center">
+                    <tr
+                      key={student.id}
+                      className={`transition-colors ${
+                        student.selected ? 'bg-background hover:bg-accent/30' : 'bg-muted/20 opacity-60'
+                      }`}
+                    >
+                      <td className="p-3.5 text-center">
+                        <input
+                          type="checkbox"
+                          checked={student.selected}
+                          onChange={() => toggleStudentSelect(student.id)}
+                          className="rounded border-gray-300 text-primary focus:ring-primary cursor-pointer w-4 h-4"
+                        />
+                      </td>
+                      <td className="p-3.5 font-medium text-muted-foreground">{index + 1}</td>
+                      <td className="p-3.5 font-mono text-xs">{student.nis}</td>
+                      <td className="p-3.5 font-semibold">{student.name}</td>
+                      <td className="p-3.5 text-center">
                         <div className="inline-flex rounded-md border p-1 bg-muted/40 gap-1">
                           <button
                             type="button"
