@@ -16,8 +16,18 @@ export function isSessionExpired(session: Session | null): boolean {
 }
 
 export function extractTenantFromDomain(hostname: string): string | null {
-  // Misal: sekolah1.portalsekolah.id -> sekolah1
-  // localhost -> null
+  // Abaikan localhost, domain Vercel, Render, dan domain utama portal
+  if (
+    hostname.includes('localhost') ||
+    hostname.endsWith('.vercel.app') ||
+    hostname.endsWith('.onrender.com') ||
+    hostname === 'portalsekolah.id' ||
+    hostname.endsWith('.portalsekolah.id') && hostname.split('.').length === 2
+  ) {
+    return null;
+  }
+
+  // Misal: sman1jkt.portalsekolah.id -> sman1jkt
   const parts = hostname.split('.');
   if (parts.length > 2) {
     return parts[0];
