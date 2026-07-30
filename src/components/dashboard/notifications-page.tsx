@@ -11,24 +11,19 @@ import {
   Megaphone,
   BookOpen,
   Users,
+  CheckCircle2,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/components/card';
 import { Button } from '@/components/ui/components/button';
 import { Badge } from '@/components/ui/components/badge';
-
-export type NotificationType =
-  | 'INFO'
-  | 'ANNOUNCEMENT'
-  | 'WARNING'
-  | 'PAYMENT'
-  | 'ACADEMIC'
-  | 'ATTENDANCE';
+import { useNotificationStore } from '@/stores/notification-store';
+import { NotificationType } from '@/types';
 
 export interface NotificationItem {
   id: string;
   title: string;
   message: string;
-  type: NotificationType;
+  type: NotificationType | string;
   createdAt: string;
   isRead: boolean;
 }
@@ -43,78 +38,103 @@ interface NotificationsPageProps {
    */
   description?: string;
   /**
-   * Data notifikasi awal. Jika tidak diberikan, digunakan data default.
+   * Data notifikasi awal opsional. Jika tidak diberikan, digunakan data dari store/API.
    */
   initialNotifications?: NotificationItem[];
 }
 
-const DEFAULT_NOTIFICATIONS: NotificationItem[] = [
-  {
-    id: '1',
-    title: 'Pengumuman Libur Nasional',
-    message:
-      'Diberitahukan bahwa kegiatan belajar mengajar diliburkan dalam rangka Hari Libur Nasional pada Kamis mendatang.',
-    type: 'ANNOUNCEMENT',
-    createdAt: '1 jam yang lalu',
-    isRead: false,
-  },
-  {
-    id: '2',
-    title: 'Pembaruan Data Berhasil',
-    message:
-      'Data profil Anda telah berhasil diperbarui dan diverifikasi oleh sistem.',
-    type: 'INFO',
-    createdAt: 'Kemarin',
-    isRead: true,
-  },
-  {
-    id: '3',
-    title: 'Peringatan Keamanan Akun',
-    message:
-      'Demi keamanan akun Anda, disarankan untuk memperbarui kata sandi secara berkala.',
-    type: 'WARNING',
-    createdAt: '3 hari yang lalu',
-    isRead: true,
-  },
-];
+function formatNotificationDate(dateStr: string) {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return dateStr;
 
-function getIcon(type: NotificationType) {
+  const now = new Date();
+  const diffInMs = now.getTime() - date.getTime();
+  const diffInMins = Math.floor(diffInMs / (1000 * 60));
+  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+  if (diffInMins < 1) return 'Baru saja';
+  if (diffInMins < 60) return `${diffInMins} menit yang lalu`;
+  if (diffInHours < 24) return `${diffInHours} jam yang lalu`;
+  if (diffInDays === 1) return 'Kemarin';
+  if (diffInDays < 7) return `${diffInDays} hari yang lalu`;
+
+  return date.toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
+function getIcon(type: string) {
   switch (type) {
     case 'ANNOUNCEMENT':
-      return <Megaphone className="w-4 h-4 text-muted-foreground shrink-0" />;
+      return <Megaphone className="w-4 h-4 text-primary shrink-0" />;
     case 'WARNING':
+    case 'ALERT':
       return <AlertTriangle className="w-4 h-4 text-destructive shrink-0" />;
     case 'PAYMENT':
-      return <CreditCard className="w-4 h-4 text-muted-foreground shrink-0" />;
+      return <CreditCard className="w-4 h-4 text-amber-500 shrink-0" />;
     case 'ACADEMIC':
-      return <BookOpen className="w-4 h-4 text-muted-foreground shrink-0" />;
+    case 'ASSIGNMENT':
+      return <BookOpen className="w-4 h-4 text-blue-500 shrink-0" />;
     case 'ATTENDANCE':
-      return <Users className="w-4 h-4 text-muted-foreground shrink-0" />;
+      return <Users className="w-4 h-4 text-emerald-500 shrink-0" />;
+    case 'SUCCESS':
+      return <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />;
     case 'INFO':
     default:
-      return <Info className="w-4 h-4 text-muted-foreground shrink-0" />;
+      return <Info className="w-4 h-4 text-sky-500 shrink-0" />;
   }
 }
 
 export function NotificationsPage({
   title = 'Notifikasi',
   description = 'Pengumuman sekolah, informasi akun, dan pembaruan sistem.',
-  initialNotifications = DEFAULT_NOTIFICATIONS,
+  initialNotifications,
 }: NotificationsPageProps) {
-  const [notifications, setNotifications] =
-    React.useState<NotificationItem[]>(initialNotifications);
+  const {
+    notifications: storeNotifications,
+    unreadCount: storeUnreadCount,
+    fetchNotifications,
+    markAsRead,
+    markAllAsRead,
+    isLoading,
+  } = useNotificationStore();
 
-  const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+  const [localNotifications, setLocalNotifications] = React.useState<NotificationItem[] | null>(
+    initialNotifications || null
+  );
+
+  React.useEffect(() => {
+    if (!initialNotifications) {
+      fetchNotifications();
+    }
+  }, [fetchNotifications, initialNotifications]);
+
+  const notifications = localNotifications || storeNotifications;
+  const unreadCount = localNotifications
+    ? localNotifications.filter((n) => !n.isRead).length
+    : storeUnreadCount;
+
+  const handleMarkAllAsRead = () => {
+    if (localNotifications) {
+      setLocalNotifications((prev) => prev?.map((n) => ({ ...n, isRead: true })) || null);
+    }
+    markAllAsRead();
   };
 
-  const toggleRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, isRead: !n.isRead } : n))
-    );
+  const handleToggleRead = (id: string, isRead: boolean) => {
+    if (localNotifications) {
+      setLocalNotifications(
+        (prev) => prev?.map((n) => (n.id === id ? { ...n, isRead: true } : n)) || null
+      );
+    }
+    if (!isRead) {
+      markAsRead(id);
+    }
   };
-
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   return (
     <div className="p-6 space-y-6 max-w-4xl mx-auto">
@@ -134,7 +154,7 @@ export function NotificationsPage({
           <Button
             variant="outline"
             size="sm"
-            onClick={markAllAsRead}
+            onClick={handleMarkAllAsRead}
             className="gap-2"
           >
             <CheckCheck className="w-4 h-4" />
@@ -145,22 +165,26 @@ export function NotificationsPage({
 
       {/* Notifications List */}
       <div className="space-y-3">
-        {notifications.length === 0 ? (
+        {isLoading && notifications.length === 0 ? (
           <Card className="p-8 text-center text-muted-foreground">
-            <Bell className="w-12 h-12 mx-auto mb-3 text-muted" />
+            <p className="animate-pulse">Memuat notifikasi...</p>
+          </Card>
+        ) : notifications.length === 0 ? (
+          <Card className="p-8 text-center text-muted-foreground">
+            <Bell className="w-12 h-12 mx-auto mb-3 text-muted opacity-50" />
             <p>Tidak ada notifikasi saat ini.</p>
           </Card>
         ) : (
           notifications.map((item) => (
             <Card
               key={item.id}
-              onClick={() => toggleRead(item.id)}
+              onClick={() => handleToggleRead(item.id, item.isRead)}
               className={`cursor-pointer transition-colors hover:bg-accent/50 ${
-                !item.isRead ? 'bg-muted/30' : 'opacity-80'
+                !item.isRead ? 'bg-muted/30 border-l-4 border-l-primary' : 'opacity-80'
               }`}
             >
               <CardContent className="p-4 sm:p-5 flex items-start gap-4 text-left">
-                <div className="p-2 rounded-md bg-muted">
+                <div className="p-2 rounded-md bg-muted shrink-0">
                   {getIcon(item.type)}
                 </div>
 
@@ -177,7 +201,7 @@ export function NotificationsPage({
                     </h3>
                     <span className="text-[11px] text-muted-foreground flex items-center gap-1 shrink-0">
                       <Calendar className="w-3 h-3" />
-                      {item.createdAt}
+                      {formatNotificationDate(item.createdAt)}
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed">
@@ -196,3 +220,4 @@ export function NotificationsPage({
     </div>
   );
 }
+

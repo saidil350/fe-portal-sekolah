@@ -12,28 +12,33 @@ import { getRoleFromDashboardPath } from '../navigation/role-from-path';
 import { Avatar, AvatarImage, AvatarFallback, Button, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, Badge } from '@/components/ui';
 import { usePathname } from 'next/navigation';
 import { notificationsApi } from '@/lib/api-client';
+import Link from 'next/link';
 import { getInitials } from '@/lib/utils/image-compression';
+
+function getNotificationPageUrl(role?: string | null): string {
+  switch (role) {
+    case 'ADMIN_IT': return '/dashboard/admin/notifications';
+    case 'GURU': return '/dashboard/guru/notifications';
+    case 'SISWA': return '/dashboard/siswa/notifications';
+    default: return '/dashboard/siswa/notifications';
+  }
+}
 
 export function Topbar() {
   const { user, logout } = useAuth();
   const pathname = usePathname();
   const { tenantName } = useTenant();
   const { toggleCollapse, toggleMobileOpen } = useSidebar();
-  const { unreadCount, notifications, markAllAsRead } = useNotificationStore();
+  const { unreadCount, notifications, fetchNotifications, markAsRead, markAllAsRead } = useNotificationStore();
   const { theme, setTheme } = useTheme();
   const fallbackRole = getRoleFromDashboardPath(pathname);
   const displayRole = user?.role || fallbackRole;
-  const setNotifications = useNotificationStore(state => state.setNotifications);
 
   React.useEffect(() => {
     if (user) {
-      notificationsApi.getNotifications({ limit: 10 }).then(res => {
-        if (res.success && res.data) {
-          setNotifications(res.data.items);
-        }
-      }).catch(err => console.error('Failed to fetch notifications:', err));
+      fetchNotifications();
     }
-  }, [user, setNotifications]);
+  }, [user, fetchNotifications]);
 
   return (
     <header className="sticky top-0 z-30 flex h-14 w-full items-center justify-between border-b bg-background px-3 sm:px-4 md:px-6">
@@ -99,7 +104,7 @@ export function Topbar() {
               <div className="flex items-center justify-between w-full">
                 <span>Notifikasi</span>
                 {unreadCount > 0 && (
-                  <button onClick={markAllAsRead} className="text-[10px] text-primary hover:underline font-semibold">
+                  <button onClick={() => markAllAsRead()} className="text-[10px] text-primary hover:underline font-semibold">
                     Tandai semua dibaca
                   </button>
                 )}
@@ -114,15 +119,25 @@ export function Topbar() {
                 </div>
               ) : (
                 notifications.slice(0, 5).map((n) => (
-                  <div key={n.id} className="p-2.5 rounded-md hover:bg-muted text-left border-b last:border-0">
+                  <div
+                    key={n.id}
+                    onClick={() => !n.isRead && markAsRead(n.id)}
+                    className="p-2.5 rounded-md hover:bg-muted text-left border-b last:border-0 cursor-pointer transition-colors"
+                  >
                     <div className="font-semibold text-xs text-foreground flex items-center justify-between">
                       <span>{n.title}</span>
-                      {!n.isRead && <span className="h-1.5 w-1.5 rounded-full bg-primary" />}
+                      {!n.isRead && <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0 ml-1" />}
                     </div>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">{n.message}</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2">{n.message}</p>
                   </div>
                 ))
               )}
+            </div>
+            <DropdownMenuSeparator />
+            <div className="p-1 text-center">
+              <Link href={getNotificationPageUrl(displayRole)} className="text-xs text-primary hover:underline font-medium block p-1.5">
+                Lihat Semua Notifikasi
+              </Link>
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
