@@ -44,6 +44,15 @@ export interface UserProfileResponse {
   isActive: boolean;
   studentProfile?: StudentProfileDetail | null;
   teacherProfile?: TeacherProfileDetail | null;
+  currentClass?: { id: string; name: string; level: number } | null;
+  academicHistory?: Array<{
+    academicYear: string;
+    grade: string;
+    className: string;
+    semester: string;
+    status: string;
+    isCurrent: boolean;
+  }> | null;
   createdAt: string;
   updatedAt: string;
 }

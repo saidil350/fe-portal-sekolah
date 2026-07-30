@@ -30,4 +30,22 @@ export const classesApi = {
   getStudents: async (classId: string): Promise<ApiResponse<User[]>> => {
     return apiClient.get<ApiResponse<User[]>>(API_ROUTES.CLASSES.STUDENTS(classId));
   },
+
+  getAcademicYears: async (): Promise<ApiResponse<any[]>> => {
+    return apiClient.get<ApiResponse<any[]>>(API_ROUTES.CLASSES.ACADEMIC_YEARS);
+  },
+
+  createAcademicYear: async (data: any): Promise<ApiResponse<any>> => {
+    return apiClient.post<ApiResponse<any>>(API_ROUTES.CLASSES.ACADEMIC_YEARS, data);
+  },
+
+  promoteClasses: async (data: {
+    fromClassId: string;
+    toClassId?: string;
+    academicYearId: string;
+    promotions: Array<{ studentId: string; action: 'PROMOTE' | 'RETAIN' | 'GRADUATE'; targetClassId?: string }>;
+  }): Promise<ApiResponse<{ processedCount: number }>> => {
+    return apiClient.post<ApiResponse<{ processedCount: number }>>(API_ROUTES.CLASSES.PROMOTE, data);
+  },
 };
+

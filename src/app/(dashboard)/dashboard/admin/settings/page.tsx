@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui';
-import { Settings, Plus, Edit, Trash2, School, CalendarCheck, Bell, Users, CheckCircle, Save, Loader2 } from 'lucide-react';
+import { Settings, Plus, Edit, Trash2, School, CalendarCheck, Bell, Users, CheckCircle, Save, Loader2, GraduationCap } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
 
 interface ClassItem {
@@ -263,42 +263,52 @@ export default function AdminSettingsPage() {
         </Card>
 
         {/* Right Side: Classes list / management */}
-        <Card className="md:col-span-2 relative opacity-85">
+        <Card className="md:col-span-2 relative">
           <CardHeader className="pb-4">
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex items-center gap-2">
                 <CardTitle className="text-base font-semibold flex items-center gap-2">
                   <School className="h-4 w-4 text-primary" /> Daftar Kelas Kustom
                 </CardTitle>
-                <Badge variant="outline" className="text-[10px] bg-amber-500/10 text-amber-600 border-amber-500/30 dark:text-amber-400">
-                  Dalam Pengembangan
+                <Badge variant="default" className="text-[10px]">
+                  Aktif
                 </Badge>
               </div>
-              <Button disabled size="sm" className="h-8 text-xs gap-1.5 opacity-50 cursor-not-allowed">
-                <Plus className="h-3.5 w-3.5" /> Tambah Kelas
-              </Button>
+
+              <div className="flex items-center gap-2">
+                <Button 
+                  type="button"
+                  variant="outline"
+                  size="sm" 
+                  onClick={() => window.location.href = '/dashboard/admin/classes/promotion'}
+                  className="h-8 text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
+                >
+                  <GraduationCap className="h-3.5 w-3.5" /> Kenaikan Kelas
+                </Button>
+                <Button 
+                  type="button"
+                  size="sm" 
+                  onClick={handleOpenAddModal}
+                  className="h-8 text-xs gap-1.5"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Tambah Kelas
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="rounded-md bg-muted/60 p-4 text-center border border-dashed">
-              <School className="h-8 w-8 mx-auto mb-2 text-muted-foreground/60" />
-              <p className="text-sm font-medium text-foreground">Fitur Manajemen Kelas Kustom Sedang Dalam Pengembangan</p>
-              <p className="text-xs text-muted-foreground mt-1 max-w-md mx-auto">
-                Modul ini sedang disiapkan untuk mendukung pengelolaan tingkat dan pembuatan kelas kustom sekolah pada rilis mendatang.
-              </p>
-            </div>
-
             {loadingClasses ? (
               <div className="flex justify-center items-center py-6">
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
               </div>
-            ) : classesList.length > 0 && (
-              <div className="overflow-x-auto rounded-md border opacity-50 pointer-events-none select-none">
+            ) : classesList.length > 0 ? (
+              <div className="overflow-x-auto rounded-md border">
                 <Table>
                   <TableHeader className="bg-muted/50">
                     <TableRow>
                       <TableHead className="text-xs">Tingkat</TableHead>
                       <TableHead className="text-xs">Nama Kelas</TableHead>
+                      <TableHead className="text-xs">Wali Kelas</TableHead>
                       <TableHead className="text-xs">Status</TableHead>
                       <TableHead className="text-xs text-right">Aksi</TableHead>
                     </TableRow>
@@ -306,8 +316,9 @@ export default function AdminSettingsPage() {
                   <TableBody>
                     {classesList.map((cls) => (
                       <TableRow key={cls.id}>
-                        <TableCell className="text-xs font-semibold">{cls.level || 1}</TableCell>
+                        <TableCell className="text-xs font-semibold">Level {cls.level || 1}</TableCell>
                         <TableCell className="text-xs font-semibold">{cls.name}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{cls.homeroomTeacherName || '-'}</TableCell>
                         <TableCell>
                           <Badge variant={cls.isActive ? 'default' : 'secondary'} className="text-[10px] px-1.5 py-0.5">
                             {cls.isActive ? 'Aktif' : 'Nonaktif'}
@@ -318,16 +329,16 @@ export default function AdminSettingsPage() {
                             <Button 
                               variant="ghost" 
                               size="icon" 
-                              disabled
-                              className="h-7 w-7 text-muted-foreground"
+                              onClick={() => handleOpenEditModal(cls)}
+                              className="h-7 w-7 text-muted-foreground hover:text-foreground"
                             >
                               <Edit className="h-3.5 w-3.5" />
                             </Button>
                             <Button 
                               variant="ghost" 
                               size="icon" 
-                              disabled
-                              className="h-7 w-7 text-muted-foreground"
+                              onClick={() => handleDeleteClass(cls.id)}
+                              className="h-7 w-7 text-destructive hover:bg-destructive/10"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
                             </Button>
@@ -337,6 +348,12 @@ export default function AdminSettingsPage() {
                     ))}
                   </TableBody>
                 </Table>
+              </div>
+            ) : (
+              <div className="rounded-md bg-muted/30 p-6 text-center border border-dashed">
+                <School className="h-8 w-8 mx-auto mb-2 text-muted-foreground/60" />
+                <p className="text-sm font-medium text-foreground">Belum ada kelas kustom</p>
+                <p className="text-xs text-muted-foreground mt-1">Klik "Tambah Kelas" untuk menambahkan kelas baru.</p>
               </div>
             )}
           </CardContent>

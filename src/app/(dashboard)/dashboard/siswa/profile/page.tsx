@@ -92,6 +92,7 @@ export default function StudentProfilePage() {
             address: u.address || prev.address,
             nis: sp?.nis || prev.nis,
             nisn: sp?.nisn || prev.nisn,
+            currentClass: u.currentClass?.name ? `Kelas ${u.currentClass.name}` : prev.currentClass,
             gender: sp?.gender === 'L' ? 'Laki-laki' : sp?.gender === 'P' ? 'Perempuan' : sp?.gender || prev.gender,
             birthPlace: sp?.birthPlace || prev.birthPlace,
             birthDate: sp?.birthDate || prev.birthDate,
@@ -103,6 +104,7 @@ export default function StudentProfilePage() {
             motherOccupation: sp?.motherOccupation || prev.motherOccupation,
             guardianName: sp?.guardianName || prev.guardianName,
             guardianPhone: sp?.guardianPhone || prev.guardianPhone,
+            academicHistory: Array.isArray(u.academicHistory) && u.academicHistory.length > 0 ? u.academicHistory : prev.academicHistory,
           }));
         }
       } catch (err) {

@@ -17,6 +17,8 @@ export const API_ROUTES = {
     BASE: '/classes',
     DETAIL: (id: string) => `/classes/${id}`,
     STUDENTS: (id: string) => `/classes/${id}/students`,
+    PROMOTE: '/admin/classes/promote',
+    ACADEMIC_YEARS: '/admin/academic-years',
   },
   ATTENDANCE: {
     CHECK_IN: '/attendance/check-in',

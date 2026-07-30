@@ -13,6 +13,7 @@ export const NAV_CONFIG: Record<Role, NavItem[]> = {
   ADMIN_IT: [
     { title: 'Dashboard', href: '/dashboard/admin', iconName: 'LayoutDashboard' },
     { title: 'Kelola Pengguna', href: '/dashboard/admin/users', iconName: 'Users' },
+    { title: 'Kenaikan Kelas', href: '/dashboard/admin/classes/promotion', iconName: 'School' },
     { title: 'Monitoring Pembayaran', href: '/dashboard/admin/payments', iconName: 'CreditCard' },
     { title: 'Notifikasi Sekolah', href: '/dashboard/admin/notifications', iconName: 'Bell' },
     { title: 'Pengaturan Sekolah', href: '/dashboard/admin/settings', iconName: 'Settings' },
