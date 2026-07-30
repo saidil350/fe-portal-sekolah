@@ -3,7 +3,6 @@
 import * as React from 'react';
 import {
   User,
-  Mail,
   Phone,
   MapPin,
   GraduationCap,
@@ -37,7 +36,6 @@ import { useAuthStore } from '@/stores/auth-store';
 
 export default function StudentProfilePage() {
   const { academicYear, semester } = useTenant();
-  const [loading, setLoading] = React.useState(true);
   const [isUploadingPhoto, setIsUploadingPhoto] = React.useState(false);
   const [student, setStudent] = React.useState<StudentProfileData>({
     name: 'Siswa',
@@ -109,8 +107,6 @@ export default function StudentProfilePage() {
         }
       } catch (err) {
         console.error('Gagal memuat profil siswa:', err);
-      } finally {
-        if (isMounted) setLoading(false);
       }
     }
     loadProfile();

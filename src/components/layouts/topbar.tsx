@@ -11,7 +11,6 @@ import { Breadcrumbs } from '../navigation/breadcrumbs';
 import { getRoleFromDashboardPath } from '../navigation/role-from-path';
 import { Avatar, AvatarImage, AvatarFallback, Button, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, Badge } from '@/components/ui';
 import { usePathname } from 'next/navigation';
-import { notificationsApi } from '@/lib/api-client';
 import Link from 'next/link';
 import { getInitials } from '@/lib/utils/image-compression';
 
