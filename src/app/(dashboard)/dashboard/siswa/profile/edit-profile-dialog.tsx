@@ -154,7 +154,7 @@ export function EditProfileDialog({
 
         <form onSubmit={handleSave} className="space-y-4">
           {/* Section 1: Identitas Sekolah (Read-only) */}
-          <div className="grid grid-cols-2 gap-3 p-3 bg-muted/30 rounded-lg border">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-muted/30 rounded-lg border">
             <div>
               <label className={labelClass}>Nama Lengkap (Siswa)</label>
               <Input value={student.name} disabled className="bg-background" />

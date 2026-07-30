@@ -114,16 +114,16 @@ export default function StudentProfilePage() {
   };
 
   return (
-    <div className="p-6 space-y-6 max-w-5xl mx-auto text-left">
+    <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 max-w-5xl mx-auto text-left">
       {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 border-b">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Profil & Berkas Siswa</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Profil & Berkas Siswa</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
             Kelola biodata pribadi, data orang tua, serta kelengkapan dokumen persyaratan sekolah.
           </p>
         </div>
-        <Button size="sm" className="gap-2" onClick={() => setEditOpen(true)}>
+        <Button size="sm" className="w-full sm:w-auto gap-2" onClick={() => setEditOpen(true)}>
           <Edit3 className="w-4 h-4" />
           Edit Biodata & Ortu
         </Button>
@@ -131,38 +131,38 @@ export default function StudentProfilePage() {
 
       {/* Main Profile Header Card */}
       <Card>
-        <CardContent className="pt-6">
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-            <Avatar className="w-20 h-20 border">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-4 sm:gap-6">
+            <Avatar className="w-16 h-16 sm:w-20 sm:h-20 border">
               <AvatarImage src="" alt={student.name} />
-              <AvatarFallback className="text-xl font-semibold bg-muted text-foreground">
+              <AvatarFallback className="text-lg sm:text-xl font-semibold bg-muted text-foreground">
                 RH
               </AvatarFallback>
             </Avatar>
 
-            <div className="flex-1 text-center md:text-left space-y-2">
+            <div className="flex-1 text-center md:text-left space-y-2 w-full">
               <div className="flex flex-col md:flex-row items-center justify-between gap-2">
                 <div>
-                  <h2 className="text-xl font-bold">{student.name}</h2>
-                  <p className="text-sm text-muted-foreground flex items-center justify-center md:justify-start gap-1.5 mt-1">
-                    <GraduationCap className="w-4 h-4 text-muted-foreground" />
+                  <h2 className="text-lg sm:text-xl font-bold">{student.name}</h2>
+                  <p className="text-xs sm:text-sm text-muted-foreground flex items-center justify-center md:justify-start gap-1.5 mt-1">
+                    <GraduationCap className="w-4 h-4 text-muted-foreground shrink-0" />
                     {student.currentClass} • TA {student.academicYear}
                   </p>
                 </div>
-                <Badge variant="outline">
-                  <ShieldCheck className="w-3.5 h-3.5 mr-1" />
+                <Badge variant="outline" className="w-fit">
+                  <ShieldCheck className="w-3.5 h-3.5 mr-1 text-emerald-600" />
                   Status: {student.status}
                 </Badge>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 text-sm border-t">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 pt-3 text-xs sm:text-sm border-t text-left">
                 <div className="flex items-center gap-2 text-muted-foreground">
-                  <User className="w-4 h-4 text-muted-foreground" />
-                  <span>NISN: <strong className="text-foreground">{student.nisn}</strong></span>
+                  <User className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <span>NISN: <strong className="text-foreground font-semibold">{student.nisn}</strong></span>
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
-                  <Calendar className="w-4 h-4 text-muted-foreground" />
-                  <span>NIS: <strong className="text-foreground">{student.nis}</strong></span>
+                  <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <span>NIS: <strong className="text-foreground font-semibold">{student.nis}</strong></span>
                 </div>
               </div>
             </div>
@@ -172,51 +172,60 @@ export default function StudentProfilePage() {
 
       {/* Tabs Menu */}
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="overview">Biodata & Data Keluarga</TabsTrigger>
-          <TabsTrigger value="documents">Berkas & Surat Penting</TabsTrigger>
-          <TabsTrigger value="academic">Riwayat Kenaikan Kelas</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 h-auto p-1 gap-1">
+          <TabsTrigger value="overview" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
+            <span className="hidden sm:inline">Biodata & Data Keluarga</span>
+            <span className="sm:hidden truncate">Biodata & Ortu</span>
+          </TabsTrigger>
+          <TabsTrigger value="documents" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
+            <span className="hidden sm:inline">Berkas & Surat Penting</span>
+            <span className="sm:hidden truncate">Berkas & Surat</span>
+          </TabsTrigger>
+          <TabsTrigger value="academic" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
+            <span className="hidden sm:inline">Riwayat Kenaikan Kelas</span>
+            <span className="sm:hidden truncate">Riwayat Kelas</span>
+          </TabsTrigger>
         </TabsList>
 
         {/* Tab 1: Biodata & Data Keluarga */}
-        <TabsContent value="overview" className="space-y-4 pt-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <TabsContent value="overview" className="space-y-4 pt-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             <Card>
-              <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
+              <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-3">
+                <CardTitle className="text-sm sm:text-base flex items-center gap-2">
                   <User className="w-4 h-4 text-primary" />
                   Identitas Pribadi Siswa
                 </CardTitle>
-                <CardDescription>Informasi NIK, TTL, dan domisili siswa.</CardDescription>
+                <CardDescription className="text-xs">Informasi NIK, TTL, dan domisili siswa.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3 text-sm">
-                <div className="flex justify-between border-b pb-2">
+              <CardContent className="p-4 sm:p-6 pt-0 space-y-2.5 text-xs sm:text-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-2 gap-0.5">
                   <span className="text-xs text-muted-foreground">NIK (No. KTP)</span>
                   <span className="font-semibold">{student.nik}</span>
                 </div>
-                <div className="flex justify-between border-b pb-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-2 gap-0.5">
                   <span className="text-xs text-muted-foreground">Tempat, Tanggal Lahir</span>
                   <span className="font-semibold">{student.birthPlace}, {student.birthDate}</span>
                 </div>
-                <div className="flex justify-between border-b pb-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-2 gap-0.5">
                   <span className="text-xs text-muted-foreground">Jenis Kelamin</span>
                   <span className="font-semibold">{student.gender}</span>
                 </div>
-                <div className="flex justify-between border-b pb-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-2 gap-0.5">
                   <span className="text-xs text-muted-foreground">Agama</span>
                   <span className="font-semibold">{student.religion}</span>
                 </div>
-                <div className="flex justify-between border-b pb-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-2 gap-0.5">
                   <span className="text-xs text-muted-foreground">Email</span>
-                  <span className="font-semibold">{student.email}</span>
+                  <span className="font-semibold break-all">{student.email}</span>
                 </div>
-                <div className="flex justify-between border-b pb-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-2 gap-0.5">
                   <span className="text-xs text-muted-foreground">Nomor HP / WA</span>
                   <span className="font-semibold">{student.phone}</span>
                 </div>
-                <div>
+                <div className="pt-1">
                   <span className="text-xs text-muted-foreground block mb-1">Alamat Tinggal</span>
-                  <span className="font-medium flex items-start gap-1 text-xs bg-muted/40 p-2.5 rounded-md">
+                  <span className="font-medium flex items-start gap-1.5 text-xs bg-muted/40 p-2.5 rounded-md leading-relaxed">
                     <MapPin className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
                     {student.address}
                   </span>
@@ -225,38 +234,38 @@ export default function StudentProfilePage() {
             </Card>
 
             <Card>
-              <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
+              <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-3">
+                <CardTitle className="text-sm sm:text-base flex items-center gap-2">
                   <User className="w-4 h-4 text-primary" />
                   Data Orang Tua & Wali
                 </CardTitle>
-                <CardDescription>Identitas ayah, ibu, dan wali siswa.</CardDescription>
+                <CardDescription className="text-xs">Identitas ayah, ibu, dan wali siswa.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3 text-sm">
-                <div className="flex justify-between border-b pb-2">
+              <CardContent className="p-4 sm:p-6 pt-0 space-y-2.5 text-xs sm:text-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-2 gap-0.5">
                   <span className="text-xs text-muted-foreground">Nama Ayah</span>
                   <span className="font-semibold">{student.fatherName}</span>
                 </div>
-                <div className="flex justify-between border-b pb-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-2 gap-0.5">
                   <span className="text-xs text-muted-foreground">Pekerjaan Ayah</span>
                   <span className="font-semibold">{student.fatherOccupation}</span>
                 </div>
-                <div className="flex justify-between border-b pb-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-2 gap-0.5">
                   <span className="text-xs text-muted-foreground">Nama Ibu</span>
                   <span className="font-semibold">{student.motherName}</span>
                 </div>
-                <div className="flex justify-between border-b pb-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-2 gap-0.5">
                   <span className="text-xs text-muted-foreground">Pekerjaan Ibu</span>
                   <span className="font-semibold">{student.motherOccupation}</span>
                 </div>
-                <div className="flex justify-between border-b pb-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-2 gap-0.5">
                   <span className="text-xs text-muted-foreground">Nama Wali</span>
                   <span className="font-semibold">{student.guardianName}</span>
                 </div>
-                <div className="flex justify-between border-b pb-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-2 gap-0.5">
                   <span className="text-xs text-muted-foreground">Kontak Wali / Ortu</span>
                   <span className="font-semibold flex items-center gap-1">
-                    <Phone className="w-3.5 h-3.5 text-muted-foreground" />
+                    <Phone className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                     {student.guardianPhone}
                   </span>
                 </div>
@@ -266,25 +275,25 @@ export default function StudentProfilePage() {
         </TabsContent>
 
         {/* Tab 2: Berkas & Surat Penting */}
-        <TabsContent value="documents" className="space-y-4 pt-4">
+        <TabsContent value="documents" className="space-y-4 pt-3">
           <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Upload Berkas & Surat Persyaratan</CardTitle>
-              <CardDescription>
+            <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-3">
+              <CardTitle className="text-sm sm:text-base">Upload Berkas & Surat Persyaratan</CardTitle>
+              <CardDescription className="text-xs">
                 Unggah dokumen penting seperti Akte Kelahiran, KK, dan Ijazah untuk diverifikasi oleh Panitia/Admin Sekolah.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="p-4 sm:p-6 pt-0 space-y-3">
               {documents.map((doc) => (
-                <div key={doc.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border rounded-xl bg-card gap-3">
+                <div key={doc.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 border rounded-xl bg-card gap-3">
                   <div>
-                    <h4 className="font-semibold text-sm">{doc.name}</h4>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      File: <strong className="text-foreground">{doc.fileName}</strong> • Diunggah {doc.date}
+                    <h4 className="font-semibold text-xs sm:text-sm">{doc.name}</h4>
+                    <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 break-all">
+                      File: <strong className="text-foreground font-semibold">{doc.fileName}</strong> • Diunggah {doc.date}
                     </p>
                   </div>
-                  <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
-                    <Badge variant={doc.status === 'TERVERIFIKASI' ? 'default' : 'secondary'}>
+                  <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-2 sm:pt-0">
+                    <Badge variant={doc.status === 'TERVERIFIKASI' ? 'default' : 'secondary'} className="text-[10px] sm:text-xs">
                       {doc.status}
                     </Badge>
                     <label className="cursor-pointer inline-flex items-center justify-center rounded-md text-xs font-semibold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3">
@@ -304,41 +313,42 @@ export default function StudentProfilePage() {
         </TabsContent>
 
         {/* Tab 3: Riwayat Semester & Kenaikan Kelas */}
-        <TabsContent value="academic" className="space-y-4 pt-4">
+        <TabsContent value="academic" className="space-y-4 pt-3">
           <Card>
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
+            <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-3">
+              <CardTitle className="text-sm sm:text-base flex items-center gap-2">
                 <History className="w-4 h-4 text-muted-foreground" />
                 Jejak Kenaikan Kelas & Semester
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-xs">
                 Riwayat perjalanan akademik dari awal masuk hingga jenjang kelas saat ini.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4 text-left">
-              <div className="relative border-l border-border ml-4 pl-6 space-y-6">
+            <CardContent className="p-4 sm:p-6 pt-0 space-y-4 text-left">
+              <div className="relative border-l border-border ml-2.5 sm:ml-4 pl-4 sm:pl-6 space-y-5">
                 {student.academicHistory.map((item, index) => (
                   <div key={index} className="relative">
                     {/* Circle Bullet */}
-                    <div className={`absolute -left-[31px] top-0.5 w-3.5 h-3.5 rounded-full border bg-background ${
+                    <div className={`absolute -left-[23px] sm:-left-[31px] top-0.5 w-3.5 h-3.5 rounded-full border bg-background ${
                       item.isCurrent ? 'border-primary bg-primary' : 'border-muted-foreground'
                     }`} />
 
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
                       <div>
-                        <h4 className="font-semibold text-sm flex items-center gap-2">
+                        <h4 className="font-semibold text-xs sm:text-sm flex items-center gap-2">
                           {item.className}
                           {item.isCurrent && (
-                            <Badge variant="default" className="text-xs">Aktif</Badge>
+                            <Badge variant="default" className="text-[10px] sm:text-xs">Aktif</Badge>
                           )}
                         </h4>
-                        <p className="text-xs text-muted-foreground mt-0.5">
+                        <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">
                           Tahun Ajaran {item.academicYear} • {item.semester}
                         </p>
                       </div>
 
                       <Badge 
                         variant={item.status === 'Naik Kelas' ? 'default' : 'secondary'}
+                        className="w-fit text-[10px] sm:text-xs"
                       >
                         {item.status === 'Naik Kelas' && <TrendingUp className="w-3 h-3 mr-1" />}
                         {item.status}
