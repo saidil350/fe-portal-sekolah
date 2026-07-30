@@ -7,6 +7,7 @@ export interface Notification extends BaseEntity {
   message: string;
   type: NotificationType;
   userId?: string; // Nullable jika ini broadcast global atau tenant
+  targetRole?: string;
   isRead: boolean;
   readAt?: string;
   link?: string;

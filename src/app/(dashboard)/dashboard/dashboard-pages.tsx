@@ -769,6 +769,7 @@ export function AdminNotificationsPage() {
         title: formData.title,
         message: formData.message,
         type: formData.type,
+        targetRole: formData.audience,
       };
       
       const res = await apiClient.post<any>('/notifications/broadcast', payload);
@@ -865,6 +866,10 @@ export function AdminNotificationsPage() {
                   className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <option value="ALL">Semua Pengguna</option>
+                  <option value="SISWA">Siswa</option>
+                  <option value="GURU">Guru</option>
+                  <option value="STAFF">Staff</option>
+                  <option value="KEPALA_SEKOLAH">Kepala Sekolah</option>
                 </select>
               </div>
             </div>
