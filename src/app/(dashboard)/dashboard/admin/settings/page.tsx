@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui';
-import { Settings, Plus, Edit, Trash2, School, CalendarCheck, Bell, Users, CheckCircle, Save, Loader2, GraduationCap } from 'lucide-react';
+import { Settings, Plus, Edit, Trash2, School, CalendarCheck, Bell, Users, CheckCircle, Save, Loader2 } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
 
 interface ClassItem {
@@ -270,21 +270,9 @@ export default function AdminSettingsPage() {
                 <CardTitle className="text-base font-semibold flex items-center gap-2">
                   <School className="h-4 w-4 text-primary" /> Daftar Kelas Kustom
                 </CardTitle>
-                <Badge variant="default" className="text-[10px]">
-                  Aktif
-                </Badge>
               </div>
 
               <div className="flex items-center gap-2">
-                <Button 
-                  type="button"
-                  variant="outline"
-                  size="sm" 
-                  onClick={() => window.location.href = '/dashboard/admin/classes/promotion'}
-                  className="h-8 text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
-                >
-                  <GraduationCap className="h-3.5 w-3.5" /> Kenaikan Kelas
-                </Button>
                 <Button 
                   type="button"
                   size="sm" 
