@@ -35,9 +35,9 @@ export function Topbar() {
   }, [user, setNotifications]);
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 w-full items-center justify-between border-b bg-background px-4 md:px-6">
+    <header className="sticky top-0 z-30 flex h-14 w-full items-center justify-between border-b bg-background px-3 sm:px-4 md:px-6">
       {/* Left side */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4">
         {/* Mobile menu button */}
         <Button
           variant="ghost"
@@ -64,7 +64,7 @@ export function Topbar() {
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4">
         {/* Tenant Info */}
         <div className="hidden md:flex flex-col text-right">
           <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Sekolah</span>
@@ -93,7 +93,7 @@ export function Topbar() {
               )}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80">
+          <DropdownMenuContent align="end" className="w-[calc(100vw-2rem)] max-w-xs sm:max-w-sm sm:w-80">
             <DropdownMenuLabel>
               <div className="flex items-center justify-between w-full">
                 <span>Notifikasi</span>

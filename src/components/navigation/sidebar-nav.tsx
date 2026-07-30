@@ -40,19 +40,20 @@ const ICON_MAP = {
   Users,
 } satisfies Record<NavItem['iconName'], React.ComponentType<{ className?: string }>>;
 
-export function SidebarNav() {
+export function SidebarNav({ forceExpand = false }: { forceExpand?: boolean }) {
   const pathname = usePathname();
   const { user } = useAuthStore();
   const { isCollapsed, setMobileOpen } = useSidebarStore();
 
+  const effectiveCollapsed = forceExpand ? false : isCollapsed;
   const role = user?.role || getRoleFromDashboardPath(pathname) || 'SISWA';
   const menuItems = NAV_CONFIG[role] || [];
 
   return (
     <nav
       className={cn('flex flex-col gap-1.5 py-4 transition-all duration-300', {
-        'px-3': !isCollapsed,
-        'px-2 items-center': isCollapsed,
+        'px-3': !effectiveCollapsed,
+        'px-2 items-center': effectiveCollapsed,
       })}
     >
       {menuItems.map((item: NavItem) => {
@@ -70,7 +71,7 @@ export function SidebarNav() {
               {
                 'bg-accent text-accent-foreground font-semibold': isActive,
                 'text-muted-foreground hover:bg-muted hover:text-foreground': !isActive,
-                'justify-center w-10 h-10 p-0': isCollapsed,
+                'justify-center w-10 h-10 p-0': effectiveCollapsed,
               }
             )}
           >
@@ -84,14 +85,14 @@ export function SidebarNav() {
             )}
             
             {/* Teks label menu (disembunyikan saat collapse) */}
-            {!isCollapsed && (
+            {!effectiveCollapsed && (
               <span className="truncate">
                 {item.title}
               </span>
             )}
 
             {/* Hover Tooltip saat collapse */}
-            {isCollapsed && (
+            {effectiveCollapsed && (
               <div className="absolute left-full ml-3 z-50 rounded-md border bg-popover px-2.5 py-1.5 text-xs font-medium text-popover-foreground shadow-md opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity whitespace-nowrap">
                 {item.title}
               </div>

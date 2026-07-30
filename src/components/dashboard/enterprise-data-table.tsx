@@ -104,12 +104,12 @@ export function EnterpriseDataTable<T extends DashboardEntity>({
         {data.length === 0 ? (
           <DashboardEmptyState />
         ) : (
-          <div className="rounded-md border">
+          <div className="w-full overflow-x-auto rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
                   {columns.map((column, index) => (
-                    <TableHead key={`${String(column.accessorKey)}-${index}`} className="h-10">
+                    <TableHead key={`${String(column.accessorKey)}-${index}`} className="h-10 whitespace-nowrap">
                       <button
                         type="button"
                         className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wide"
@@ -127,7 +127,7 @@ export function EnterpriseDataTable<T extends DashboardEntity>({
                       </button>
                     </TableHead>
                   ))}
-                  <TableHead className="w-28">Aksi</TableHead>
+                  <TableHead className="w-28 whitespace-nowrap">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -141,13 +141,13 @@ export function EnterpriseDataTable<T extends DashboardEntity>({
                   pageRows.map((row) => (
                     <TableRow key={row.id} className="group cursor-pointer">
                       {columns.map((column, index) => (
-                        <TableCell key={`${row.id}-${String(column.accessorKey)}-${index}`} className="py-3">
+                        <TableCell key={`${row.id}-${String(column.accessorKey)}-${index}`} className="py-3 whitespace-nowrap sm:whitespace-normal">
                           <Link href={row.href} className="block">
                             {column.cell ? column.cell({ row: { original: row } }) : String(row[column.accessorKey ?? 'title'] ?? '')}
                           </Link>
                         </TableCell>
                       ))}
-                      <TableCell className="py-3">
+                      <TableCell className="py-3 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           {row.status && <Badge variant="secondary">{row.status}</Badge>}
                           <Button
@@ -174,7 +174,7 @@ export function EnterpriseDataTable<T extends DashboardEntity>({
           </div>
         )}
 
-        <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
           <span>
             Halaman {pageIndex + 1} dari {pageCount}
           </span>

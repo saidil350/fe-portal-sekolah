@@ -31,7 +31,7 @@ export function MobileDrawer() {
 
           {/* Links */}
           <div className="flex-1 py-4 overflow-y-auto custom-scrollbar">
-            <SidebarNav />
+            <SidebarNav forceExpand={true} />
           </div>
         </div>
       </SheetContent>

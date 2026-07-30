@@ -77,15 +77,15 @@ export function AnalyticsExplorer({
             ))}
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {data.slice(0, 4).map((point) => (
             <Link
               key={point.id}
               href={point.href}
-              className="inline-flex h-9 items-center justify-between gap-3 rounded-md border bg-background px-3 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
+              className="inline-flex h-9 items-center justify-between gap-2 rounded-md border bg-background px-3 text-xs sm:text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
               onClick={() => setChartKey(point.id)}
             >
-              <span>{point.label}</span>
+              <span className="truncate">{point.label}</span>
               <span className="font-semibold">{point.value}</span>
             </Link>
           ))}

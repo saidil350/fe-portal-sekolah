@@ -21,14 +21,14 @@ export interface DashboardMetric {
 
 export function InteractiveMetricGrid({ metrics }: { metrics: DashboardMetric[] }) {
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {metrics.map((metric) => {
         const Icon = metric.icon;
         const isClickable = Boolean(metric.href || metric.onClick);
 
         const cardContent = (
           <Card className={`h-full transition-colors ${isClickable ? 'hover:bg-accent/40 cursor-pointer' : ''}`}>
-            <CardContent className="flex h-full flex-col gap-4 p-5">
+            <CardContent className="flex h-full flex-col gap-3 p-4 sm:p-5">
               <div className="flex items-start justify-between gap-4">
                 <div className="rounded-md bg-muted p-2.5 text-foreground">
                   <Icon className="size-4" />

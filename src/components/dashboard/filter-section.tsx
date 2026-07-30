@@ -110,13 +110,13 @@ export function FilterSection({
 
         {/* Export Buttons */}
         {onExport && (
-          <div className="flex gap-2 sm:col-span-2 md:col-span-3 lg:col-span-2 xl:col-span-2">
+          <div className="flex w-full gap-2 sm:col-span-2 md:col-span-1 lg:col-span-2 xl:col-span-2">
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={() => onExport('pdf')}
-              className="flex-1 gap-2"
+              className="flex-1 gap-1.5 text-xs"
             >
               <Download className="h-3.5 w-3.5" /> PDF
             </Button>
@@ -125,7 +125,7 @@ export function FilterSection({
               variant="outline"
               size="sm"
               onClick={() => onExport('csv')}
-              className="flex-1 gap-2"
+              className="flex-1 gap-1.5 text-xs"
             >
               <Download className="h-3.5 w-3.5" /> CSV
             </Button>
