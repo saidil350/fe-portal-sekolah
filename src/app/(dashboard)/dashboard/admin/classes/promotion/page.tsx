@@ -44,14 +44,14 @@ const DEFAULT_ACADEMIC_YEARS: AcademicYear[] = [
 ];
 
 const DEFAULT_CLASSES: ClassItem[] = [
-  { id: 'cls-10-ipa1', name: 'X IPA 1', level: 10, program: 'MIPA' },
-  { id: 'cls-10-ipa2', name: 'X IPA 2', level: 10, program: 'MIPA' },
-  { id: 'cls-10-ips1', name: 'X IPS 1', level: 10, program: 'IPS' },
-  { id: 'cls-11-ipa1', name: 'XI IPA 1', level: 11, program: 'MIPA' },
-  { id: 'cls-11-ipa2', name: 'XI IPA 2', level: 11, program: 'MIPA' },
-  { id: 'cls-11-ips1', name: 'XI IPS 1', level: 11, program: 'IPS' },
-  { id: 'cls-12-ipa1', name: 'XII IPA 1', level: 12, program: 'MIPA' },
-  { id: 'cls-12-ips1', name: 'XII IPS 1', level: 12, program: 'IPS' },
+  { id: 'cls-10-1', name: 'X-1', level: 10 },
+  { id: 'cls-10-2', name: 'X-2', level: 10 },
+  { id: 'cls-10-3', name: 'X-3', level: 10 },
+  { id: 'cls-11-1', name: 'XI-1', level: 11 },
+  { id: 'cls-11-2', name: 'XI-2', level: 11 },
+  { id: 'cls-11-3', name: 'XI-3', level: 11 },
+  { id: 'cls-12-1', name: 'XII-1', level: 12 },
+  { id: 'cls-12-2', name: 'XII-2', level: 12 },
 ];
 
 export default function ClassPromotionPage() {
@@ -60,7 +60,7 @@ export default function ClassPromotionPage() {
   const [selectedYearId, setSelectedYearId] = React.useState<string>(DEFAULT_ACADEMIC_YEARS[0].id);
   
   const [fromClassId, setFromClassId] = React.useState<string>(DEFAULT_CLASSES[0].id);
-  const [toClassId, setToClassId] = React.useState<string>(DEFAULT_CLASSES[3].id); // XI IPA 1
+  const [toClassId, setToClassId] = React.useState<string>(DEFAULT_CLASSES[3].id); // XI-1
   
   const [students, setStudents] = React.useState<StudentItem[]>([]);
   const [loading, setLoading] = React.useState<boolean>(false);
@@ -348,7 +348,7 @@ export default function ClassPromotionPage() {
               <option value="">-- Pilih Rombel Asal --</option>
               {classesList.map((cls) => (
                 <option key={cls.id} value={cls.id}>
-                  Tingkat {cls.level} — {cls.name} {cls.program ? `(${cls.program})` : ''}
+                  Kelas {cls.name}
                 </option>
               ))}
             </select>
@@ -370,7 +370,7 @@ export default function ClassPromotionPage() {
               </option>
               {classesList.map((cls) => (
                 <option key={cls.id} value={cls.id}>
-                  Tingkat {cls.level} — {cls.name} {cls.program ? `(${cls.program})` : ''}
+                  Kelas {cls.name}
                 </option>
               ))}
             </select>
