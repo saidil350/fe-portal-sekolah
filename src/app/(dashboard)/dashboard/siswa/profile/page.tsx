@@ -1,15 +1,15 @@
 'use client';
 
 import * as React from 'react';
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  GraduationCap, 
-  Calendar, 
-  ShieldCheck, 
-  Edit3, 
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  GraduationCap,
+  Calendar,
+  ShieldCheck,
+  Edit3,
   History,
   TrendingUp,
   Camera,
@@ -136,7 +136,7 @@ export default function StudentProfilePage() {
       setIsUploadingPhoto(true);
       const base64Image = await compressImage(file);
       await profileApi.updateProfile({ image: base64Image });
-      
+
       setStudent((prev) => ({ ...prev, avatarUrl: base64Image }));
       useAuthStore.getState().updateUser({ avatarUrl: base64Image });
 
@@ -161,7 +161,7 @@ export default function StudentProfilePage() {
     try {
       setIsUploadingPhoto(true);
       await profileApi.updateProfile({ image: null });
-      
+
       setStudent((prev) => ({ ...prev, avatarUrl: null }));
       useAuthStore.getState().updateUser({ avatarUrl: null });
 
@@ -493,11 +493,11 @@ export default function StudentProfilePage() {
 
                     <label className="cursor-pointer inline-flex items-center justify-center rounded-md text-xs font-semibold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-2.5">
                       Unggah Ulang
-                      <input 
-                        type="file" 
+                      <input
+                        type="file"
                         accept=".pdf,.jpg,.jpeg,.png"
-                        className="hidden" 
-                        onChange={(e) => handleUploadSimulated(doc.id, e)} 
+                        className="hidden"
+                        onChange={(e) => handleUploadSimulated(doc.id, e)}
                       />
                     </label>
                   </div>
@@ -524,9 +524,8 @@ export default function StudentProfilePage() {
                 {student.academicHistory.map((item, index) => (
                   <div key={index} className="relative">
                     {/* Circle Bullet */}
-                    <div className={`absolute -left-[23px] sm:-left-[31px] top-0.5 w-3.5 h-3.5 rounded-full border bg-background ${
-                      item.isCurrent ? 'border-primary bg-primary' : 'border-muted-foreground'
-                    }`} />
+                    <div className={`absolute -left-[23px] sm:-left-[31px] top-0.5 w-3.5 h-3.5 rounded-full border bg-background ${item.isCurrent ? 'border-primary bg-primary' : 'border-muted-foreground'
+                      }`} />
 
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
                       <div>
@@ -541,7 +540,7 @@ export default function StudentProfilePage() {
                         </p>
                       </div>
 
-                      <Badge 
+                      <Badge
                         variant={item.status === 'Naik Kelas' ? 'default' : 'secondary'}
                         className="w-fit text-[10px] sm:text-xs"
                       >
