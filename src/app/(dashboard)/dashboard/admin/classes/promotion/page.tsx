@@ -133,6 +133,50 @@ export default function ClassPromotionPage() {
   }, [fromClassId, classesList]);
 
   const fetchClassStudents = async (classId: string, level: number) => {
+    const isFinalLevel = level >= 12;
+    const currentClass = classesList.find((c) => c.id === classId);
+    const className = currentClass ? currentClass.name : 'Romawi';
+
+    // Map siswa dinamis sesuai rombel yang dipilih
+    const mockStudentsMap: Record<string, Array<{ id: string; name: string; nis: string }>> = {
+      'X-1': [
+        { id: 'std-101', name: 'Ahmad Fauzi', nis: '20241001' },
+        { id: 'std-102', name: 'Budi Santoso', nis: '20241002' },
+        { id: 'std-103', name: 'Citra Dewi', nis: '20241003' },
+        { id: 'std-104', name: 'Dian Permana', nis: '20241004' },
+        { id: 'std-105', name: 'Eka Putri', nis: '20241005' },
+      ],
+      'X-2': [
+        { id: 'std-106', name: 'Faisal Amri', nis: '20241006' },
+        { id: 'std-107', name: 'Gita Gutawa', nis: '20241007' },
+        { id: 'std-108', name: 'Hendra Pratama', nis: '20241008' },
+        { id: 'std-109', name: 'Indah Permata', nis: '20241009' },
+        { id: 'std-110', name: 'Joko Susilo', nis: '20241010' },
+      ],
+      'XI-1': [
+        { id: 'std-201', name: 'Kurnia Meiga', nis: '20231001' },
+        { id: 'std-202', name: 'Lulu Nurhaliza', nis: '20231002' },
+        { id: 'std-203', name: 'Maya Estianty', nis: '20231003' },
+        { id: 'std-204', name: 'Naufal Azhar', nis: '20231004' },
+        { id: 'std-205', name: 'Oki Setiana', nis: '20231005' },
+      ],
+      'XII-1': [
+        { id: 'std-301', name: 'Putra Aditya', nis: '20221001' },
+        { id: 'std-302', name: 'Qori Sandioriva', nis: '20221002' },
+        { id: 'std-303', name: 'Rian Hidayat', nis: '20221003' },
+        { id: 'std-304', name: 'Siti Rahayu', nis: '20221004' },
+        { id: 'std-305', name: 'Taufik Hidayat', nis: '20221005' },
+      ],
+    };
+
+    const fallbackList = mockStudentsMap[className] || [
+      { id: `std-${classId}-1`, name: `Siswa 1 (${className})`, nis: '20251001' },
+      { id: `std-${classId}-2`, name: `Siswa 2 (${className})`, nis: '20251002' },
+      { id: `std-${classId}-3`, name: `Siswa 3 (${className})`, nis: '20251003' },
+      { id: `std-${classId}-4`, name: `Siswa 4 (${className})`, nis: '20251004' },
+      { id: `std-${classId}-5`, name: `Siswa 5 (${className})`, nis: '20251005' },
+    ];
+
     try {
       const res = await apiClient.get<any>(`/admin/classes/${classId}/students`);
       if (res?.data && Array.isArray(res.data) && res.data.length > 0) {
@@ -142,21 +186,27 @@ export default function ClassPromotionPage() {
             name: s.name,
             nis: s.nis || '10293' + s.id.slice(0, 3),
             selected: true,
-            action: level >= 12 ? 'GRADUATE' : 'PROMOTE',
+            action: isFinalLevel ? 'GRADUATE' : 'PROMOTE',
           }))
         );
       } else {
-        const isFinalLevel = level >= 12;
-        setStudents([
-          { id: 'std-1', name: 'Ahmad Fauzi', nis: '20241001', selected: true, action: isFinalLevel ? 'GRADUATE' : 'PROMOTE' },
-          { id: 'std-2', name: 'Budi Santoso', nis: '20241002', selected: true, action: isFinalLevel ? 'GRADUATE' : 'PROMOTE' },
-          { id: 'std-3', name: 'Citra Dewi', nis: '20241003', selected: true, action: isFinalLevel ? 'GRADUATE' : 'PROMOTE' },
-          { id: 'std-4', name: 'Dian Permana', nis: '20241004', selected: true, action: isFinalLevel ? 'GRADUATE' : 'PROMOTE' },
-          { id: 'std-5', name: 'Eka Putri', nis: '20241005', selected: true, action: isFinalLevel ? 'GRADUATE' : 'PROMOTE' },
-        ]);
+        setStudents(
+          fallbackList.map((s) => ({
+            ...s,
+            selected: true,
+            action: isFinalLevel ? 'GRADUATE' : 'PROMOTE',
+          }))
+        );
       }
     } catch (err) {
-      console.error('Error fetching students:', err);
+      console.error('Error fetching students, using fallback:', err);
+      setStudents(
+        fallbackList.map((s) => ({
+          ...s,
+          selected: true,
+          action: isFinalLevel ? 'GRADUATE' : 'PROMOTE',
+        }))
+      );
     }
   };
 
