@@ -24,28 +24,30 @@ import {
 } from './edit-profile-dialog';
 
 import { useTenant } from '@/hooks/use-tenant';
+import { profileApi } from '@/lib/api-client';
 
 export default function StudentProfilePage() {
   const { academicYear, semester } = useTenant();
+  const [loading, setLoading] = React.useState(true);
   const [student, setStudent] = React.useState<StudentProfileData>({
-    name: 'Rian Hidayat',
-    nisn: '0054819203',
-    nis: '2026-1108',
-    email: 'rian.hidayat@sekolah.sch.id',
-    phone: '0812-3456-7890',
+    name: 'Siswa',
+    nisn: '-',
+    nis: '-',
+    email: '-',
+    phone: '-',
     currentClass: 'Kelas 11 IPA 1',
-    address: 'Jl. Merdeka No. 45, RT 02 / RW 05, Kel. Citarum, Kec. Bandung Wetan, Kota Bandung',
-    nik: '3273011405080002',
-    birthPlace: 'Bandung',
-    birthDate: '2008-05-14',
-    gender: 'Laki-laki',
-    religion: 'Islam',
-    fatherName: 'Budi Hidayat',
-    fatherOccupation: 'Karyawan Swasta',
-    motherName: 'Siti Aminah',
-    motherOccupation: 'Ibu Rumah Tangga',
-    guardianName: 'Budi Hidayat (Ayah)',
-    guardianPhone: '0813-9876-5432',
+    address: 'Belum diisi',
+    nik: '-',
+    birthPlace: '-',
+    birthDate: '-',
+    gender: '-',
+    religion: '-',
+    fatherName: '-',
+    fatherOccupation: '-',
+    motherName: '-',
+    motherOccupation: '-',
+    guardianName: '-',
+    guardianPhone: '-',
     academicYear: `${academicYear} (${semester})`,
     status: 'Aktif',
 
@@ -59,32 +61,40 @@ export default function StudentProfilePage() {
         status: 'Sedang Berjalan',
         isCurrent: true,
       },
-      {
-        academicYear: academicYear,
-        grade: 'Kelas 11',
-        className: 'Kelas 11 IPA 1',
-        semester: semester === 'Genap' ? 'Semester Ganjil' : 'Semester Lalu',
-        status: 'Tuntas',
-        isCurrent: false,
-      },
-      {
-        academicYear: '2024/2025',
-        grade: 'Kelas 10',
-        className: 'Kelas 10 IPA 1',
-        semester: 'Semester Genap',
-        status: 'Naik Kelas',
-        isCurrent: false,
-      },
-      {
-        academicYear: '2024/2025',
-        grade: 'Kelas 10',
-        className: 'Kelas 10 IPA 1',
-        semester: 'Semester Ganjil',
-        status: 'Tuntas',
-        isCurrent: false,
-      },
     ],
   });
+
+  React.useEffect(() => {
+    let isMounted = true;
+    async function loadProfile() {
+      try {
+        const res = await profileApi.getProfile();
+        if (res?.data && isMounted) {
+          const u = res.data;
+          const sp = u.studentProfile;
+          setStudent((prev) => ({
+            ...prev,
+            name: u.name || prev.name,
+            email: u.email || prev.email,
+            nis: sp?.nis || prev.nis,
+            nisn: sp?.nisn || prev.nisn,
+            gender: sp?.gender || prev.gender,
+            birthPlace: sp?.birthPlace || prev.birthPlace,
+            birthDate: sp?.birthDate || prev.birthDate,
+          }));
+        }
+      } catch (err) {
+        console.error('Gagal memuat profil siswa:', err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+    loadProfile();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
 
   const [documents, setDocuments] = React.useState([
     { id: '1', name: 'Akte Kelahiran', fileName: 'Akte_Kelahiran_Rian.pdf', status: 'TERVERIFIKASI', date: '12 Jul 2025' },
@@ -366,9 +376,20 @@ export default function StudentProfilePage() {
         open={editOpen}
         onOpenChange={setEditOpen}
         student={student}
-        onSaved={(data) =>
-          setStudent((prev) => ({ ...prev, ...data }))
-        }
+        onSaved={async (data) => {
+          setStudent((prev) => ({ ...prev, ...data }));
+          try {
+            await profileApi.updateProfile({
+              phone: data.phone,
+              address: data.address,
+              birthPlace: data.birthPlace,
+              birthDate: data.birthDate,
+              gender: data.gender,
+            });
+          } catch (err) {
+            console.error('Gagal memperbarui profil di backend:', err);
+          }
+        }}
       />
     </div>
   );

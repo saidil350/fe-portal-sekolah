@@ -20,8 +20,10 @@ import {
   EditTeacherProfileDialog,
   type TeacherProfileData,
 } from './edit-profile-dialog';
+import { profileApi } from '@/lib/api-client';
 
 export default function TeacherProfilePage() {
+  const [loading, setLoading] = React.useState(true);
   const [teacher, setTeacher] = React.useState<TeacherProfileData>({
     name: 'Siti Aminah, S.Pd.',
     nip: '198507122010012004',
@@ -53,6 +55,33 @@ export default function TeacherProfilePage() {
       },
     ],
   });
+
+  React.useEffect(() => {
+    let isMounted = true;
+    async function loadProfile() {
+      try {
+        const res = await profileApi.getProfile();
+        if (res?.data && isMounted) {
+          const u = res.data;
+          const tp = u.teacherProfile;
+          setTeacher((prev) => ({
+            ...prev,
+            name: u.name || prev.name,
+            email: u.email || prev.email,
+            nip: tp?.nip || prev.nip,
+          }));
+        }
+      } catch (err) {
+        console.error('Gagal memuat profil guru:', err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+    loadProfile();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const [editOpen, setEditOpen] = React.useState(false);
 
@@ -206,9 +235,17 @@ export default function TeacherProfilePage() {
         open={editOpen}
         onOpenChange={setEditOpen}
         teacher={teacher}
-        onSaved={(data) =>
-          setTeacher((prev) => ({ ...prev, ...data }))
-        }
+        onSaved={async (data) => {
+          setTeacher((prev) => ({ ...prev, ...data }));
+          try {
+            await profileApi.updateProfile({
+              phone: data.phone,
+              address: data.address,
+            });
+          } catch (err) {
+            console.error('Gagal memperbarui profil guru di backend:', err);
+          }
+        }}
       />
     </div>
   );

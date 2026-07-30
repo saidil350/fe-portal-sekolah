@@ -11,3 +11,4 @@ export * from './endpoints/assignments';
 export * from './endpoints/payments';
 export * from './endpoints/notifications';
 export * from './endpoints/dashboard';
+export * from './endpoints/profile';

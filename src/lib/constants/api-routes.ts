@@ -47,4 +47,5 @@ export const API_ROUTES = {
     STATS: '/dashboard/stats',
     SUMMARY: '/dashboard/summary',
   },
+  PROFILE: '/profile',
 };
