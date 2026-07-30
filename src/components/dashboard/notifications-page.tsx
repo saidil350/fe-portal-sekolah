@@ -11,19 +11,25 @@ import {
   Megaphone,
   BookOpen,
   Users,
-  CheckCircle2,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/components/card';
 import { Button } from '@/components/ui/components/button';
 import { Badge } from '@/components/ui/components/badge';
 import { useNotificationStore } from '@/stores/notification-store';
-import { NotificationType } from '@/types';
+
+export type NotificationType =
+  | 'INFO'
+  | 'ANNOUNCEMENT'
+  | 'WARNING'
+  | 'PAYMENT'
+  | 'ACADEMIC'
+  | 'ATTENDANCE';
 
 export interface NotificationItem {
   id: string;
   title: string;
   message: string;
-  type: NotificationType | string;
+  type: NotificationType;
   createdAt: string;
   isRead: boolean;
 }
@@ -38,7 +44,7 @@ interface NotificationsPageProps {
    */
   description?: string;
   /**
-   * Data notifikasi awal opsional. Jika tidak diberikan, digunakan data dari store/API.
+   * Data notifikasi awal. Jika tidak diberikan, digunakan data dari store/API.
    */
   initialNotifications?: NotificationItem[];
 }
@@ -67,25 +73,21 @@ function formatNotificationDate(dateStr: string) {
   });
 }
 
-function getIcon(type: string) {
+function getIcon(type: NotificationType) {
   switch (type) {
     case 'ANNOUNCEMENT':
-      return <Megaphone className="w-4 h-4 text-primary shrink-0" />;
+      return <Megaphone className="w-4 h-4 text-muted-foreground shrink-0" />;
     case 'WARNING':
-    case 'ALERT':
       return <AlertTriangle className="w-4 h-4 text-destructive shrink-0" />;
     case 'PAYMENT':
-      return <CreditCard className="w-4 h-4 text-amber-500 shrink-0" />;
+      return <CreditCard className="w-4 h-4 text-muted-foreground shrink-0" />;
     case 'ACADEMIC':
-    case 'ASSIGNMENT':
-      return <BookOpen className="w-4 h-4 text-blue-500 shrink-0" />;
+      return <BookOpen className="w-4 h-4 text-muted-foreground shrink-0" />;
     case 'ATTENDANCE':
-      return <Users className="w-4 h-4 text-emerald-500 shrink-0" />;
-    case 'SUCCESS':
-      return <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />;
+      return <Users className="w-4 h-4 text-muted-foreground shrink-0" />;
     case 'INFO':
     default:
-      return <Info className="w-4 h-4 text-sky-500 shrink-0" />;
+      return <Info className="w-4 h-4 text-muted-foreground shrink-0" />;
   }
 }
 
@@ -100,7 +102,6 @@ export function NotificationsPage({
     fetchNotifications,
     markAsRead,
     markAllAsRead,
-    isLoading,
   } = useNotificationStore();
 
   const [localNotifications, setLocalNotifications] = React.useState<NotificationItem[] | null>(
@@ -113,7 +114,7 @@ export function NotificationsPage({
     }
   }, [fetchNotifications, initialNotifications]);
 
-  const notifications = localNotifications || storeNotifications;
+  const notifications = (localNotifications || storeNotifications) as NotificationItem[];
   const unreadCount = localNotifications
     ? localNotifications.filter((n) => !n.isRead).length
     : storeUnreadCount;
@@ -165,13 +166,9 @@ export function NotificationsPage({
 
       {/* Notifications List */}
       <div className="space-y-3">
-        {isLoading && notifications.length === 0 ? (
+        {notifications.length === 0 ? (
           <Card className="p-8 text-center text-muted-foreground">
-            <p className="animate-pulse">Memuat notifikasi...</p>
-          </Card>
-        ) : notifications.length === 0 ? (
-          <Card className="p-8 text-center text-muted-foreground">
-            <Bell className="w-12 h-12 mx-auto mb-3 text-muted opacity-50" />
+            <Bell className="w-12 h-12 mx-auto mb-3 text-muted" />
             <p>Tidak ada notifikasi saat ini.</p>
           </Card>
         ) : (
@@ -180,12 +177,12 @@ export function NotificationsPage({
               key={item.id}
               onClick={() => handleToggleRead(item.id, item.isRead)}
               className={`cursor-pointer transition-colors hover:bg-accent/50 ${
-                !item.isRead ? 'bg-muted/30 border-l-4 border-l-primary' : 'opacity-80'
+                !item.isRead ? 'bg-muted/30' : 'opacity-80'
               }`}
             >
               <CardContent className="p-4 sm:p-5 flex items-start gap-4 text-left">
-                <div className="p-2 rounded-md bg-muted shrink-0">
-                  {getIcon(item.type)}
+                <div className="p-2 rounded-md bg-muted">
+                  {getIcon(item.type as NotificationType)}
                 </div>
 
                 <div className="flex-1 space-y-1">
@@ -220,4 +217,5 @@ export function NotificationsPage({
     </div>
   );
 }
+
 
