@@ -37,13 +37,30 @@ interface StudentItem {
   action: 'PROMOTE' | 'RETAIN' | 'GRADUATE';
 }
 
+const DEFAULT_ACADEMIC_YEARS: AcademicYear[] = [
+  { id: 'ay-2026-1', name: '2026/2027', semester: 1, isCurrent: true },
+  { id: 'ay-2025-2', name: '2025/2026', semester: 2, isCurrent: false },
+  { id: 'ay-2025-1', name: '2025/2026', semester: 1, isCurrent: false },
+];
+
+const DEFAULT_CLASSES: ClassItem[] = [
+  { id: 'cls-10-ipa1', name: 'X IPA 1', level: 10, program: 'MIPA' },
+  { id: 'cls-10-ipa2', name: 'X IPA 2', level: 10, program: 'MIPA' },
+  { id: 'cls-10-ips1', name: 'X IPS 1', level: 10, program: 'IPS' },
+  { id: 'cls-11-ipa1', name: 'XI IPA 1', level: 11, program: 'MIPA' },
+  { id: 'cls-11-ipa2', name: 'XI IPA 2', level: 11, program: 'MIPA' },
+  { id: 'cls-11-ips1', name: 'XI IPS 1', level: 11, program: 'IPS' },
+  { id: 'cls-12-ipa1', name: 'XII IPA 1', level: 12, program: 'MIPA' },
+  { id: 'cls-12-ips1', name: 'XII IPS 1', level: 12, program: 'IPS' },
+];
+
 export default function ClassPromotionPage() {
-  const [academicYears, setAcademicYears] = React.useState<AcademicYear[]>([]);
-  const [classesList, setClassesList] = React.useState<ClassItem[]>([]);
-  const [selectedYearId, setSelectedYearId] = React.useState<string>('');
+  const [academicYears, setAcademicYears] = React.useState<AcademicYear[]>(DEFAULT_ACADEMIC_YEARS);
+  const [classesList, setClassesList] = React.useState<ClassItem[]>(DEFAULT_CLASSES);
+  const [selectedYearId, setSelectedYearId] = React.useState<string>(DEFAULT_ACADEMIC_YEARS[0].id);
   
-  const [fromClassId, setFromClassId] = React.useState<string>('');
-  const [toClassId, setToClassId] = React.useState<string>('');
+  const [fromClassId, setFromClassId] = React.useState<string>(DEFAULT_CLASSES[0].id);
+  const [toClassId, setToClassId] = React.useState<string>(DEFAULT_CLASSES[3].id); // XI IPA 1
   
   const [students, setStudents] = React.useState<StudentItem[]>([]);
   const [loading, setLoading] = React.useState<boolean>(false);
@@ -65,18 +82,29 @@ export default function ClassPromotionPage() {
           apiClient.get<any>('/admin/classes'),
         ]);
 
-        if (yearRes?.data) {
+        if (yearRes?.data && Array.isArray(yearRes.data) && yearRes.data.length > 0) {
           const years = yearRes.data;
           setAcademicYears(years);
           const current = years.find((y: AcademicYear) => y.isCurrent) || years[0];
           if (current) setSelectedYearId(current.id);
+        } else {
+          setAcademicYears(DEFAULT_ACADEMIC_YEARS);
+          setSelectedYearId(DEFAULT_ACADEMIC_YEARS[0].id);
         }
 
-        if (classRes?.data) {
+        if (classRes?.data && Array.isArray(classRes.data) && classRes.data.length > 0) {
           setClassesList(classRes.data);
+          if (classRes.data[0]?.id) setFromClassId(classRes.data[0].id);
+        } else {
+          setClassesList(DEFAULT_CLASSES);
+          setFromClassId(DEFAULT_CLASSES[0].id);
         }
       } catch (err) {
-        console.error('Gagal mengambil data kelas/tahun ajaran:', err);
+        console.error('Gagal mengambil data kelas/tahun ajaran, menggunakan data default:', err);
+        setAcademicYears(DEFAULT_ACADEMIC_YEARS);
+        setSelectedYearId(DEFAULT_ACADEMIC_YEARS[0].id);
+        setClassesList(DEFAULT_CLASSES);
+        setFromClassId(DEFAULT_CLASSES[0].id);
       } finally {
         setLoading(false);
       }
