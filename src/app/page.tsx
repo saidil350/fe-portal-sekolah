@@ -27,6 +27,7 @@ import {
   Badge,
   Button,
 } from '@/components/ui';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 const FEATURES = [
   {
@@ -135,6 +136,7 @@ export default function LandingPage() {
             <a href="#statistik" className="hover:text-foreground transition-colors">Statistik</a>
           </nav>
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             {mounted && isAuthenticated ? (
               <Button onClick={handleDashboardNav} className="gap-2">
                 <LayoutDashboard className="h-4 w-4" />

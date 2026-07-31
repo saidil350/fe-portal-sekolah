@@ -1,12 +1,12 @@
 'use client';
 
 import * as React from 'react';
-import { Menu, Bell, Sun, Moon, LogOut, User, Trash2 } from 'lucide-react';
+import { Menu, Bell, LogOut, User, Trash2 } from 'lucide-react';
 import { useAuth } from '../../hooks/use-auth';
 import { useTenant } from '../../hooks/use-tenant';
 import { useSidebar } from '../../hooks/use-sidebar';
 import { useNotificationStore } from '../../stores/notification-store';
-import { useTheme } from 'next-themes';
+import { ThemeToggle } from '../theme-toggle';
 import { Breadcrumbs } from '../navigation/breadcrumbs';
 import { getRoleFromDashboardPath } from '../navigation/role-from-path';
 import { Avatar, AvatarImage, AvatarFallback, Button, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, Badge } from '@/components/ui';
@@ -39,7 +39,6 @@ export function Topbar() {
   const { tenantName } = useTenant();
   const { toggleCollapse, toggleMobileOpen } = useSidebar();
   const { unreadCount, notifications, fetchNotifications, markAsRead, markAllAsRead, deleteNotification } = useNotificationStore();
-  const { theme, setTheme } = useTheme();
   const fallbackRole = getRoleFromDashboardPath(pathname);
   const displayRole = user?.role || fallbackRole;
 
@@ -87,14 +86,7 @@ export function Topbar() {
         </div>
 
         {/* Dark Mode Toggle */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-        >
-          <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-        </Button>
+        <ThemeToggle />
 
         {/* Notifications Dropdown */}
         <DropdownMenu>

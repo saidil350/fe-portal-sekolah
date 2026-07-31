@@ -22,6 +22,7 @@ import { Input } from '@/components/ui/components/input';
 import { Label } from '@/components/ui/components/label';
 import { Separator } from '@/components/ui/components/separator';
 import { Role } from '@/types';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'Alamat email tidak valid' }),
@@ -88,7 +89,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-muted/40">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-muted/40 relative">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
       <div className="w-full max-w-sm">
         <div className="flex flex-col items-center mb-6">
           <div className="rounded-full bg-primary p-2.5 text-primary-foreground mb-3">
