@@ -31,7 +31,7 @@ export function useAuth() {
     } finally {
       // clearAuth() sekarang juga menghapus cookies secara otomatis
       clearAuth();
-      window.location.href = '/login';
+      window.location.replace('/login');
     }
   };
 

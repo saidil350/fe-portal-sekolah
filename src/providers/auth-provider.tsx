@@ -24,9 +24,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     register401Listener(() => {
       clearAuth();
       clearCookies();
-      router.push('/login');
+      window.location.replace('/login');
     });
-  }, [clearAuth, router]);
+  }, [clearAuth]);
+
+  // Handle browser Back/Forward Cache (bfcache) restoration on back button click
+  React.useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent) => {
+      const { isAuthenticated } = useAuthStore.getState();
+      if ((event.persisted || !isAuthenticated) && pathname.startsWith('/dashboard')) {
+        clearCookies();
+        window.location.replace('/login');
+      }
+    };
+
+    window.addEventListener('pageshow', handlePageShow);
+    return () => {
+      window.removeEventListener('pageshow', handlePageShow);
+    };
+  }, [pathname]);
 
   // Validate session on mount — call getMe() to verify token with backend
   React.useEffect(() => {
@@ -47,18 +63,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               router.replace(ROLE_DASHBOARD_PATH[response.data.role]);
             }
           } else {
-            // Backend rejected token — clear everything
+            // Backend rejected token — clear everything and redirect if on protected route
             clearAuth();
             clearCookies();
+            if (pathname.startsWith('/dashboard')) {
+              window.location.replace('/login');
+            }
           }
         } catch {
-          // Network error or 401 — clear auth state
+          // Network error or 401 — clear auth state and redirect if on protected route
           clearAuth();
           clearCookies();
+          if (pathname.startsWith('/dashboard')) {
+            window.location.replace('/login');
+          }
         }
       } else if (!isAuthenticated) {
-        // No auth state — clear stale cookies if any
+        // No auth state — clear stale cookies & redirect if accessing protected dashboard routes
         clearCookies();
+        if (pathname.startsWith('/dashboard')) {
+          window.location.replace('/login');
+        }
       }
     };
 
