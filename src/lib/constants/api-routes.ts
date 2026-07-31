@@ -44,6 +44,8 @@ export const API_ROUTES = {
     MARK_READ: (id: string) => `/notifications/${id}/read`,
     MARK_ALL_READ: '/notifications/read-all',
     BROADCAST: '/notifications/broadcast',
+    DELETE: (id: string) => `/notifications/${id}`,
+    CLEAR: '/notifications/clear',
   },
   DASHBOARD: {
     STATS: '/dashboard/stats',

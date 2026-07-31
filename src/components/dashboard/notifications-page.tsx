@@ -11,6 +11,9 @@ import {
   Megaphone,
   BookOpen,
   Users,
+  Trash2,
+  CheckSquare,
+  Square,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/components/card';
 import { Button } from '@/components/ui/components/button';
@@ -104,11 +107,16 @@ export function NotificationsPage({
     fetchNotifications,
     markAsRead,
     markAllAsRead,
+    deleteNotification,
+    deleteSelectedNotifications,
+    deleteAllNotifications,
   } = useNotificationStore();
 
   const [localNotifications, setLocalNotifications] = React.useState<NotificationItem[] | null>(
     initialNotifications || null
   );
+
+  const [selectedIds, setSelectedIds] = React.useState<string[]>([]);
 
   React.useEffect(() => {
     if (!initialNotifications) {
@@ -120,6 +128,24 @@ export function NotificationsPage({
   const unreadCount = localNotifications
     ? localNotifications.filter((n) => !n.isRead).length
     : storeUnreadCount;
+
+  const isAllSelected =
+    notifications.length > 0 && selectedIds.length === notifications.length;
+
+  const handleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(notifications.map((n) => n.id));
+    }
+  };
+
+  const handleToggleSelect = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
 
   const handleMarkAllAsRead = () => {
     if (localNotifications) {
@@ -139,6 +165,39 @@ export function NotificationsPage({
     }
   };
 
+  const handleDeleteSingle = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (localNotifications) {
+      setLocalNotifications((prev) => prev?.filter((n) => n.id !== id) || null);
+    }
+    setSelectedIds((prev) => prev.filter((i) => i !== id));
+    deleteNotification(id);
+  };
+
+  const handleDeleteSelected = () => {
+    if (selectedIds.length === 0) return;
+    if (confirm(`Apakah Anda yakin ingin menghapus ${selectedIds.length} notifikasi terpilih?`)) {
+      if (localNotifications) {
+        setLocalNotifications(
+          (prev) => prev?.filter((n) => !selectedIds.includes(n.id)) || null
+        );
+      }
+      deleteSelectedNotifications(selectedIds);
+      setSelectedIds([]);
+    }
+  };
+
+  const handleDeleteAll = () => {
+    if (notifications.length === 0) return;
+    if (confirm('Apakah Anda yakin ingin menghapus SELURUH notifikasi?')) {
+      if (localNotifications) {
+        setLocalNotifications([]);
+      }
+      deleteAllNotifications();
+      setSelectedIds([]);
+    }
+  };
+
   return (
     <div className="p-6 space-y-6 max-w-4xl mx-auto">
       {/* Header */}
@@ -153,18 +212,67 @@ export function NotificationsPage({
           <p className="text-sm text-muted-foreground mt-1">{description}</p>
         </div>
 
-        {unreadCount > 0 && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleMarkAllAsRead}
-            className="gap-2"
-          >
-            <CheckCheck className="w-4 h-4" />
-            Tandai Semua Dibaca
-          </Button>
-        )}
+        {/* Action Buttons Header */}
+        <div className="flex flex-wrap items-center gap-2">
+          {unreadCount > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleMarkAllAsRead}
+              className="gap-2"
+            >
+              <CheckCheck className="w-4 h-4" />
+              Tandai Semua Dibaca
+            </Button>
+          )}
+
+          {notifications.length > 0 && (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleDeleteAll}
+              className="gap-2"
+            >
+              <Trash2 className="w-4 h-4" />
+              Hapus Semua
+            </Button>
+          )}
+        </div>
       </div>
+
+      {/* Multi-Select Action Toolbar */}
+      {notifications.length > 0 && (
+        <div className="flex items-center justify-between px-3 py-2 bg-muted/40 rounded-lg border text-sm">
+          <button
+            onClick={handleSelectAll}
+            className="flex items-center gap-2 font-medium hover:text-primary transition-colors"
+          >
+            {isAllSelected ? (
+              <CheckSquare className="w-4 h-4 text-primary" />
+            ) : (
+              <Square className="w-4 h-4 text-muted-foreground" />
+            )}
+            <span>Pilih Semua ({notifications.length})</span>
+          </button>
+
+          {selectedIds.length > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground font-medium">
+                {selectedIds.length} Terpilih
+              </span>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleDeleteSelected}
+                className="h-8 gap-1.5 text-xs px-3"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Hapus Terpilih
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Notifications List */}
       <div className="space-y-3">
@@ -174,50 +282,76 @@ export function NotificationsPage({
             <p>Tidak ada notifikasi saat ini.</p>
           </Card>
         ) : (
-          notifications.map((item) => (
-            <Card
-              key={item.id}
-              onClick={() => handleToggleRead(item.id, item.isRead)}
-              className={`cursor-pointer transition-colors hover:bg-accent/50 ${
-                !item.isRead ? 'bg-muted/30' : 'opacity-80'
-              }`}
-            >
-              <CardContent className="p-4 sm:p-5 flex items-start gap-4 text-left">
-                <div className="p-2 rounded-md bg-muted">
-                  {getIcon(item.type as NotificationType)}
-                </div>
+          notifications.map((item) => {
+            const isSelected = selectedIds.includes(item.id);
+            return (
+              <Card
+                key={item.id}
+                onClick={() => handleToggleRead(item.id, item.isRead)}
+                className={`cursor-pointer transition-colors hover:bg-accent/50 group relative ${
+                  isSelected ? 'border-primary bg-primary/5' : !item.isRead ? 'bg-muted/30' : 'opacity-80'
+                }`}
+              >
+                <CardContent className="p-4 sm:p-5 flex items-start gap-3 sm:gap-4 text-left">
+                  {/* Checkbox */}
+                  <button
+                    onClick={(e) => handleToggleSelect(item.id, e)}
+                    className="mt-0.5 p-1 rounded hover:bg-accent shrink-0 transition-colors"
+                    title="Pilih Notifikasi"
+                  >
+                    {isSelected ? (
+                      <CheckSquare className="w-4 h-4 text-primary" />
+                    ) : (
+                      <Square className="w-4 h-4 text-muted-foreground/60 group-hover:text-muted-foreground" />
+                    )}
+                  </button>
 
-                <div className="flex-1 space-y-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <h3
-                      className={`text-sm font-semibold ${
-                        !item.isRead
-                          ? 'text-foreground font-bold'
-                          : 'text-muted-foreground'
-                      }`}
-                    >
-                      {item.title}
-                    </h3>
-                    <span className="text-[11px] text-muted-foreground flex items-center gap-1 shrink-0">
-                      <Calendar className="w-3 h-3" />
-                      {formatNotificationDate(item.createdAt)}
-                    </span>
+                  {/* Icon */}
+                  <div className="p-2 rounded-md bg-muted shrink-0">
+                    {getIcon(item.type as NotificationType)}
                   </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {item.message}
-                  </p>
-                </div>
 
-                {!item.isRead && (
-                  <div className="w-2 h-2 rounded-full bg-primary shrink-0 self-center" />
-                )}
-              </CardContent>
-            </Card>
-          ))
+                  {/* Content */}
+                  <div className="flex-1 space-y-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <h3
+                        className={`text-sm font-semibold truncate ${
+                          !item.isRead
+                            ? 'text-foreground font-bold'
+                            : 'text-muted-foreground'
+                        }`}
+                      >
+                        {item.title}
+                      </h3>
+                      <span className="text-[11px] text-muted-foreground flex items-center gap-1 shrink-0">
+                        <Calendar className="w-3 h-3" />
+                        {formatNotificationDate(item.createdAt)}
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {item.message}
+                    </p>
+                  </div>
+
+                  {/* Indicators & Delete Action */}
+                  <div className="flex items-center gap-2 shrink-0 self-center">
+                    {!item.isRead && (
+                      <div className="w-2 h-2 rounded-full bg-primary shrink-0" />
+                    )}
+                    <button
+                      onClick={(e) => handleDeleteSingle(item.id, e)}
+                      className="p-1.5 rounded-md hover:bg-destructive/10 hover:text-destructive text-muted-foreground/60 opacity-0 group-hover:opacity-100 sm:opacity-70 transition-all"
+                      title="Hapus Notifikasi"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })
         )}
       </div>
     </div>
   );
 }
-
-

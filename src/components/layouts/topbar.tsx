@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Menu, Bell, Sun, Moon, LogOut, User } from 'lucide-react';
+import { Menu, Bell, Sun, Moon, LogOut, User, Trash2 } from 'lucide-react';
 import { useAuth } from '../../hooks/use-auth';
 import { useTenant } from '../../hooks/use-tenant';
 import { useSidebar } from '../../hooks/use-sidebar';
@@ -38,7 +38,7 @@ export function Topbar() {
   const pathname = usePathname();
   const { tenantName } = useTenant();
   const { toggleCollapse, toggleMobileOpen } = useSidebar();
-  const { unreadCount, notifications, fetchNotifications, markAsRead, markAllAsRead } = useNotificationStore();
+  const { unreadCount, notifications, fetchNotifications, markAsRead, markAllAsRead, deleteNotification } = useNotificationStore();
   const { theme, setTheme } = useTheme();
   const fallbackRole = getRoleFromDashboardPath(pathname);
   const displayRole = user?.role || fallbackRole;
@@ -131,11 +131,23 @@ export function Topbar() {
                   <div
                     key={n.id}
                     onClick={() => !n.isRead && markAsRead(n.id)}
-                    className="p-2.5 rounded-md hover:bg-muted text-left border-b last:border-0 cursor-pointer transition-colors"
+                    className="p-2.5 rounded-md hover:bg-muted text-left border-b last:border-0 cursor-pointer transition-colors group relative"
                   >
-                    <div className="font-semibold text-xs text-foreground flex items-center justify-between">
-                      <span>{n.title}</span>
-                      {!n.isRead && <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0 ml-1" />}
+                    <div className="font-semibold text-xs text-foreground flex items-center justify-between gap-1">
+                      <span className="truncate">{n.title}</span>
+                      <div className="flex items-center gap-1 shrink-0">
+                        {!n.isRead && <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteNotification(n.id);
+                          }}
+                          className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive p-0.5 rounded transition-all"
+                          title="Hapus"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
                     </div>
                     <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2">{n.message}</p>
                   </div>

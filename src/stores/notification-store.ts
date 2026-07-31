@@ -11,6 +11,9 @@ interface NotificationState {
   setNotifications: (notifications: Notification[]) => void;
   markAsRead: (id: string) => Promise<void>;
   markAllAsRead: () => Promise<void>;
+  deleteNotification: (id: string) => Promise<void>;
+  deleteSelectedNotifications: (ids: string[]) => Promise<void>;
+  deleteAllNotifications: () => Promise<void>;
 }
 
 export const useNotificationStore = create<NotificationState>((set) => ({
@@ -75,6 +78,49 @@ export const useNotificationStore = create<NotificationState>((set) => ({
       await notificationsApi.markAllAsRead();
     } catch (err) {
       console.error('Failed to mark all notifications as read:', err);
+    }
+  },
+
+  deleteNotification: async (id: string) => {
+    set((state) => {
+      const target = state.notifications.find((n) => n.id === id);
+      const isUnread = target && !target.isRead;
+      return {
+        notifications: state.notifications.filter((n) => n.id !== id),
+        unreadCount: isUnread ? Math.max(0, state.unreadCount - 1) : state.unreadCount,
+      };
+    });
+    try {
+      await notificationsApi.deleteNotification(id);
+    } catch (err) {
+      console.error('Failed to delete notification:', err);
+    }
+  },
+
+  deleteSelectedNotifications: async (ids: string[]) => {
+    set((state) => {
+      const remaining = state.notifications.filter((n) => !ids.includes(n.id));
+      return {
+        notifications: remaining,
+        unreadCount: remaining.filter((n) => !n.isRead).length,
+      };
+    });
+    try {
+      await notificationsApi.clearNotifications(ids);
+    } catch (err) {
+      console.error('Failed to delete selected notifications:', err);
+    }
+  },
+
+  deleteAllNotifications: async () => {
+    set({
+      notifications: [],
+      unreadCount: 0,
+    });
+    try {
+      await notificationsApi.clearNotifications();
+    } catch (err) {
+      console.error('Failed to delete all notifications:', err);
     }
   },
 }));
