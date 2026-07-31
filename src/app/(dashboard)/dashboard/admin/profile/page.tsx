@@ -48,17 +48,21 @@ interface AdminProfileData {
 const labelClass = 'text-xs text-muted-foreground block mb-1.5';
 
 export default function AdminProfilePage() {
+  const authUser = useAuthStore((state) => state.user);
   const [isUploadingPhoto, setIsUploadingPhoto] = React.useState(false);
-  const [admin, setAdmin] = React.useState<AdminProfileData>({
-    name: 'Ahmad Fauzi, S.Kom.',
-    adminId: 'ADM-2023-001',
-    email: 'ahmad.fauzi@sekolah.sch.id',
-    phone: '0811-2233-4455',
-    role: 'Admin IT',
-    unit: 'Teknologi Informasi & Sistem',
-    address: 'Jl. Sudirman No. 55, Bandung',
-    status: 'Aktif',
-    avatarUrl: null,
+  const [admin, setAdmin] = React.useState<AdminProfileData>(() => {
+    const user = useAuthStore.getState().user;
+    return {
+      name: user?.name || 'Admin IT',
+      adminId: 'ADM-IT',
+      email: user?.email || '',
+      phone: '-',
+      role: 'Admin IT',
+      unit: 'Teknologi Informasi & Sistem',
+      address: '-',
+      status: 'Aktif',
+      avatarUrl: user?.avatarUrl || null,
+    };
   });
 
   const [editOpen, setEditOpen] = React.useState(false);
@@ -67,6 +71,17 @@ export default function AdminProfilePage() {
     phone: admin.phone,
     address: admin.address,
   });
+
+  React.useEffect(() => {
+    if (authUser) {
+      setAdmin((prev) => ({
+        ...prev,
+        name: prev.name && prev.name !== 'Admin IT' ? prev.name : authUser.name || 'Admin IT',
+        email: prev.email || authUser.email || '',
+        avatarUrl: prev.avatarUrl !== null ? prev.avatarUrl : authUser.avatarUrl || null,
+      }));
+    }
+  }, [authUser]);
 
   React.useEffect(() => {
     let isMounted = true;
@@ -81,8 +96,13 @@ export default function AdminProfilePage() {
             email: u.email || prev.email,
             phone: u.phone || prev.phone,
             address: u.address || prev.address,
-            avatarUrl: u.avatarUrl || null,
+            avatarUrl: u.avatarUrl !== undefined ? u.avatarUrl : prev.avatarUrl,
           }));
+
+          useAuthStore.getState().updateUser({
+            name: u.name || undefined,
+            avatarUrl: u.avatarUrl || null,
+          });
         }
       } catch (err) {
         console.error('Gagal memuat profil admin:', err);

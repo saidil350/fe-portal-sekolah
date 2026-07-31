@@ -36,42 +36,55 @@ import { useAuthStore } from '@/stores/auth-store';
 
 export default function StudentProfilePage() {
   const { academicYear, semester } = useTenant();
+  const authUser = useAuthStore((state) => state.user);
   const [isUploadingPhoto, setIsUploadingPhoto] = React.useState(false);
-  const [student, setStudent] = React.useState<StudentProfileData>({
-    name: 'Putra Aditya',
-    avatarUrl: null,
-    nisn: '0054321098',
-    nis: '20250001',
-    email: 'siswa.putra@sekolah1.sch.id',
-    phone: '0812-9876-5432',
-    currentClass: 'Kelas 11 IPA 1',
-    address: 'Jl. Kebon Jeruk Raya No. 45, Kebayoran Lama, Jakarta Selatan',
-    nik: '3174011505080001',
-    birthPlace: 'Jakarta',
-    birthDate: '15 Mei 2008',
-    gender: 'Laki-laki',
-    religion: 'Islam',
-    fatherName: 'Bambang Aditya',
-    fatherOccupation: 'Wiraswasta',
-    motherName: 'Dewi Rahmawati',
-    motherOccupation: 'Ibu Rumah Tangga',
-    guardianName: 'Bambang Aditya',
-    guardianPhone: '0812-9876-5432',
-    academicYear: `${academicYear} (${semester})`,
-    status: 'Aktif',
-
-    // Academic Progression History
-    academicHistory: [
-      {
-        academicYear: academicYear,
-        grade: 'Kelas 11',
-        className: 'Kelas 11 IPA 1',
-        semester: `Semester ${semester} (Aktif)`,
-        status: 'Sedang Berjalan',
-        isCurrent: true,
-      },
-    ],
+  const [student, setStudent] = React.useState<StudentProfileData>(() => {
+    const user = useAuthStore.getState().user;
+    return {
+      name: user?.name || 'Siswa',
+      avatarUrl: user?.avatarUrl || null,
+      nisn: '-',
+      nis: '-',
+      email: user?.email || '',
+      phone: '-',
+      currentClass: 'Kelas Terdaftar',
+      address: '-',
+      nik: '-',
+      birthPlace: '-',
+      birthDate: '-',
+      gender: '-',
+      religion: '-',
+      fatherName: '-',
+      fatherOccupation: '-',
+      motherName: '-',
+      motherOccupation: '-',
+      guardianName: '-',
+      guardianPhone: '-',
+      academicYear: `${academicYear} (${semester})`,
+      status: 'Aktif',
+      academicHistory: [
+        {
+          academicYear: academicYear,
+          grade: 'Kelas',
+          className: 'Kelas Terdaftar',
+          semester: `Semester ${semester} (Aktif)`,
+          status: 'Sedang Berjalan',
+          isCurrent: true,
+        },
+      ],
+    };
   });
+
+  React.useEffect(() => {
+    if (authUser) {
+      setStudent((prev) => ({
+        ...prev,
+        name: prev.name && prev.name !== 'Siswa' ? prev.name : authUser.name || 'Siswa',
+        avatarUrl: prev.avatarUrl !== null ? prev.avatarUrl : authUser.avatarUrl || null,
+        email: prev.email || authUser.email || '',
+      }));
+    }
+  }, [authUser]);
 
   React.useEffect(() => {
     let isMounted = true;
@@ -84,7 +97,7 @@ export default function StudentProfilePage() {
           setStudent((prev) => ({
             ...prev,
             name: u.name || prev.name,
-            avatarUrl: u.avatarUrl || null,
+            avatarUrl: u.avatarUrl !== undefined ? u.avatarUrl : prev.avatarUrl,
             email: u.email || prev.email,
             phone: u.phone && u.phone !== '-' ? u.phone : prev.phone,
             address: u.address && u.address !== '-' ? u.address : prev.address,
@@ -104,6 +117,11 @@ export default function StudentProfilePage() {
             guardianPhone: sp?.guardianPhone || prev.guardianPhone,
             academicHistory: Array.isArray(u.academicHistory) && u.academicHistory.length > 0 ? u.academicHistory : prev.academicHistory,
           }));
+
+          useAuthStore.getState().updateUser({
+            name: u.name || undefined,
+            avatarUrl: u.avatarUrl || null,
+          });
         }
       } catch (err) {
         console.error('Gagal memuat profil siswa:', err);

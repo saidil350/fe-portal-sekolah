@@ -29,40 +29,34 @@ import { compressImage, getInitials } from '@/lib/utils/image-compression';
 import { useAuthStore } from '@/stores/auth-store';
 
 export default function TeacherProfilePage() {
+  const authUser = useAuthStore((state) => state.user);
   const [loading, setLoading] = React.useState(true);
   const [isUploadingPhoto, setIsUploadingPhoto] = React.useState(false);
-  const [teacher, setTeacher] = React.useState<TeacherProfileData>({
-    name: 'Siti Aminah, S.Pd.',
-    nip: '198507122010012004',
-    email: 'siti.aminah@sekolah.sch.id',
-    phone: '0812-9988-7766',
-    role: 'Guru Tetap',
-    address: 'Jl. Ahmad Yani No. 12, Bandung',
-    status: 'Aktif',
-    avatarUrl: null,
-
-    // Riwayat mengajar (tanpa referensi mapel/kelas)
-    teachingHistory: [
-      {
-        year: '2025/2026',
-        period: 'Semester Genap',
-        status: 'Sedang Berjalan',
-        isCurrent: true,
-      },
-      {
-        year: '2025/2026',
-        period: 'Semester Ganjil',
-        status: 'Selesai',
-        isCurrent: false,
-      },
-      {
-        year: '2024/2025',
-        period: 'Semester Genap',
-        status: 'Selesai',
-        isCurrent: false,
-      },
-    ],
+  const [teacher, setTeacher] = React.useState<TeacherProfileData>(() => {
+    const user = useAuthStore.getState().user;
+    return {
+      name: user?.name || 'Guru',
+      nip: '-',
+      email: user?.email || '',
+      phone: '-',
+      role: 'Guru',
+      address: '-',
+      status: 'Aktif',
+      avatarUrl: user?.avatarUrl || null,
+      teachingHistory: [],
+    };
   });
+
+  React.useEffect(() => {
+    if (authUser) {
+      setTeacher((prev) => ({
+        ...prev,
+        name: prev.name && prev.name !== 'Guru' ? prev.name : authUser.name || 'Guru',
+        email: prev.email || authUser.email || '',
+        avatarUrl: prev.avatarUrl !== null ? prev.avatarUrl : authUser.avatarUrl || null,
+      }));
+    }
+  }, [authUser]);
 
   React.useEffect(() => {
     let isMounted = true;
@@ -78,9 +72,14 @@ export default function TeacherProfilePage() {
             email: u.email || prev.email,
             phone: u.phone || prev.phone,
             address: u.address || prev.address,
-            avatarUrl: u.avatarUrl || null,
+            avatarUrl: u.avatarUrl !== undefined ? u.avatarUrl : prev.avatarUrl,
             nip: tp?.nip || prev.nip,
           }));
+
+          useAuthStore.getState().updateUser({
+            name: u.name || undefined,
+            avatarUrl: u.avatarUrl || null,
+          });
         }
       } catch (err) {
         console.error('Gagal memuat profil guru:', err);

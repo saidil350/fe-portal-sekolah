@@ -48,17 +48,21 @@ interface PrincipalProfileData {
 const labelClass = 'text-xs text-muted-foreground block mb-1.5';
 
 export default function KepalaSekolahProfilePage() {
+  const authUser = useAuthStore((state) => state.user);
   const [isUploadingPhoto, setIsUploadingPhoto] = React.useState(false);
-  const [principal, setPrincipal] = React.useState<PrincipalProfileData>({
-    name: 'Drs. H. Rahmat Santoso, M.Pd.',
-    nip: '196604201992031007',
-    email: 'rahmat.santoso@sekolah.sch.id',
-    phone: '0812-5566-7788',
-    role: 'Kepala Sekolah',
-    school: 'SMA Negeri 1 Jakarta',
-    status: 'Aktif',
-    address: 'Jl. Kebon Sirih No. 10, Jakarta Pusat',
-    avatarUrl: null,
+  const [principal, setPrincipal] = React.useState<PrincipalProfileData>(() => {
+    const user = useAuthStore.getState().user;
+    return {
+      name: user?.name || 'Kepala Sekolah',
+      nip: '-',
+      email: user?.email || '',
+      phone: '-',
+      role: 'Kepala Sekolah',
+      school: 'Sekolah',
+      status: 'Aktif',
+      address: '-',
+      avatarUrl: user?.avatarUrl || null,
+    };
   });
 
   const [editOpen, setEditOpen] = React.useState(false);
@@ -67,6 +71,17 @@ export default function KepalaSekolahProfilePage() {
     phone: principal.phone,
     address: principal.address,
   });
+
+  React.useEffect(() => {
+    if (authUser) {
+      setPrincipal((prev) => ({
+        ...prev,
+        name: prev.name && prev.name !== 'Kepala Sekolah' ? prev.name : authUser.name || 'Kepala Sekolah',
+        email: prev.email || authUser.email || '',
+        avatarUrl: prev.avatarUrl !== null ? prev.avatarUrl : authUser.avatarUrl || null,
+      }));
+    }
+  }, [authUser]);
 
   React.useEffect(() => {
     let isMounted = true;
@@ -81,8 +96,13 @@ export default function KepalaSekolahProfilePage() {
             email: u.email || prev.email,
             phone: u.phone || prev.phone,
             address: u.address || prev.address,
-            avatarUrl: u.avatarUrl || null,
+            avatarUrl: u.avatarUrl !== undefined ? u.avatarUrl : prev.avatarUrl,
           }));
+
+          useAuthStore.getState().updateUser({
+            name: u.name || undefined,
+            avatarUrl: u.avatarUrl || null,
+          });
         }
       } catch (err) {
         console.error('Gagal memuat profil kepala sekolah:', err);
