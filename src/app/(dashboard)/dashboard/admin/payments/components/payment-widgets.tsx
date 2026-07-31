@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Skeleton, Avatar, AvatarFallback, Input, Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui';
 import { Receipt, Search, ChevronLeft, ChevronRight, Filter, RefreshCw, Eye, Send } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
+import { formatDisplayId } from '@/lib/utils';
 import { PublishInvoiceModal } from './publish-invoice-modal';
 
 export interface InvoiceItem {
@@ -450,7 +451,7 @@ export function PaymentWidgets() {
                 </div>
                 <div className="flex justify-between text-xs py-1.5 border-b border-dashed">
                   <span className="text-muted-foreground">ID Order (Midtrans):</span>
-                  <span className="font-semibold font-mono text-muted-foreground">{selectedInvoiceDetails.orderId || '-'}</span>
+                  <span className="font-semibold font-mono text-muted-foreground">{formatDisplayId(selectedInvoiceDetails.orderId, 'TRX')}</span>
                 </div>
                 <div className="flex justify-between text-xs py-1.5 border-b border-dashed">
                   <span className="text-muted-foreground">Metode Pembayaran:</span>

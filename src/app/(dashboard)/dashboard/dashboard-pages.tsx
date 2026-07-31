@@ -53,6 +53,7 @@ import {
   UserCheck,
   Users,
 } from 'lucide-react';
+import { getReadableInvoiceRef, formatDisplayId } from '@/lib/utils';
 
 function text(row: DashboardRow, key: string) {
   return String(row[key] ?? '');
@@ -1890,7 +1891,8 @@ export function StudentPaymentsPage() {
         if (res.success && res.data && res.data.items) {
           // Sesuaikan format data dengan tabel yang sudah ada jika diperlukan
           const mapped = res.data.items.map((inv: any) => ({
-            invoice: `SPP-${inv.id}`, // Aslinya id
+            id: inv.id,
+            invoice: inv.invoiceNumber || getReadableInvoiceRef(inv),
             month: inv.month,
             amount: inv.amount,
             method: inv.method || 'Transfer',

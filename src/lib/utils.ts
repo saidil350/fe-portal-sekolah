@@ -5,6 +5,7 @@ import { z } from 'zod';
 // Re-exports for convenience
 export { ROLES, ROLE_LABELS, DASHBOARD_ROUTES, PUBLIC_ROUTES } from '@/lib/constants';
 export { canAccess, hasPermission, hasRole } from '@/lib/auth';
+export { formatDisplayId, getReadableInvoiceRef, isUuid } from '@/lib/formatters';
 
 // Classname merger (shadcn-ui)
 export function cn(...inputs: ClassValue[]) {

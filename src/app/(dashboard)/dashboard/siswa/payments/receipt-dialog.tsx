@@ -12,10 +12,11 @@ import {
 } from '@/components/ui/components/dialog';
 import { Button } from '@/components/ui/components/button';
 import { Badge } from '@/components/ui/components/badge';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, getReadableInvoiceRef } from '@/lib/utils';
 
 export interface ReceiptPayment {
   id: string;
+  invoiceNumber?: string;
   title: string;
   month: string;
   amount: number;
@@ -65,7 +66,7 @@ export function ReceiptDialog({ payment, open, onOpenChange }: ReceiptDialogProp
             <div className="rounded-lg border bg-muted/40 p-4 space-y-1">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-mono text-muted-foreground">
-                  {payment.id}
+                  {payment.invoiceNumber || getReadableInvoiceRef(payment)}
                 </span>
                 <Badge variant="outline" className="text-emerald-600 border-emerald-600">
                   LUNAS

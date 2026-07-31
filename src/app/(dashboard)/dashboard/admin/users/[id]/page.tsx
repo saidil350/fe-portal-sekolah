@@ -251,7 +251,7 @@ export default function AdminUserDetailPage() {
     return (
       <div className="p-6 max-w-xl mx-auto text-center space-y-4">
         <h2 className="text-xl font-bold">Pengguna tidak ditemukan</h2>
-        <p className="text-sm text-muted-foreground">Data pengguna dengan ID ini tidak dapat ditemukan.</p>
+        <p className="text-sm text-muted-foreground">Data profil pengguna yang dicari tidak dapat ditemukan.</p>
         <Button asChild variant="outline">
           <Link href="/dashboard/admin/users">
             <ArrowLeft className="w-4 h-4 mr-2" />
