@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Skeleton, Avatar, AvatarFallback, Input, Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui';
-import { Receipt, Search, ChevronLeft, ChevronRight, Filter, RefreshCw, Eye, Send } from 'lucide-react';
+import { Receipt, Search, ChevronLeft, ChevronRight, Filter, RefreshCw, Eye, Send, FileSpreadsheet } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
 import { formatDisplayId } from '@/lib/utils';
+import { exportToExcel } from '@/lib/utils/export-utils';
 import { PublishInvoiceModal } from './publish-invoice-modal';
 
 export interface InvoiceItem {
@@ -151,6 +152,41 @@ export function PaymentWidgets() {
     setCurrentPage(1);
   };
 
+  const handleExportInvoicesExcel = async () => {
+    try {
+      const params = new URLSearchParams();
+      params.set('page', '1');
+      params.set('limit', '1000');
+      if (debouncedSearch) params.set('search', debouncedSearch);
+      if (statusFilter !== 'ALL') params.set('status', statusFilter);
+      params.set('month', selectedMonth.toString());
+      params.set('year', selectedYear.toString());
+      
+      const result = await apiClient.get<any>(`/admin/payments/invoices?${params.toString()}`);
+      const items = result.success && result.data ? (Array.isArray(result.data) ? result.data : result.data.items || []) : [];
+      
+      if (items.length === 0) {
+        alert('Tidak ada data invoice untuk diexport.');
+        return;
+      }
+      
+      const exportData = items.map((inv: any) => ({
+        'No. Invoice': inv.invoiceNumber,
+        'Nama Siswa': inv.studentName,
+        'Bulan': getMonthName(inv.month),
+        'Tahun': inv.year,
+        'Nominal (Rp)': inv.amount,
+        'Status': inv.status === 'PAID' ? 'Lunas' : inv.status === 'PENDING' ? 'Pending' : 'Gagal',
+        'Jatuh Tempo': inv.dueDate ? new Date(inv.dueDate).toLocaleDateString('id-ID') : '-'
+      }));
+
+      exportToExcel(exportData, `Daftar_Invoice_SPP_${getMonthName(selectedMonth)}_${selectedYear}_${new Date().getTime()}`);
+    } catch (err: any) {
+      console.error('Export invoices error:', err);
+      alert('Gagal mengeksport data invoice.');
+    }
+  };
+
   if (loading && invoices.length === 0) {
     return (
       <div className="grid gap-4">
@@ -234,13 +270,24 @@ export function PaymentWidgets() {
               </div>
             </div>
             
-            <Button
-              onClick={() => setIsPublishModalOpen(true)}
-              className="bg-primary hover:bg-primary/90 text-white h-9 text-xs px-3 shadow-sm flex items-center gap-1.5"
-            >
-              <Send className="h-3.5 w-3.5" />
-              Publish Tagihan SPP
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={handleExportInvoicesExcel}
+                className="h-9 text-xs px-3 flex items-center gap-1.5"
+              >
+                <FileSpreadsheet className="h-3.5 w-3.5 text-green-600" />
+                Export Excel
+              </Button>
+
+              <Button
+                onClick={() => setIsPublishModalOpen(true)}
+                className="bg-primary hover:bg-primary/90 text-white h-9 text-xs px-3 shadow-sm flex items-center gap-1.5"
+              >
+                <Send className="h-3.5 w-3.5" />
+                Publish Tagihan SPP
+              </Button>
+            </div>
           </div>
 
           {/* Search & Filter Controls */}
