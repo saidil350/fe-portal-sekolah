@@ -28,6 +28,11 @@ export interface TeacherProfileDetail {
   userId: string;
   nip?: string;
   gender: string;
+  birthPlace?: string;
+  birthDate?: string;
+  nik?: string;
+  religion?: string;
+  education?: string;
   subjectArea?: string[];
   isHomeroom: boolean;
 }
@@ -67,6 +72,7 @@ export interface UpdateProfilePayload {
   gender?: string;
   nik?: string;
   religion?: string;
+  education?: string;
   fatherName?: string;
   fatherOccupation?: string;
   motherName?: string;

@@ -2,9 +2,9 @@
 
 import * as React from 'react';
 import { PageHeader } from '@/components/dashboard/dashboard-route-page';
-import { Card, CardHeader, CardContent, CardTitle, Badge, Button, Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, useToast, Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui';
+import { Card, CardContent, Button, Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, useToast, Badge } from '@/components/ui';
 import { attendanceApi } from '@/lib/api-client';
-import { CalendarCheck, FileText, CheckCircle, Camera, Clock, LogOut, MapPin } from 'lucide-react';
+import { CalendarCheck, Camera, Clock, LogOut, MapPin } from 'lucide-react';
 
 type TeacherAttendanceStep = 'gps' | 'face' | 'ready';
 
@@ -22,14 +22,6 @@ export default function GuruDashboard() {
 
   const stats = [
     { title: 'Presensi Hari Ini', value: '98.5%', icon: CalendarCheck },
-    { title: 'Tugas Belum Dinilai', value: '14 Pengumpulan', icon: FileText },
-  ];
-
-  // Tugas tanpa referensi mapel/kelas
-  const assignments = [
-    { title: 'Tugas 1: Laporan Eksperimen', due: '28 Mei 2026', submitted: '28/30 Siswa' },
-    { title: 'Ulangan Harian: Bab 4', due: '25 Mei 2026', submitted: '30/30 Siswa' },
-    { title: 'Tugas Mandiri: Studi Kasus', due: '30 Mei 2026', submitted: '12/30 Siswa' },
   ];
 
   const resetAttendanceFlow = () => {
@@ -127,7 +119,7 @@ export default function GuruDashboard() {
     <div className="space-y-6">
       <PageHeader
         title="Dashboard Guru"
-        description="Gunakan clock in/out berbasis GPS dan verifikasi wajah, lalu pantau penugasan siswa."
+        description="Gunakan clock in/out berbasis GPS dan verifikasi wajah untuk melakukan presensi."
         action={
           <Button className="gap-2" onClick={openAttendanceFlow}>
             {isClockedIn ? <LogOut className="h-4 w-4" /> : <Clock className="h-4 w-4" />}
@@ -155,39 +147,6 @@ export default function GuruDashboard() {
           );
         })}
       </div>
-
-      {/* Assignments List — tanpa kolom mapel/kelas */}
-      <Card>
-        <CardHeader className="text-left pb-4 border-b">
-          <CardTitle className="text-lg font-bold flex items-center gap-2">
-            <CheckCircle className="h-5 w-5 text-muted-foreground" /> Daftar Penugasan Aktif
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Judul Tugas</TableHead>
-                <TableHead>Batas Pengumpulan</TableHead>
-                <TableHead>Status Pengumpulan</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {assignments.map((assignment, index) => (
-                <TableRow key={index}>
-                  <TableCell className="font-medium">{assignment.title}</TableCell>
-                  <TableCell>{assignment.due}</TableCell>
-                  <TableCell>
-                    <Badge variant={assignment.submitted.startsWith('30') ? 'default' : 'secondary'}>
-                      {assignment.submitted}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
 
       <Dialog open={isAttendanceOpen} onOpenChange={setIsAttendanceOpen}>
         <DialogContent>

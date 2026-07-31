@@ -6,7 +6,7 @@ export default function GuruNotificationsPage() {
   return (
     <NotificationsPage
       title="Notifikasi Guru"
-      description="Pengumuman sekolah, informasi tugas, dan pembaruan kehadiran siswa."
+      description="Pengumuman sekolah dan pembaruan kehadiran siswa."
     />
   );
 }
