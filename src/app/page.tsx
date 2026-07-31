@@ -16,6 +16,10 @@ import {
   CheckCircle2,
   ChevronRight,
   Sparkles,
+  UserCheck,
+  Settings,
+  Briefcase,
+  Award,
 } from 'lucide-react';
 import {
   Card,
@@ -28,17 +32,17 @@ const FEATURES = [
   {
     icon: LayoutDashboard,
     title: 'Dashboard Multi-Peran',
-    desc: 'Tampilan khusus untuk Siswa, Guru, Staff, Kepala Sekolah, Admin IT, hingga Super Admin.',
+    desc: 'Tampilan khusus yang disesuaikan untuk Kepala Sekolah, Admin IT, Guru, dan Siswa.',
   },
   {
     icon: BookOpen,
-    title: 'Manajemen Tugas',
+    title: 'Manajemen Tugas & Materi',
     desc: 'Pengelolaan tugas dan pengumpulan tugas terintegrasi antara guru dan siswa.',
   },
   {
     icon: CalendarCheck,
     title: 'Presensi Digital',
-    desc: 'Pencatatan kehadiran secara real-time yang akurat dan dapat diakses kapan saja.',
+    desc: 'Pencatatan kehadiran siswa dan guru secara real-time dan terstruktur.',
   },
   {
     icon: Bell,
@@ -47,13 +51,40 @@ const FEATURES = [
   },
   {
     icon: Users,
-    title: 'Manajemen Pengguna',
-    desc: 'Kelola seluruh akun pengguna sekolah dengan mudah dari satu panel admin.',
+    title: 'Manajemen Akun Pengguna',
+    desc: 'Kelola seluruh akun pengguna sekolah dengan mudah dari satu panel Admin IT.',
   },
   {
     icon: Shield,
     title: 'Keamanan Multi-Tenant',
     desc: 'Isolasi data antar sekolah yang aman dengan arsitektur multi-tenant modern.',
+  },
+];
+
+const ROLES_INFO = [
+  {
+    role: 'Kepala Sekolah',
+    icon: Award,
+    color: 'text-amber-500 bg-amber-500/10 border-amber-500/20',
+    desc: 'Pengawasan eksekutif, monitoring laporan keuangan & kehadiran, serta statistik performa sekolah.',
+  },
+  {
+    role: 'Admin IT',
+    icon: Settings,
+    color: 'text-blue-500 bg-blue-500/10 border-blue-500/20',
+    desc: 'Pengelolaan akun pengguna, pengaturan tahun akademik, broadcast notifikasi, dan manajemen sistem.',
+  },
+  {
+    role: 'Guru',
+    icon: Briefcase,
+    color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20',
+    desc: 'Input presensi harian, pembuatan & pemeriksaan tugas siswa, serta pengumuman materi pelajaran.',
+  },
+  {
+    role: 'Siswa',
+    icon: UserCheck,
+    color: 'text-purple-500 bg-purple-500/10 border-purple-500/20',
+    desc: 'Akses jadwal pelajaran, pengumpulan tugas online, monitoring presensi pribadi, dan melihat pengumuman.',
   },
 ];
 
@@ -76,11 +107,9 @@ export default function LandingPage() {
   const handleDashboardNav = () => {
     if (isAuthenticated && user) {
       const roleMap: Record<string, string> = {
-        SUPER_ADMIN: '/dashboard/super-admin',
         ADMIN_IT: '/dashboard/admin',
         KEPALA_SEKOLAH: '/dashboard/kepala-sekolah',
         GURU: '/dashboard/guru',
-        STAFF: '/dashboard/staff',
         SISWA: '/dashboard/siswa',
       };
       router.push(roleMap[user.role] || '/dashboard/siswa');
@@ -102,8 +131,8 @@ export default function LandingPage() {
           </div>
           <nav className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
             <a href="#fitur" className="hover:text-foreground transition-colors">Fitur</a>
+            <a href="#peran" className="hover:text-foreground transition-colors">Peran Sistem</a>
             <a href="#statistik" className="hover:text-foreground transition-colors">Statistik</a>
-            <a href="#tentang" className="hover:text-foreground transition-colors">Tentang</a>
           </nav>
           <div className="flex items-center gap-3">
             {mounted && isAuthenticated ? (
@@ -137,8 +166,7 @@ export default function LandingPage() {
           <br />& Lebih Efisien
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-          Sistem informasi manajemen sekolah terintegrasi yang menghubungkan guru,
-          siswa, orang tua, dan administrasi dalam satu platform yang aman dan real-time.
+          Sistem informasi manajemen sekolah terintegrasi yang menghubungkan Kepala Sekolah, Admin IT, Guru, dan Siswa dalam satu platform yang aman dan real-time.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Button
@@ -161,7 +189,7 @@ export default function LandingPage() {
 
         {/* Trust badges */}
         <div className="mt-10 flex flex-wrap justify-center gap-6 text-sm text-muted-foreground">
-          {['Tidak perlu kartu kredit', 'Setup kurang dari 5 menit', 'Data aman & terenkripsi'].map((t) => (
+          {['Akses Berbasis Peran', 'Setup Mudah & Cepat', 'Data Aman & Terenkripsi'].map((t) => (
             <span key={t} className="flex items-center gap-1.5">
               <CheckCircle2 className="h-4 w-4 text-primary" />
               {t}
@@ -211,29 +239,49 @@ export default function LandingPage() {
       </section>
 
       {/* ─── Roles Section ─── */}
-      <section id="tentang" className="container max-w-7xl mx-auto px-6 pb-24">
-        <Card className="bg-muted/50">
-          <CardContent className="p-8 md:p-16 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Dirancang untuk Semua Peran
-            </h2>
-            <p className="text-muted-foreground mb-10 max-w-xl mx-auto">
-              Setiap pengguna mendapatkan tampilan dan akses yang relevan dengan perannya.
-            </p>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-w-2xl mx-auto mb-10">
-              {['Siswa', 'Guru', 'Staff Administrasi', 'Kepala Sekolah', 'Admin IT', 'Super Admin'].map((r) => (
-                <div key={r} className="flex items-center gap-2 px-4 py-3 rounded-md border bg-card text-sm font-medium">
-                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
-                  {r}
+      <section id="peran" className="container max-w-7xl mx-auto px-6 pb-24">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            4 Role Utama Pengguna Sistem
+          </h2>
+          <p className="text-muted-foreground text-lg max-w-xl mx-auto">
+            Setiap role dilengkapi akses khusus yang disesuaikan dengan tanggung jawab masing-masing.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+          {ROLES_INFO.map((r) => (
+            <Card key={r.role} className="border hover:border-primary/50 transition-all">
+              <CardContent className="p-6 flex items-start gap-4">
+                <div className={`p-3 rounded-lg border shrink-0 ${r.color}`}>
+                  <r.icon className="h-6 w-6" />
                 </div>
-              ))}
-            </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-bold text-lg">{r.role}</h3>
+                    <Badge variant="outline" className="text-xs">Aktif</Badge>
+                  </div>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    {r.desc}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <Card className="bg-muted/50">
+          <CardContent className="p-8 md:p-12 text-center">
+            <h3 className="text-2xl font-bold mb-3">Siap Menggunakan Portal Sekolah?</h3>
+            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+              Masuk dengan akun demo untuk mencoba fitur sesuai role yang Anda inginkan.
+            </p>
             <Button
               size="lg"
               onClick={handleDashboardNav}
               className="gap-2 px-8 h-12"
             >
-              {mounted && isAuthenticated ? 'Buka Dashboard Saya' : 'Coba Sekarang'}
+              {mounted && isAuthenticated ? 'Buka Dashboard Saya' : 'Masuk ke Sistem Demo'}
               <ArrowRight className="h-4 w-4" />
             </Button>
           </CardContent>
@@ -261,3 +309,4 @@ export default function LandingPage() {
     </div>
   );
 }
+
