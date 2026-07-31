@@ -200,7 +200,7 @@ export default function AdminUserDetailPage() {
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
             <Avatar className="w-24 h-24 border shadow-sm">
-              <AvatarImage src="" alt={studentDetail.name} />
+              <AvatarImage src={userData?.image || userData?.avatarUrl || ''} alt={studentDetail.name} />
               <AvatarFallback className="text-2xl font-bold bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-100">
                 {studentDetail.name.split(' ').map((n: string) => n[0]).join('')}
               </AvatarFallback>

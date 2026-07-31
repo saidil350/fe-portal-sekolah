@@ -23,6 +23,16 @@ function getNotificationPageUrl(role?: string | null): string {
   }
 }
 
+function getProfilePageUrl(role?: string | null): string {
+  switch (role) {
+    case 'ADMIN_IT': return '/dashboard/admin/profile';
+    case 'KEPALA_SEKOLAH': return '/dashboard/kepala-sekolah/profile';
+    case 'GURU': return '/dashboard/guru/profile';
+    case 'SISWA': return '/dashboard/siswa/profile';
+    default: return '/dashboard/siswa/profile';
+  }
+}
+
 export function Topbar() {
   const { user, logout } = useAuth();
   const pathname = usePathname();
@@ -162,8 +172,10 @@ export function Topbar() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <User className="h-4 w-4 mr-2" /> Profil Saya
+            <DropdownMenuItem asChild>
+              <Link href={getProfilePageUrl(displayRole)} className="flex items-center w-full cursor-pointer">
+                <User className="h-4 w-4 mr-2" /> Profil Saya
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={logout} className="text-destructive hover:bg-destructive/10">

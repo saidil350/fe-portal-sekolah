@@ -21,6 +21,7 @@ export interface TeacherProfileData {
   address: string;
   role: string;
   status: string;
+  avatarUrl?: string | null;
   teachingHistory?: Array<{
     year: string;
     period: string;

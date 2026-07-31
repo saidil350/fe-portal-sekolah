@@ -10,6 +10,9 @@ import {
   Edit3,
   Settings,
   History,
+  Camera,
+  Trash2,
+  Loader2,
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/components/card';
 import { Button } from '@/components/ui/components/button';
@@ -26,6 +29,9 @@ import {
 } from '@/components/ui/components/dialog';
 import { Input } from '@/components/ui/components/input';
 import { toast } from '@/components/ui/hooks/use-toast';
+import { profileApi } from '@/lib/api-client';
+import { compressImage, getInitials } from '@/lib/utils/image-compression';
+import { useAuthStore } from '@/stores/auth-store';
 
 interface AdminProfileData {
   name: string;
@@ -36,11 +42,13 @@ interface AdminProfileData {
   role: string;
   unit: string;
   status: string;
+  avatarUrl?: string | null;
 }
 
 const labelClass = 'text-xs text-muted-foreground block mb-1.5';
 
 export default function AdminProfilePage() {
+  const [isUploadingPhoto, setIsUploadingPhoto] = React.useState(false);
   const [admin, setAdmin] = React.useState<AdminProfileData>({
     name: 'Ahmad Fauzi, S.Kom.',
     adminId: 'ADM-2023-001',
@@ -50,6 +58,7 @@ export default function AdminProfilePage() {
     unit: 'Teknologi Informasi & Sistem',
     address: 'Jl. Sudirman No. 55, Bandung',
     status: 'Aktif',
+    avatarUrl: null,
   });
 
   const [editOpen, setEditOpen] = React.useState(false);
@@ -58,6 +67,94 @@ export default function AdminProfilePage() {
     phone: admin.phone,
     address: admin.address,
   });
+
+  React.useEffect(() => {
+    let isMounted = true;
+    async function loadProfile() {
+      try {
+        const res = await profileApi.getProfile();
+        if (res?.data && isMounted) {
+          const u = res.data;
+          setAdmin((prev) => ({
+            ...prev,
+            name: u.name || prev.name,
+            email: u.email || prev.email,
+            phone: u.phone || prev.phone,
+            address: u.address || prev.address,
+            avatarUrl: u.avatarUrl || null,
+          }));
+        }
+      } catch (err) {
+        console.error('Gagal memuat profil admin:', err);
+      }
+    }
+    loadProfile();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handlePhotoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: 'Format tidak didukung',
+        description: 'Silakan pilih file gambar (JPG, PNG, atau WEBP).',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      setIsUploadingPhoto(true);
+      const base64Image = await compressImage(file);
+      await profileApi.updateProfile({ image: base64Image });
+
+      setAdmin((prev) => ({ ...prev, avatarUrl: base64Image }));
+      useAuthStore.getState().updateUser({ avatarUrl: base64Image });
+
+      toast({
+        title: 'Foto Profil Diperbarui',
+        description: 'Foto profil Anda berhasil diunggah dan disimpan.',
+      });
+    } catch (err) {
+      console.error('Gagal mengunggah foto profil:', err);
+      toast({
+        title: 'Gagal Mengunggah Foto',
+        description: 'Terjadi kesalahan saat memproses gambar profil Anda.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUploadingPhoto(false);
+      e.target.value = '';
+    }
+  };
+
+  const handlePhotoRemove = async () => {
+    try {
+      setIsUploadingPhoto(true);
+      await profileApi.updateProfile({ image: null });
+
+      setAdmin((prev) => ({ ...prev, avatarUrl: null }));
+      useAuthStore.getState().updateUser({ avatarUrl: null });
+
+      toast({
+        title: 'Foto Profil Dihapus',
+        description: 'Foto profil Anda telah dikembalikan ke inisial nama.',
+      });
+    } catch (err) {
+      console.error('Gagal menghapus foto profil:', err);
+      toast({
+        title: 'Gagal Menghapus Foto',
+        description: 'Terjadi kesalahan saat menghapus foto profil Anda.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUploadingPhoto(false);
+    }
+  };
 
   const accessHistory = [
     {
@@ -83,21 +180,21 @@ export default function AdminProfilePage() {
     },
   ];
 
-  // Inisial untuk avatar
-  const initials = admin.name
-    .split(' ')
-    .slice(0, 2)
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase();
-
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.email.trim() || !form.phone.trim()) {
       toast({ title: 'Data belum lengkap', description: 'Email dan nomor HP wajib diisi.', variant: 'destructive' });
       return;
     }
     setAdmin((prev) => ({ ...prev, ...form }));
+    try {
+      await profileApi.updateProfile({
+        phone: form.phone,
+        address: form.address,
+      });
+    } catch (err) {
+      console.error('Gagal memperbarui data kontak admin di backend:', err);
+    }
     toast({ title: 'Profil berhasil diperbarui', description: 'Perubahan data kontak telah disimpan.' });
     setEditOpen(false);
   };
@@ -125,12 +222,47 @@ export default function AdminProfilePage() {
       <Card>
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-            <Avatar className="w-20 h-20 border">
-              <AvatarImage src="" alt={admin.name} />
-              <AvatarFallback className="text-xl font-semibold bg-muted text-foreground">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
+            <div className="relative group shrink-0">
+              <Avatar className="w-20 h-20 sm:w-24 sm:h-24 border-2 border-primary/20 shadow-md">
+                <AvatarImage src={admin.avatarUrl || ''} alt={admin.name} />
+                <AvatarFallback className="text-xl sm:text-2xl font-bold bg-primary/10 text-primary">
+                  {getInitials(admin.name)}
+                </AvatarFallback>
+              </Avatar>
+
+              {/* Overlay loading / camera button */}
+              <label
+                htmlFor="admin-photo-input"
+                className="absolute bottom-0 right-0 p-2 bg-primary text-primary-foreground rounded-full shadow-lg cursor-pointer hover:bg-primary/90 transition-all hover:scale-110"
+                title="Ubah Foto Profil"
+              >
+                {isUploadingPhoto ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Camera className="w-4 h-4" />
+                )}
+                <input
+                  id="admin-photo-input"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={handlePhotoSelect}
+                  disabled={isUploadingPhoto}
+                />
+              </label>
+
+              {/* Remove photo button if photo exists */}
+              {admin.avatarUrl && !isUploadingPhoto && (
+                <button
+                  type="button"
+                  onClick={handlePhotoRemove}
+                  className="absolute top-0 right-0 p-1.5 bg-destructive text-destructive-foreground rounded-full shadow hover:bg-destructive/90 transition-all hover:scale-110"
+                  title="Hapus Foto Profil"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
 
             <div className="flex-1 text-center md:text-left space-y-2">
               <div className="flex flex-col md:flex-row items-center justify-between gap-2">
