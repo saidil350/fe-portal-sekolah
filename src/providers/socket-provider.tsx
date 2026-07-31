@@ -42,7 +42,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       unsubscribeBroadcast = registerSocketListener('notification.broadcast', (notif) => {
         addNotification(notif);
         toast({
-          title: `📢 ${notif.title}`,
+          title: notif.title,
           description: notif.message,
         });
       });

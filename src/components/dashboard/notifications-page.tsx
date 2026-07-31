@@ -60,7 +60,7 @@ function formatNotificationDate(dateStr: string) {
   const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
   const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
 
-  if (diffInMins < 1) return 'Baru saja';
+  if (diffInMs < 60000 || diffInMins < 1) return 'Baru saja';
   if (diffInMins < 60) return `${diffInMins} menit yang lalu`;
   if (diffInHours < 24) return `${diffInHours} jam yang lalu`;
   if (diffInDays === 1) return 'Kemarin';
@@ -70,6 +70,8 @@ function formatNotificationDate(dateStr: string) {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   });
 }
 

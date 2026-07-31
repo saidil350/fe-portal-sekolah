@@ -797,7 +797,7 @@ export function AdminNotificationsPage() {
       actionIcon={Bell}
       onAction={() => setIsAddOpen(true)}
       stats={[
-        { title: 'Total Pengumuman', value: loading ? '...' : `${data.length} Pesan`, description: 'Riwayat pengumuman broadcast', icon: Bell },
+        { title: 'Total Pengumuman', value: loading ? '...' : `${data.length} Pesan`, description: 'Riwayat pengumuman', icon: Bell },
         { title: 'Terkirim Hari Ini', value: loading ? '...' : `${stats?.sentToday || 0} Pesan`, description: 'In-app notifikasi', icon: FileText },
       ]}
       table={{
@@ -809,7 +809,7 @@ export function AdminNotificationsPage() {
           { header: 'Judul', accessorKey: 'title' },
           { header: 'Audiens', accessorKey: 'audience' },
           { header: 'Kanal', accessorKey: 'channel' },
-          { header: 'Terkirim', accessorKey: 'sent' },
+          { header: 'Waktu', render: (item: any) => item.createdAt ? new Date(item.createdAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '-' },
           { header: 'Status', render: status },
         ],
       }}
