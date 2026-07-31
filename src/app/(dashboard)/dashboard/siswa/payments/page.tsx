@@ -12,7 +12,8 @@ import {
   Search,
   ChevronLeft,
   ChevronRight,
-  Inbox
+  Inbox,
+  RefreshCw
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/components/card';
 import { Button } from '@/components/ui/components/button';
@@ -38,6 +39,7 @@ interface PaymentItem {
   status: 'PAID' | 'UNPAID' | 'PENDING';
   paidAt?: string;
   method?: string;
+  orderId?: string;
 }
 
 export default function StudentPaymentsPage() {
@@ -181,6 +183,28 @@ export default function StudentPaymentsPage() {
     }
   };
 
+  const [checkingOrderId, setCheckingOrderId] = React.useState<string | null>(null);
+
+  const handleSyncStatus = async (orderId: string) => {
+    try {
+      setCheckingOrderId(orderId);
+      const res = await apiClient.get<any>(API_ROUTES.PAYMENTS.STATUS(orderId));
+      if (res.success && res.data?.status === 'PAID') {
+        toast({ title: 'Berhasil', description: 'Pembayaran telah dikonfirmasi LUNAS!' });
+        fetchInvoices(page, statusFilter, search);
+      } else {
+        toast({
+          title: 'Status Pembayaran',
+          description: `Status transaksi: ${res.data?.status || 'PENDING'}. Jika Anda telah menyelesaikan pembayaran, tunggu beberapa detik dan coba lagi.`,
+        });
+      }
+    } catch (err: any) {
+      toast({ title: 'Gagal Memeriksa Status', description: err.message || 'Terjadi kesalahan jaringan', variant: 'destructive' });
+    } finally {
+      setCheckingOrderId(null);
+    }
+  };
+
   return (
     <div className="p-6 space-y-6 max-w-5xl mx-auto">
       {/* Header */}
@@ -311,17 +335,32 @@ export default function StudentPaymentsPage() {
                   </div>
                 </div>
 
-                <div>
+                <div className="flex flex-col sm:flex-row items-center gap-2">
                   {item.status === 'UNPAID' ? (
-                    <Button 
-                      size="sm" 
-                      onClick={() => handlePay(item.id)} 
-                      disabled={isPaying && processingInvoiceId === item.id}
-                      className="w-full sm:w-auto gap-1"
-                    >
-                      {isPaying && processingInvoiceId === item.id ? "Memproses..." : "Bayar Sekarang"}
-                      <ArrowUpRight className="w-4 h-4" />
-                    </Button>
+                    <>
+                      {item.orderId && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleSyncStatus(item.orderId!)}
+                          disabled={checkingOrderId === item.orderId}
+                          className="w-full sm:w-auto text-xs gap-1"
+                          title="Periksa status pembayaran langsung ke Midtrans"
+                        >
+                          <RefreshCw className={`w-3.5 h-3.5 ${checkingOrderId === item.orderId ? 'animate-spin' : ''}`} />
+                          {checkingOrderId === item.orderId ? "Mengecek..." : "Cek Status"}
+                        </Button>
+                      )}
+                      <Button 
+                        size="sm" 
+                        onClick={() => handlePay(item.id)} 
+                        disabled={isPaying && processingInvoiceId === item.id}
+                        className="w-full sm:w-auto gap-1"
+                      >
+                        {isPaying && processingInvoiceId === item.id ? "Memproses..." : "Bayar Sekarang"}
+                        <ArrowUpRight className="w-4 h-4" />
+                      </Button>
+                    </>
                   ) : (
                     <Button
                       size="sm"
