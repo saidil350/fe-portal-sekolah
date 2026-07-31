@@ -185,7 +185,7 @@ export default function StudentPaymentsPage() {
 
   const [checkingOrderId, setCheckingOrderId] = React.useState<string | null>(null);
 
-  const handleSyncStatus = async (orderId: string) => {
+  const handleSyncStatus = React.useCallback(async (orderId: string) => {
     try {
       setCheckingOrderId(orderId);
       const res = await apiClient.get<any>(API_ROUTES.PAYMENTS.STATUS(orderId));
@@ -203,7 +203,21 @@ export default function StudentPaymentsPage() {
     } finally {
       setCheckingOrderId(null);
     }
-  };
+  }, [fetchInvoices, page, statusFilter, search]);
+
+  // Otomatis verifikasi jika halaman dibuka setelah redirect dari Midtrans (misal membawa query ?order_id=SPP-xxx)
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectOrderId = urlParams.get('order_id');
+
+      if (redirectOrderId) {
+        handleSyncStatus(redirectOrderId);
+        // Bersihkan query string dari URL browser agar bersih
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+  }, [handleSyncStatus]);
 
   return (
     <div className="p-6 space-y-6 max-w-5xl mx-auto">
