@@ -20,7 +20,8 @@ import {
   History,
   Building2,
   Award,
-  Eye
+  Eye,
+  Loader2
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/components/card';
 import { Button } from '@/components/ui/components/button';
@@ -72,7 +73,7 @@ export default function AdminUserDetailPage() {
       id: 'doc-1',
       name: 'Akte Kelahiran',
       type: 'PDF / Gambar',
-      fileName: 'Akte_Kelahiran_Rian_Hidayat.pdf',
+      fileName: 'Akte_Kelahiran_Siswa.pdf',
       uploadDate: '12 Juli 2025',
       status: 'TERVERIFIKASI',
     },
@@ -80,7 +81,7 @@ export default function AdminUserDetailPage() {
       id: 'doc-2',
       name: 'Kartu Keluarga (KK)',
       type: 'PDF / Gambar',
-      fileName: 'Kartu_Keluarga_Hidayat.pdf',
+      fileName: 'Kartu_Keluarga_Siswa.pdf',
       uploadDate: '12 Juli 2025',
       status: 'TERVERIFIKASI',
     },
@@ -88,7 +89,7 @@ export default function AdminUserDetailPage() {
       id: 'doc-3',
       name: 'Ijazah SMP / SKL',
       type: 'PDF',
-      fileName: 'Ijazah_SMP_Rian_Hidayat.pdf',
+      fileName: 'Ijazah_SMP_Siswa.pdf',
       uploadDate: '14 Juli 2025',
       status: 'TERVERIFIKASI',
     },
@@ -96,7 +97,7 @@ export default function AdminUserDetailPage() {
       id: 'doc-4',
       name: 'Pas Foto 3x4 (Latar Merah)',
       type: 'JPG',
-      fileName: 'Pasfoto_Rian_Hidayat.jpg',
+      fileName: 'Pasfoto_Siswa.jpg',
       uploadDate: '15 Juli 2025',
       status: 'TERVERIFIKASI',
     },
@@ -104,37 +105,48 @@ export default function AdminUserDetailPage() {
       id: 'doc-5',
       name: 'KTP Orang Tua / Wali',
       type: 'PDF / Gambar',
-      fileName: 'KTP_Budi_Hidayat.pdf',
+      fileName: 'KTP_OrangTua.pdf',
       uploadDate: '16 Juli 2025',
       status: 'MENUNGGU',
     },
   ];
+
+  const sp = userData?.studentProfile;
+  const currentClassObj = userData?.currentClass;
+
+  const birthPlaceStr = sp?.birthPlace || userData?.birthPlace || '';
+  const birthDateStr = sp?.birthDate || userData?.birthDate || '';
+  const formattedBirth = (birthPlaceStr || birthDateStr)
+    ? `${birthPlaceStr}${birthPlaceStr && birthDateStr ? ', ' : ''}${birthDateStr}`
+    : (userData?.birthPlaceDate || '-');
 
   const studentDetail = {
     name: userData?.name || '-',
     email: userData?.email || '-',
     role: userData?.role || '-',
     isActive: userData?.isActive ?? true,
-    nisn: userData?.nisn || '-',
-    nis: userData?.nis || '-',
-    gender: userData?.gender || '-',
-    birthPlaceDate: userData?.birthPlaceDate || '-',
-    phone: userData?.phoneNumber || userData?.phone || '-',
-    currentClass: userData?.className || '-',
-    address: userData?.address || '-',
-    nik: userData?.nik || '-',
-    religion: userData?.religion || '-',
+    nisn: sp?.nisn || userData?.nisn || '-',
+    nis: sp?.nis || userData?.nis || '-',
+    gender: sp?.gender === 'L' ? 'Laki-laki' : sp?.gender === 'P' ? 'Perempuan' : (sp?.gender || userData?.gender || '-'),
+    birthPlaceDate: formattedBirth,
+    phone: userData?.phone || userData?.phoneNumber || sp?.guardianPhone || '-',
+    currentClass: currentClassObj?.name ? `Kelas ${currentClassObj.name}` : (userData?.className || '-'),
+    address: userData?.address || sp?.guardianAddress || '-',
+    nik: sp?.nik || userData?.nik || '-',
+    religion: sp?.religion || userData?.religion || '-',
     
     // Data Orang Tua
-    fatherName: userData?.fatherName || '-',
-    fatherOccupation: userData?.fatherOccupation || '-',
-    fatherPhone: userData?.fatherPhone || '-',
-    motherName: userData?.motherName || '-',
-    motherOccupation: userData?.motherOccupation || '-',
-    guardianAddress: userData?.guardianAddress || '-',
+    fatherName: sp?.fatherName || userData?.fatherName || '-',
+    fatherOccupation: sp?.fatherOccupation || userData?.fatherOccupation || '-',
+    fatherPhone: sp?.guardianPhone || userData?.fatherPhone || '-',
+    motherName: sp?.motherName || userData?.motherName || '-',
+    motherOccupation: sp?.motherOccupation || userData?.motherOccupation || '-',
+    guardianAddress: userData?.address || userData?.guardianAddress || '-',
 
     // Riwayat Akademik
-    academicHistory: userData?.academicHistory || [],
+    academicHistory: Array.isArray(userData?.academicHistory) && userData.academicHistory.length > 0
+      ? userData.academicHistory
+      : [],
   };
 
   const handleViewDocument = (doc: StudentDocument) => {
@@ -167,6 +179,34 @@ export default function AdminUserDetailPage() {
     });
   };
 
+  if (loading) {
+    return (
+      <div className="p-6 flex flex-col items-center justify-center min-h-[400px] space-y-4">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground">Memuat detail profil pengguna...</p>
+      </div>
+    );
+  }
+
+  if (!userData) {
+    return (
+      <div className="p-6 max-w-xl mx-auto text-center space-y-4">
+        <h2 className="text-xl font-bold">Pengguna tidak ditemukan</h2>
+        <p className="text-sm text-muted-foreground">Data pengguna dengan ID ini tidak dapat ditemukan.</p>
+        <Button asChild variant="outline">
+          <Link href="/dashboard/admin/users">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Kembali ke Daftar Pengguna
+          </Link>
+        </Button>
+      </div>
+    );
+  }
+
+  const initials = studentDetail.name !== '-'
+    ? studentDetail.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()
+    : 'U';
+
   return (
     <div className="p-6 space-y-6 max-w-6xl mx-auto text-left">
       {/* Tombol Kembali & Header */}
@@ -178,9 +218,9 @@ export default function AdminUserDetailPage() {
             </Link>
           </Button>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Detail Data Pribadi Siswa</h1>
+            <h1 className="text-2xl font-bold tracking-tight">Detail Data Profil Pengguna</h1>
             <p className="text-sm text-muted-foreground">
-              Dokumen fisik, profil lengkap, dan status verifikasi siswa.
+              Dokumen fisik, profil lengkap, dan status verifikasi pengguna.
             </p>
           </div>
         </div>
@@ -202,7 +242,7 @@ export default function AdminUserDetailPage() {
             <Avatar className="w-24 h-24 border shadow-sm">
               <AvatarImage src={userData?.image || userData?.avatarUrl || ''} alt={studentDetail.name} />
               <AvatarFallback className="text-2xl font-bold bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-100">
-                {studentDetail.name.split(' ').map((n: string) => n[0]).join('')}
+                {initials}
               </AvatarFallback>
             </Avatar>
 
