@@ -36,8 +36,8 @@ export default function SiswaDashboard() {
   const [activeInvoices, setActiveInvoices] = React.useState<any[]>([]);
   const [isPaying, setIsPaying] = React.useState(false);
   const [processingInvoiceId, setProcessingInvoiceId] = React.useState<string | null>(null);
-  const [currentClass, setCurrentClass] = React.useState<string>('Kelas X-1');
-  const [studentNisn, setStudentNisn] = React.useState<string>('0054819203');
+  const [currentClass, setCurrentClass] = React.useState<string>('Kelas Terdaftar');
+  const [studentNisn, setStudentNisn] = React.useState<string>('-');
 
   const student = {
     name: user?.name ?? 'Siswa',

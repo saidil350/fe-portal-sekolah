@@ -202,10 +202,10 @@ export default function StudentProfilePage() {
     date: string;
     fileUrl?: string;
   }>>([
-    { id: '1', name: 'Akte Kelahiran', fileName: 'Akte_Kelahiran_Rian.pdf', date: '12 Jul 2025' },
-    { id: '2', name: 'Kartu Keluarga (KK)', fileName: 'Kartu_Keluarga_Rian.pdf', date: '12 Jul 2025' },
-    { id: '3', name: 'Ijazah SMP / SKL', fileName: 'Ijazah_SMP_Rian.pdf', date: '14 Jul 2025' },
-    { id: '4', name: 'Pas Foto 3x4 (Latar Merah)', fileName: 'Pasfoto_Rian.jpg', date: '15 Jul 2025' },
+    { id: '1', name: 'Akte Kelahiran', fileName: 'Akte_Kelahiran_Siswa.pdf', date: '12 Jul 2025' },
+    { id: '2', name: 'Kartu Keluarga (KK)', fileName: 'Kartu_Keluarga_Siswa.pdf', date: '12 Jul 2025' },
+    { id: '3', name: 'Ijazah SMP / SKL', fileName: 'Ijazah_SMP_Siswa.pdf', date: '14 Jul 2025' },
+    { id: '4', name: 'Pas Foto 3x4 (Latar Merah)', fileName: 'Pasfoto_Siswa.jpg', date: '15 Jul 2025' },
     { id: '5', name: 'KTP Orang Tua / Wali', fileName: 'KTP_OrangTua.pdf', date: '16 Jul 2025' },
   ]);
 
