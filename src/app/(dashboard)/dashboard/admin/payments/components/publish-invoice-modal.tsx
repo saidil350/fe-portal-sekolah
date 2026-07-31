@@ -110,6 +110,13 @@ export function PublishInvoiceModal({
       return;
     }
 
+    if (useCustomAmount) {
+      if (!customAmount || isNaN(customAmount) || customAmount <= 0) {
+        alert('Nominal custom SPP harus bernilai angka positif lebih dari 0.');
+        return;
+      }
+    }
+
     try {
       setSubmitting(true);
       const payload: any = {
@@ -323,12 +330,17 @@ export function PublishInvoiceModal({
                 <Label className="text-xs text-muted-foreground">Nominal SPP (Rp)</Label>
                 <Input
                   type="number"
-                  value={customAmount}
+                  value={customAmount || ''}
                   onChange={(e) => setCustomAmount(Number(e.target.value))}
                   placeholder="Masukkan nominal custom..."
                   className="h-9"
-                  min={0}
+                  min={1}
                 />
+                {customAmount > 0 && (
+                  <p className="text-[11px] font-medium text-emerald-600">
+                    Terbaca: Rp {customAmount.toLocaleString('id-ID')}
+                  </p>
+                )}
                 <p className="text-[11px] text-muted-foreground">
                   Nominal ini akan diterapkan secara khusus pada siswa yang dipilih di atas.
                 </p>
