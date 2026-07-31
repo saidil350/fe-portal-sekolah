@@ -21,10 +21,12 @@ import {
   Building2,
   Award,
   Eye,
-  Loader2
+  Loader2,
+  Pencil
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/components/card';
 import { Button } from '@/components/ui/components/button';
+import { Input } from '@/components/ui/components/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/components/avatar';
 import { Badge } from '@/components/ui/components/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/components/tabs';
@@ -47,6 +49,63 @@ export default function AdminUserDetailPage() {
 
   const [loading, setLoading] = React.useState(true);
   const [userData, setUserData] = React.useState<any>(null);
+
+  // Edit Modal State
+  const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
+  const [editName, setEditName] = React.useState('');
+  const [editEmail, setEditEmail] = React.useState('');
+  const [editNisn, setEditNisn] = React.useState('');
+  const [isSubmittingEdit, setIsSubmittingEdit] = React.useState(false);
+
+  const handleOpenEditModal = () => {
+    if (!userData) return;
+    setEditName(userData.name || '');
+    setEditEmail(userData.email || '');
+    setEditNisn(userData.studentProfile?.nisn || userData.nisn || '');
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveEditUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmittingEdit(true);
+    try {
+      const payload: any = {
+        name: editName,
+        email: editEmail,
+      };
+      if (userData.role === 'SISWA') {
+        payload.nisn = editNisn;
+      }
+
+      const res = await apiClient.patch<any>(`/users/${userId}`, payload);
+      if (res.success) {
+        toast({
+          title: 'Berhasil Memperbarui Data',
+          description: 'Data profil pengguna dan NISN berhasil disimpan.',
+        });
+        setIsEditModalOpen(false);
+        // Refresh user detail data
+        const updated = await apiClient.get<any>(`/users/${userId}`);
+        if (updated.success && updated.data) {
+          setUserData(updated.data);
+        }
+      } else {
+        toast({
+          title: 'Gagal Memperbarui Data',
+          description: res.message || 'Terjadi kesalahan saat memperbarui data.',
+          variant: 'destructive',
+        });
+      }
+    } catch (err: any) {
+      toast({
+        title: 'Error',
+        description: err.message || 'Terjadi kesalahan jaringan.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmittingEdit(false);
+    }
+  };
 
   React.useEffect(() => {
     async function fetchUserDetail() {
@@ -225,6 +284,10 @@ export default function AdminUserDetailPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={handleOpenEditModal} className="text-xs gap-1.5 h-8">
+            <Pencil className="w-3.5 h-3.5" />
+            Edit Data / NISN
+          </Button>
           <Badge variant={studentDetail.isActive ? 'default' : 'destructive'} className="text-xs px-3 py-1">
             <ShieldCheck className="w-3.5 h-3.5 mr-1" />
             Akun {studentDetail.isActive ? 'Aktif' : 'Nonaktif'}
@@ -451,6 +514,79 @@ export default function AdminUserDetailPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Modal Edit Data Pengguna / NISN */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+          <Card className="w-full max-w-md bg-background border shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+            <CardHeader className="pb-3 border-b">
+              <CardTitle className="text-base font-semibold flex items-center gap-2">
+                <Pencil className="h-4 w-4 text-primary" />
+                Ubah Profil Pengguna & NISN
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Perbarui data identitas utama dan NISN siswa di bawah ini.
+              </CardDescription>
+            </CardHeader>
+            <form onSubmit={handleSaveEditUser}>
+              <CardContent className="space-y-4 pt-4 text-left">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-muted-foreground">Nama Lengkap</label>
+                  <Input
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    placeholder="Nama Lengkap"
+                    className="text-xs h-9"
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-muted-foreground">Email</label>
+                  <Input
+                    type="email"
+                    value={editEmail}
+                    onChange={(e) => setEditEmail(e.target.value)}
+                    placeholder="Email Pengguna"
+                    className="text-xs h-9"
+                    required
+                  />
+                </div>
+                {userData?.role === 'SISWA' && (
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-muted-foreground">NISN (Nomor Induk Siswa Nasional)</label>
+                    <Input
+                      value={editNisn}
+                      onChange={(e) => setEditNisn(e.target.value)}
+                      placeholder="Masukkan 10 Digit NISN"
+                      className="text-xs h-9"
+                      maxLength={10}
+                    />
+                    <p className="text-[11px] text-muted-foreground">NISN terdiri dari 10 digit angka resmi Kemdikbud.</p>
+                  </div>
+                )}
+                <div className="flex justify-end gap-2 pt-3 border-t mt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsEditModalOpen(false)}
+                    className="h-8 text-xs px-3"
+                  >
+                    Batal
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={isSubmittingEdit}
+                    className="h-8 text-xs px-4 gap-1.5"
+                  >
+                    {isSubmittingEdit && <Loader2 className="h-3 w-3 animate-spin" />}
+                    Simpan Perubahan
+                  </Button>
+                </div>
+              </CardContent>
+            </form>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

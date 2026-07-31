@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import Link from 'next/link';
 import {
   DashboardRoutePage,
   DashboardRow,
@@ -451,6 +452,17 @@ export function AdminUsersPage() {
           { header: 'Email', accessorKey: 'email' },
           { header: 'Role', accessorKey: 'role', render: (row: any) => <StatusBadge label={row.role || ''} /> },
           { header: 'Status', accessorKey: 'status', render: status },
+          { 
+            header: 'Aksi', 
+            accessorKey: 'id', 
+            render: (row: any) => (
+              <Button size="sm" variant="outline" asChild className="h-7 text-xs px-2.5">
+                <Link href={`/dashboard/admin/users/${row.id}`}>
+                  Detail & Edit
+                </Link>
+              </Button>
+            ) 
+          },
         ],
       }}
     />
