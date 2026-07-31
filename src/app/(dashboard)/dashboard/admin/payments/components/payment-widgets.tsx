@@ -451,7 +451,7 @@ export function PaymentWidgets() {
                 </div>
                 <div className="flex justify-between text-xs py-1.5 border-b border-dashed">
                   <span className="text-muted-foreground">ID Order (Midtrans):</span>
-                  <span className="font-semibold font-mono text-muted-foreground">{formatDisplayId(selectedInvoiceDetails.orderId, 'TRX')}</span>
+                  <span className="font-semibold font-mono text-muted-foreground">{selectedInvoiceDetails.orderId || '-'}</span>
                 </div>
                 <div className="flex justify-between text-xs py-1.5 border-b border-dashed">
                   <span className="text-muted-foreground">Metode Pembayaran:</span>

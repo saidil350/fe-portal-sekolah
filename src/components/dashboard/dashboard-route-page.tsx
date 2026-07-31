@@ -156,7 +156,11 @@ function rowSubtitle(row: DashboardRow) {
 function rowMetrics(row: DashboardRow) {
   return Object.fromEntries(
     Object.entries(row)
-      .filter(([, value]) => typeof value === 'string' || typeof value === 'number')
+      .filter(([key, value]) => {
+        const k = key.toLowerCase();
+        if (k === 'id' || k === 'uuid' || k === 'isactive' || k === 'ontogglestatus' || k === 'href' || k === 'type' || k === 'title' || k === 'subtitle') return false;
+        return typeof value === 'string' || typeof value === 'number';
+      })
       .slice(0, 4)
       .map(([key, value]) => [key, String(value)])
   );
