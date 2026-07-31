@@ -806,7 +806,15 @@ export function AdminNotificationsPage() {
         searchKey: 'title',
         data: data,
         columns: [
-          { header: 'Judul', accessorKey: 'title' },
+          { 
+            header: 'Judul & Pesan', 
+            render: (item: any) => (
+              <div className="space-y-0.5">
+                <div className="font-semibold text-sm">{item.title}</div>
+                {item.message && <div className="text-xs text-muted-foreground line-clamp-1">{item.message}</div>}
+              </div>
+            )
+          },
           { header: 'Audiens', accessorKey: 'audience' },
           { header: 'Kanal', accessorKey: 'channel' },
           { header: 'Waktu', render: (item: any) => item.createdAt ? new Date(item.createdAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '-' },

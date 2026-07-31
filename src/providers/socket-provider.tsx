@@ -40,11 +40,13 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       });
 
       unsubscribeBroadcast = registerSocketListener('notification.broadcast', (notif) => {
-        addNotification(notif);
-        toast({
-          title: notif.title,
-          description: notif.message,
-        });
+        if (!notif.targetRole || notif.targetRole === 'ALL' || notif.targetRole === user.role) {
+          addNotification(notif);
+          toast({
+            title: notif.title,
+            description: notif.message,
+          });
+        }
       });
     });
 

@@ -26,6 +26,7 @@ import { formatCurrency } from '@/lib/utils';
 import { profileApi, apiClient } from '@/lib/api-client';
 import { useAuth } from '@/hooks/use-auth';
 import { useTenant } from '@/hooks/use-tenant';
+import { useNotificationStore } from '@/stores/notification-store';
 
 export default function SiswaDashboard() {
   const router = useRouter();
@@ -47,10 +48,7 @@ export default function SiswaDashboard() {
     monthlySpp: 500000,
   };
 
-  React.useEffect(() => {
-    fetchInvoices();
-    fetchProfileData();
-  }, []);
+  const { notifications, fetchNotifications } = useNotificationStore();
 
   const fetchProfileData = async () => {
     try {
@@ -90,22 +88,11 @@ export default function SiswaDashboard() {
     }
   };
 
-  const announcements = [
-    {
-      id: '1',
-      title: 'Tagihan SPP Bulan Ini Diterbitkan',
-      date: '10 Mei 2026',
-      category: 'Keuangan',
-      desc: 'Pembayaran SPP bulan ini sudah dapat dilakukan melalui transfer virtual account atau QRIS.',
-    },
-    {
-      id: '2',
-      title: 'Pengumuman Libur Nasional',
-      date: '12 Mei 2026',
-      category: 'Informasi',
-      desc: 'Diberitahukan kepada seluruh siswa bahwa kegiatan sekolah diliburkan pada Kamis mendatang.',
-    },
-  ];
+  React.useEffect(() => {
+    fetchInvoices();
+    fetchProfileData();
+    fetchNotifications();
+  }, [fetchNotifications]);
 
   const handlePay = async (invoiceId: string) => {
     if (isPaying) return;
@@ -332,24 +319,36 @@ export default function SiswaDashboard() {
           </CardHeader>
 
           <CardContent className="space-y-3">
-            {announcements.map((item) => (
-              <div
-                key={item.id}
-                className="p-3.5 rounded-lg border bg-card space-y-1.5 hover:bg-accent/50 transition-colors text-left"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <h4 className="font-semibold text-sm leading-tight text-foreground">
-                    {item.title}
-                  </h4>
-                  <span className="text-[10px] text-muted-foreground shrink-0">
-                    {item.date}
-                  </span>
-                </div>
-                <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
-                  {item.desc}
-                </p>
+            {notifications.length === 0 ? (
+              <div className="p-6 text-center text-xs text-muted-foreground">
+                Belum ada pengumuman sekolah saat ini.
               </div>
-            ))}
+            ) : (
+              notifications.slice(0, 4).map((item) => (
+                <div
+                  key={item.id}
+                  className="p-3.5 rounded-lg border bg-card space-y-1.5 hover:bg-accent/50 transition-colors text-left"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <h4 className="font-semibold text-sm leading-tight text-foreground">
+                      {item.title}
+                    </h4>
+                    <span className="text-[10px] text-muted-foreground shrink-0">
+                      {item.createdAt
+                        ? new Date(item.createdAt).toLocaleDateString('id-ID', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric',
+                          })
+                        : ''}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                    {item.message}
+                  </p>
+                </div>
+              ))
+            )}
           </CardContent>
         </Card>
       </div>
