@@ -11,6 +11,11 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'Portal Sekolah - Platform SaaS Multi-Tenant',
   description: 'Sistem Informasi Manajemen Sekolah Terintegrasi dan Realtime.',
+  icons: {
+    icon: '/icon.svg',
+    shortcut: '/icon.svg',
+    apple: '/apple-icon.svg',
+  },
 };
 
 import Script from 'next/script';
