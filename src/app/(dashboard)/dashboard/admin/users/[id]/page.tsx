@@ -446,8 +446,8 @@ export default function AdminUserDetailPage() {
                     className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl border bg-card hover:bg-muted/30 transition-colors gap-3"
                   >
                     <div className="flex items-start gap-3">
-                      <div className="p-2.5 rounded-lg bg-primary/10 text-primary mt-0.5">
-                        <FileText className="w-5 h-5" />
+                      <div className="p-2.5 rounded-lg bg-muted/60 border border-border/50 text-foreground mt-0.5">
+                        <FileText className="w-5 h-5" strokeWidth={1.75} />
                       </div>
                       <div>
                         <h4 className="font-semibold text-sm">{doc.name}</h4>

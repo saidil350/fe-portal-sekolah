@@ -168,11 +168,11 @@ export default function AdminSettingsPage() {
       </div>
 
       {/* Stats row */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
+      <div className="grid gap-4 md:grid-cols-3 text-left">
+        <Card className="transition-all hover:border-border/80">
           <CardContent className="flex items-center gap-4 p-5">
-            <div className="rounded-md bg-primary/10 p-2.5 text-primary">
-              <School className="h-5 w-5" />
+            <div className="rounded-lg bg-muted/60 border border-border/50 p-2.5 text-foreground">
+              <School className="h-5 w-5" strokeWidth={1.75} />
             </div>
             <div>
               <p className="text-xs font-medium text-muted-foreground">Profil Sekolah</p>
@@ -181,10 +181,10 @@ export default function AdminSettingsPage() {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="transition-all hover:border-border/80">
           <CardContent className="flex items-center gap-4 p-5">
-            <div className="rounded-md bg-green-500/10 p-2.5 text-green-600">
-              <CalendarCheck className="h-5 w-5" />
+            <div className="rounded-lg bg-muted/60 border border-border/50 p-2.5 text-foreground">
+              <CalendarCheck className="h-5 w-5" strokeWidth={1.75} />
             </div>
             <div>
               <p className="text-xs font-medium text-muted-foreground">Tahun Ajaran</p>
@@ -193,10 +193,10 @@ export default function AdminSettingsPage() {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="transition-all hover:border-border/80">
           <CardContent className="flex items-center gap-4 p-5">
-            <div className="rounded-md bg-blue-500/10 p-2.5 text-blue-600">
-              <Users className="h-5 w-5" />
+            <div className="rounded-lg bg-muted/60 border border-border/50 p-2.5 text-foreground">
+              <Users className="h-5 w-5" strokeWidth={1.75} />
             </div>
             <div>
               <p className="text-xs font-medium text-muted-foreground">Total Kelas Kustom</p>

@@ -454,8 +454,8 @@ export default function StudentProfilePage() {
               {documents.map((doc) => (
                 <div key={doc.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 border rounded-xl bg-card gap-3 hover:bg-muted/20 transition-colors">
                   <div className="flex items-start gap-3">
-                    <div className="p-2 rounded-lg bg-primary/10 text-primary shrink-0 mt-0.5">
-                      <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <div className="p-2 rounded-lg bg-muted/60 border border-border/50 text-foreground shrink-0 mt-0.5">
+                      <FileText className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={1.75} />
                     </div>
                     <div>
                       <h4 className="font-semibold text-xs sm:text-sm">{doc.name}</h4>
