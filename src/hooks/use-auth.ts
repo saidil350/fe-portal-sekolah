@@ -10,12 +10,11 @@ export function useAuth() {
     if (response.success && response.data) {
       const sess = response.data;
 
-      // Setel cookie agar middleware Next.js dapat melacak otentikasi di Server Side
-      const expiry = new Date(sess.expiresAt).toUTCString();
-      document.cookie = `portal_session=${sess.token}; path=/; expires=${expiry}; SameSite=Lax`;
-      document.cookie = `portal_user_role=${sess.user.role}; path=/; expires=${expiry}; SameSite=Lax`;
+      // Setel cookie sebagai Session Cookie (tanpa `expires`) agar otomatis terhapus saat browser ditutup
+      document.cookie = `portal_session=${sess.token}; path=/; SameSite=Lax`;
+      document.cookie = `portal_user_role=${sess.user.role}; path=/; SameSite=Lax`;
       if (sess.user.tenantId) {
-        document.cookie = `portal_user_tenant=${sess.user.tenantId}; path=/; expires=${expiry}; SameSite=Lax`;
+        document.cookie = `portal_user_tenant=${sess.user.tenantId}; path=/; SameSite=Lax`;
       }
 
       setAuth(sess.user, sess);

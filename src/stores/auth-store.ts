@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { createJSONStorage, persist } from 'zustand/middleware';
 import { User, Session } from '@/types';
 import { setAuthToken, setTenantId } from '@/lib/api-client';
 
@@ -65,6 +65,7 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'portal-sekolah-auth-store',
+      storage: createJSONStorage(() => (typeof window !== 'undefined' ? sessionStorage : ({} as Storage))),
       partialize: (state) => ({
         user: state.user,
         session: state.session,
