@@ -198,7 +198,8 @@ export function DashboardSectionCard({
   searchQuery: string;
 }) {
   const pathname = usePathname();
-  const entities = section.data.map((row, index): DashboardEntity & DashboardRow => {
+  const safeData = Array.isArray(section.data) ? section.data : [];
+  const entities = safeData.map((row, index): DashboardEntity & DashboardRow => {
     const href = rowHref(pathname, row, index);
 
     return {
@@ -220,7 +221,8 @@ export function DashboardSectionCard({
     };
   });
 
-  const columns: DashboardTableColumn<DashboardEntity & DashboardRow>[] = section.columns.map((column) => ({
+  const safeColumns = Array.isArray(section.columns) ? section.columns : [];
+  const columns: DashboardTableColumn<DashboardEntity & DashboardRow>[] = safeColumns.map((column) => ({
     header: column.header,
     accessorKey: column.accessorKey as keyof (DashboardEntity & DashboardRow),
     cell: ({ row }) => (column.render ? column.render(row.original) : String(row.original[column.accessorKey ?? 'title'] ?? '')),

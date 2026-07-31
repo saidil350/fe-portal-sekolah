@@ -699,7 +699,12 @@ export function AdminPaymentsPage() {
         console.log('API Responses:', summaryRes, invoicesRes);
         
         if (summaryRes.success) setSummary(summaryRes.data);
-        if (invoicesRes.success) setInvoices(invoicesRes.data);
+        if (invoicesRes.success && invoicesRes.data) {
+          const list = Array.isArray(invoicesRes.data)
+            ? invoicesRes.data
+            : (invoicesRes.data.items || []);
+          setInvoices(list);
+        }
       } catch (err) {
         console.error('Error fetching payments admin data:', err);
       } finally {
@@ -713,6 +718,8 @@ export function AdminPaymentsPage() {
   const realizationFormatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(realizationAmount);
   const pendingInvoices = summary?.pendingInvoices || 0;
   const qrisPercentage = summary?.qrisPercentage || 0;
+
+  const safeInvoices = Array.isArray(invoices) ? invoices : [];
 
   return (
     <DashboardRoutePage
@@ -733,12 +740,12 @@ export function AdminPaymentsPage() {
         icon: CreditCard,
         searchKey: 'studentName',
         searchPlaceholder: 'Cari nama siswa...',
-        data: invoices,
+        data: safeInvoices,
         columns: [
           { header: 'No. Invoice', accessorKey: 'invoiceNumber' },
           { header: 'Nama Siswa', render: (row: any) => row.studentName || 'Siswa' },
           { header: 'Periode', render: (row: any) => `${row.month}/${row.year}` },
-          { header: 'Nominal', render: (row: any) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(row.amount) },
+          { header: 'Nominal', render: (row: any) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(row.amount || 0) },
           { header: 'Status', render: status },
         ],
       }}
@@ -960,7 +967,12 @@ export function HeadmasterFinancePage() {
           apiClient.get<any>(`/admin/payments/invoices`)
         ]);
         if (summaryRes.success) setSummary(summaryRes.data);
-        if (invoicesRes.success) setInvoices(invoicesRes.data);
+        if (invoicesRes.success && invoicesRes.data) {
+          const list = Array.isArray(invoicesRes.data)
+            ? invoicesRes.data
+            : (invoicesRes.data.items || []);
+          setInvoices(list);
+        }
       } catch (err) {
         console.error('Error fetching payments admin data:', err);
       } finally {
@@ -974,16 +986,18 @@ export function HeadmasterFinancePage() {
   const pendingInvoices = summary?.pendingInvoices || 0;
   const qrisPercentage = summary?.qrisPercentage || 0;
 
-  const groupedByMonth = invoices.reduce((acc: any, inv: any) => {
+  const safeInvoices = Array.isArray(invoices) ? invoices : [];
+
+  const groupedByMonth = safeInvoices.reduce((acc: any, inv: any) => {
     const key = `${inv.month}-${inv.year}`;
     if (!acc[key]) {
       acc[key] = { monthLabel: `${inv.month}/${inv.year}`, target: 0, actual: 0, unpaid: 0 };
     }
-    acc[key].target += inv.amount;
+    acc[key].target += Number(inv.amount || 0);
     if (inv.status === 'PAID' || inv.status === 'Lunas') {
-      acc[key].actual += inv.amount;
+      acc[key].actual += Number(inv.amount || 0);
     } else {
-      acc[key].unpaid += inv.amount;
+      acc[key].unpaid += Number(inv.amount || 0);
     }
     return acc;
   }, {});
@@ -1546,7 +1560,12 @@ export function StaffInvoicesPage() {
           apiClient.get<any>(`/admin/payments/invoices`)
         ]);
         if (summaryRes.success) setSummary(summaryRes.data);
-        if (invoicesRes.success) setInvoices(invoicesRes.data);
+        if (invoicesRes.success && invoicesRes.data) {
+          const list = Array.isArray(invoicesRes.data)
+            ? invoicesRes.data
+            : (invoicesRes.data.items || []);
+          setInvoices(list);
+        }
       } catch (err) {
         console.error('Error fetching invoices:', err);
       } finally {
@@ -1559,6 +1578,8 @@ export function StaffInvoicesPage() {
   const totalMasuk = summary?.realizationAmount || 0;
   const pendingInvoices = summary?.pendingInvoices || 0;
 
+  const safeInvoices = Array.isArray(invoices) ? invoices : [];
+
   return (
     <DashboardRoutePage
       title="Kelola Invoices SPP"
@@ -1566,9 +1587,9 @@ export function StaffInvoicesPage() {
       actionLabel="Buat Invoice"
       actionIcon={Receipt}
       stats={[
-        { title: 'Invoice Bulan Ini', value: loading ? '...' : (invoices.length).toString(), description: 'Semua siswa aktif', icon: Receipt },
-        { title: 'Sudah Lunas', value: loading ? '...' : (invoices.filter(i => i.status === 'PAID').length).toString(), description: 'Pembayaran masuk', icon: CheckCircle },
-        { title: 'Menunggu Verifikasi', value: loading ? '...' : (invoices.filter(i => i.status === 'PENDING').length).toString(), description: 'Transfer manual / Belum bayar', icon: Clock },
+        { title: 'Invoice Bulan Ini', value: loading ? '...' : (safeInvoices.length).toString(), description: 'Semua siswa aktif', icon: Receipt },
+        { title: 'Sudah Lunas', value: loading ? '...' : (safeInvoices.filter(i => i.status === 'PAID' || i.status === 'Lunas').length).toString(), description: 'Pembayaran masuk', icon: CheckCircle },
+        { title: 'Menunggu Verifikasi', value: loading ? '...' : (safeInvoices.filter(i => i.status === 'PENDING' || i.status === 'UNPAID').length).toString(), description: 'Transfer manual / Belum bayar', icon: Clock },
       ]}
       insights={[
         { title: 'Total masuk', value: loading ? '...' : new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(totalMasuk), description: 'Bulan ini', badge: 'Bulan ini' },
@@ -1579,12 +1600,12 @@ export function StaffInvoicesPage() {
         title: 'Daftar Invoice Terbaru',
         icon: Receipt,
         searchKey: 'studentName',
-        data: invoices,
+        data: safeInvoices,
         columns: [
           { header: 'Siswa', render: (row: any) => row.studentName || 'Siswa' },
           { header: 'Periode', render: (row: any) => `${row.month}/${row.year}` },
           { header: 'Invoice', accessorKey: 'invoiceNumber' },
-          { header: 'Nominal', render: (row: any) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(row.amount) },
+          { header: 'Nominal', render: (row: any) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(row.amount || 0) },
           { header: 'Status', render: status },
         ],
       }}
