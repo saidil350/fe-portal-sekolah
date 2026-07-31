@@ -2,8 +2,8 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { useParams, usePathname } from 'next/navigation';
-import { ArrowLeft, BarChart3, Bell, CheckCircle2, CreditCard, Eye, GraduationCap, Megaphone, UserRound, Users } from 'lucide-react';
+import { useParams, usePathname, useRouter } from 'next/navigation';
+import { ArrowLeft, BarChart3, Bell, CheckCircle2, CreditCard, Eye, GraduationCap, Megaphone, UserRound, Users, CalendarCheck, BookOpen } from 'lucide-react';
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@/components/ui';
 import { AnalyticsExplorer } from './analytics-explorer';
 import { EnterpriseDataTable } from './enterprise-data-table';
@@ -27,8 +27,10 @@ function parentPath(pathname: string) {
 export function DashboardDetailPage({ kind = 'detail' }: { kind?: 'detail' | 'analytics' | 'student' | 'class' }) {
   const params = useParams();
   const pathname = usePathname();
+  const router = useRouter();
   const entityLabel = labelFromSlug(params.entityId ?? params.studentId ?? params.classId);
   const moduleSlug = typeof params.module === 'string' ? params.module : Array.isArray(params.module) ? params.module[0] : '';
+  const roleSlug = typeof params.role === 'string' ? params.role : Array.isArray(params.role) ? params.role[0] : 'siswa';
   const moduleLabel = labelFromSlug(params.module);
   const parent = parentPath(pathname);
 
@@ -53,6 +55,17 @@ export function DashboardDetailPage({ kind = 'detail' }: { kind?: 'detail' | 'an
             const found = res.data.data.find((n: any) => n.id === entityIdStr);
             if (found) {
               setNotificationData(found);
+              return;
+            }
+          }
+          return apiClient.get<any>('/notifications');
+        })
+        .then((res) => {
+          if (res?.success && Array.isArray(res.data?.data)) {
+            const entityIdStr = Array.isArray(params.entityId) ? params.entityId[0] : params.entityId;
+            const found = res.data.data.find((n: any) => n.id === entityIdStr);
+            if (found) {
+              setNotificationData(found);
             }
           }
         })
@@ -60,61 +73,111 @@ export function DashboardDetailPage({ kind = 'detail' }: { kind?: 'detail' | 'an
     }
   }, [isNotification, params.entityId]);
 
-  const metricsList = isNotification
-    ? [
-        { label: 'Status Pengiriman', value: 'Terkirim', icon: CheckCircle2 },
-        { label: 'Target Audiens', value: notificationData?.targetRole || 'Semua User', icon: Users },
-        { label: 'Tipe Notifikasi', value: notificationData?.type || 'INFO', icon: Megaphone },
-        { label: 'Kanal Broadcast', value: 'In-App', icon: Eye },
-      ]
-    : [
-        { label: 'Pembayaran', value: '88.4%', icon: CreditCard },
-        { label: 'Status Sistem', value: 'Aktif', icon: BarChart3 },
-        { label: 'Akademik', value: '84.8', icon: GraduationCap },
-        { label: 'Profil Terkait', value: '12', icon: UserRound },
-      ];
+  if (isNotification) {
+    const title = notificationData?.title || entityLabel;
+    const message = notificationData?.message || 'Detail pengumuman notifikasi sekolah.';
+    const type = notificationData?.type || 'INFO';
+    const targetRole = notificationData?.targetRole || 'Semua User';
+    const createdAt = notificationData?.createdAt
+      ? new Date(notificationData.createdAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })
+      : null;
 
-  const entities: DashboardEntity[] = isNotification
-    ? [
-        {
-          id: 'broadcast-status',
-          type: 'Broadcast',
-          title: notificationData?.title ? `Pengumuman: ${notificationData.title}` : 'Status Pengumuman Sekolah',
-          subtitle: notificationData?.message || 'Pengumuman telah didistribusikan ke pengguna.',
-          href: '#',
-          status: 'Terkirim',
-          metrics: { Kanal: 'In-App', Target: notificationData?.targetRole || 'Semua' },
-        },
-        {
-          id: 'delivery-log',
-          type: 'Log Sistem',
-          title: 'Riwayat Penyampaian Notifikasi',
-          subtitle: 'Sistem berhasil mengirim notifikasi in-app ke target audiens.',
-          href: '#',
-          status: 'Selesai',
-          metrics: { Status: 'Sukses', SLA: 'Instan' },
-        },
-      ]
-    : [
-        {
-          id: 'payment-cycle',
-          type: 'Transaksi',
-          title: 'Siklus pembayaran aktif',
-          subtitle: 'Invoice, QRIS, dan transfer manual dalam satu alur.',
-          href: `${pathname}/payment-cycle`,
-          status: 'Aktif',
-          metrics: { Realisasi: '88.4%', Invoice: '132', SLA: '3 jam' },
-        },
-        {
-          id: 'system-log',
-          type: 'Sistem',
-          title: 'Log Aktivitas Terkait',
-          subtitle: 'Catatan aktivitas dan riwayat pembaruan sistem.',
-          href: '#',
-          status: 'Aktif',
-          metrics: { Status: 'Normal' },
-        },
-      ];
+    const getActionRoute = () => {
+      if (type === 'PAYMENT') return `/dashboard/${roleSlug}/payments`;
+      if (type === 'ATTENDANCE') return `/dashboard/${roleSlug}/attendance`;
+      if (type === 'ACADEMIC') return `/dashboard/${roleSlug}/classes`;
+      return null;
+    };
+    const actionRoute = getActionRoute();
+
+    return (
+      <div className="flex flex-col gap-6 max-w-4xl mx-auto text-left">
+        <div className="flex items-center justify-between">
+          <Button variant="ghost" size="sm" asChild className="gap-2">
+            <Link href={parent}>
+              <ArrowLeft className="size-4" /> Kembali ke Notifikasi
+            </Link>
+          </Button>
+          <Badge variant="outline" className="uppercase font-semibold">
+            {type}
+          </Badge>
+        </div>
+
+        <Card className="border-primary/20 shadow-sm">
+          <CardHeader className="pb-3 border-b bg-muted/20">
+            <div className="flex items-start justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Bell className="size-5 text-primary shrink-0" />
+                  <CardTitle className="text-xl font-bold">{title}</CardTitle>
+                </div>
+                {createdAt && <p className="text-xs text-muted-foreground pt-1">Dikirim pada: {createdAt}</p>}
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6 space-y-6">
+            <div className="prose prose-sm max-w-none dark:prose-invert text-foreground leading-relaxed text-base">
+              {message}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t text-sm">
+              <div className="p-3 rounded-lg bg-muted/40 border space-y-1">
+                <span className="text-xs text-muted-foreground font-medium">Target Penerima</span>
+                <p className="font-semibold">{targetRole}</p>
+              </div>
+              <div className="p-3 rounded-lg bg-muted/40 border space-y-1">
+                <span className="text-xs text-muted-foreground font-medium">Kanal Pengiriman</span>
+                <p className="font-semibold">In-App Broadcast</p>
+              </div>
+              <div className="p-3 rounded-lg bg-muted/40 border space-y-1">
+                <span className="text-xs text-muted-foreground font-medium">Status</span>
+                <p className="font-semibold text-emerald-600 dark:text-emerald-400">Terkirim & Aktif</p>
+              </div>
+            </div>
+
+            {actionRoute && (
+              <div className="pt-2 flex justify-end">
+                <Button size="sm" onClick={() => router.push(actionRoute)} className="gap-2">
+                  {type === 'PAYMENT' && <CreditCard className="size-4" />}
+                  {type === 'ATTENDANCE' && <CalendarCheck className="size-4" />}
+                  {type === 'ACADEMIC' && <BookOpen className="size-4" />}
+                  Buka Halaman {type === 'PAYMENT' ? 'Pembayaran' : type === 'ATTENDANCE' ? 'Presensi' : 'Akademik'}
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const metricsList = [
+    { label: 'Pembayaran', value: '88.4%', icon: CreditCard },
+    { label: 'Status Sistem', value: 'Aktif', icon: BarChart3 },
+    { label: 'Akademik', value: '84.8', icon: GraduationCap },
+    { label: 'Profil Terkait', value: '12', icon: UserRound },
+  ];
+
+  const entities: DashboardEntity[] = [
+    {
+      id: 'payment-cycle',
+      type: 'Transaksi',
+      title: 'Siklus pembayaran aktif',
+      subtitle: 'Invoice, QRIS, dan transfer manual dalam satu alur.',
+      href: `${pathname}/payment-cycle`,
+      status: 'Aktif',
+      metrics: { Realisasi: '88.4%', Invoice: '132', SLA: '3 jam' },
+    },
+    {
+      id: 'system-log',
+      type: 'Sistem',
+      title: 'Log Aktivitas Terkait',
+      subtitle: 'Catatan aktivitas dan riwayat pembaruan sistem.',
+      href: '#',
+      status: 'Aktif',
+      metrics: { Status: 'Normal' },
+    },
+  ];
 
   return (
     <div className="flex flex-col gap-6">
@@ -130,37 +193,13 @@ export function DashboardDetailPage({ kind = 'detail' }: { kind?: 'detail' | 'an
               <Badge variant="secondary">{kind}</Badge>
               <Badge variant="outline">{moduleLabel}</Badge>
             </div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              {isNotification && notificationData?.title ? notificationData.title : entityLabel}
-            </h1>
+            <h1 className="text-3xl font-bold tracking-tight">{entityLabel}</h1>
             <p className="mt-2 max-w-3xl text-sm leading-relaxed text-muted-foreground">
-              {isNotification
-                ? 'Halaman detail informasi notifikasi dan pengumuman sekolah.'
-                : `Halaman detail nested untuk eksplorasi ${moduleLabel}. Dari sini user dapat melihat analytics, tabel terkait, dan konteks master-detail tanpa keluar dari alur dashboard.`}
+              Halaman detail nested untuk eksplorasi {moduleLabel}. Dari sini user dapat melihat analytics, tabel terkait, dan konteks master-detail tanpa keluar dari alur dashboard.
             </p>
           </div>
         </div>
       </div>
-
-      {isNotification && notificationData?.message && (
-        <Card className="border-primary/20 bg-primary/5">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Bell className="size-5 text-primary" /> Pesan Notifikasi
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-left space-y-2">
-            <p className="text-base font-medium leading-relaxed">{notificationData.message}</p>
-            <div className="flex flex-wrap items-center gap-2 pt-2 text-xs text-muted-foreground">
-              <Badge variant="outline">{notificationData.type || 'INFO'}</Badge>
-              <span>Target: <strong>{notificationData.targetRole || 'Semua User'}</strong></span>
-              {notificationData.createdAt && (
-                <span>• {new Date(notificationData.createdAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}</span>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         {metricsList.map((metric) => {
@@ -210,12 +249,11 @@ export function DashboardDetailPage({ kind = 'detail' }: { kind?: 'detail' | 'an
           </CardTitle>
         </CardHeader>
         <CardContent className="text-left text-sm leading-relaxed text-muted-foreground">
-          {isNotification
-            ? 'Detail notifikasi ini menyajikan informasi ringkasan pengumuman, audiens target, dan log pengiriman.'
-            : 'Detail page ini sengaja generik untuk v1 mock SaaS: semua drill-down dari bulan, kelas, siswa, invoice, tugas, dan analytics akan punya halaman hidup dengan konteks yang konsisten.'}
+          Detail page ini sengaja generik untuk v1 mock SaaS: semua drill-down dari bulan, kelas, siswa, invoice, tugas, dan analytics akan punya halaman hidup dengan konteks yang konsisten.
         </CardContent>
       </Card>
     </div>
   );
 }
+
 
