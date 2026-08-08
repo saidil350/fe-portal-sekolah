@@ -5,6 +5,7 @@ import { apiClient } from '@/lib/api-client';
 import { formatDisplayId } from '@/lib/utils';
 import { exportToExcel } from '@/lib/utils/export-utils';
 import { PublishInvoiceModal } from './publish-invoice-modal';
+import { useAuthStore } from '@/stores/auth-store';
 
 export interface InvoiceItem {
   id?: string;
@@ -30,6 +31,9 @@ const getMonthName = (monthNum?: number) => {
 };
 
 export function PaymentWidgets() {
+  const user = useAuthStore((state) => state.user);
+  const isBendahara = user?.role === 'BENDAHARA';
+
   const [loading, setLoading] = useState(true);
   const [invoices, setInvoices] = useState<InvoiceItem[]>([]);
   const [totalInvoices, setTotalInvoices] = useState(0);
@@ -280,13 +284,15 @@ export function PaymentWidgets() {
                 Export Excel
               </Button>
 
-              <Button
-                onClick={() => setIsPublishModalOpen(true)}
-                className="bg-primary hover:bg-primary/90 text-white h-9 text-xs px-3 shadow-sm flex items-center gap-1.5"
-              >
-                <Send className="h-3.5 w-3.5" />
-                Publish Tagihan SPP
-              </Button>
+              {isBendahara && (
+                <Button
+                  onClick={() => setIsPublishModalOpen(true)}
+                  className="bg-primary hover:bg-primary/90 text-white h-9 text-xs px-3 shadow-sm flex items-center gap-1.5"
+                >
+                  <Send className="h-3.5 w-3.5" />
+                  Publish Tagihan SPP
+                </Button>
+              )}
             </div>
           </div>
 
@@ -523,30 +529,36 @@ export function PaymentWidgets() {
       )}
 
       {/* Modal Publish Tagihan SPP */}
-      <PublishInvoiceModal
-        isOpen={isPublishModalOpen}
-        onClose={() => setIsPublishModalOpen(false)}
-        onSuccess={() => {
-          // Re-fetch invoices
-          const params = new URLSearchParams();
-          params.set('page', currentPage.toString());
-          params.set('limit', itemsPerPage.toString());
-          if (debouncedSearch) params.set('search', debouncedSearch);
-          if (statusFilter !== 'ALL') params.set('status', statusFilter);
-          params.set('month', selectedMonth.toString());
-          params.set('year', selectedYear.toString());
-          
-          apiClient.get<any>(`/admin/payments/invoices?${params.toString()}`).then((result) => {
-            if (result.success && result.data) {
-              setInvoices(result.data.items || []);
-              setTotalInvoices(result.data.pagination?.total || 0);
-            }
-          });
-        }}
-        defaultMonth={selectedMonth}
-        defaultYear={selectedYear}
-      />
+      {isBendahara && (
+        <PublishInvoiceModal
+          isOpen={isPublishModalOpen}
+          onClose={() => setIsPublishModalOpen(false)}
+          onSuccess={() => {
+            // Re-fetch invoices
+            const params = new URLSearchParams();
+            params.set('page', currentPage.toString());
+            params.set('limit', itemsPerPage.toString());
+            if (debouncedSearch) params.set('search', debouncedSearch);
+            if (statusFilter !== 'ALL') params.set('status', statusFilter);
+            params.set('month', selectedMonth.toString());
+            params.set('year', selectedYear.toString());
+            
+            apiClient.get<any>(`/admin/payments/invoices?${params.toString()}`).then((result) => {
+              if (result.success && result.data) {
+                if (Array.isArray(result.data)) {
+                  setInvoices(result.data);
+                  setTotalInvoices(result.data.length);
+                } else {
+                  setInvoices(result.data.items || []);
+                  setTotalInvoices(result.data.pagination?.total || 0);
+                }
+              }
+            });
+          }}
+          defaultMonth={selectedMonth}
+          defaultYear={selectedYear}
+        />
+      )}
     </div>
   );
 }
-

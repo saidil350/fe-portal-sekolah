@@ -47,7 +47,7 @@ export const PERMISSION_MATRIX: Record<Role, Permission[]> = {
     'users.read',
     'classes.read',
     'attendance.read', 'attendance.read.all', 'attendance.report',
-    'payments.create', 'payments.read', 'payments.read.all', 'payments.verify',
+    'payments.read', 'payments.read.all',
     'notifications.read',
     'dashboard.view'
   ],
