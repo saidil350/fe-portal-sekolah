@@ -24,6 +24,13 @@ export const NAV_CONFIG: Record<Role, NavItem[]> = {
     { title: 'Monitoring Pembayaran', href: '/dashboard/kepala-sekolah/payments', iconName: 'CreditCard' },
     { title: 'Profil Saya', href: '/dashboard/kepala-sekolah/profile', iconName: 'User' },
   ],
+  BENDAHARA: [
+    { title: 'Dashboard Keuangan', href: '/dashboard/bendahara', iconName: 'LayoutDashboard' },
+    { title: 'Kelola Pembayaran', href: '/dashboard/bendahara/payments', iconName: 'CreditCard' },
+    { title: 'Pengaturan Tarif SPP', href: '/dashboard/bendahara/payments/tariffs', iconName: 'FileText' },
+    { title: 'Notifikasi', href: '/dashboard/bendahara/notifications', iconName: 'Bell' },
+    { title: 'Profil Saya', href: '/dashboard/bendahara/profile', iconName: 'User' },
+  ],
   GURU: [
     { title: 'Dashboard', href: '/dashboard/guru', iconName: 'LayoutDashboard' },
     { title: 'Notifikasi', href: '/dashboard/guru/notifications', iconName: 'Bell' },

@@ -80,6 +80,7 @@ export default function LoginPage() {
       SUPER_ADMIN: 'superadmin@portalsekolah.id',
       ADMIN_IT: 'admin.it@sekolah1.sch.id',
       KEPALA_SEKOLAH: 'kepsek@sekolah1.sch.id',
+      BENDAHARA: 'bendahara@sekolah1.sch.id',
       GURU: 'guru.budi@sekolah1.sch.id',
       STAFF: 'staff@sekolah1.sch.id',
       SISWA: 'siswa.putra@sekolah1.sch.id',
@@ -149,7 +150,7 @@ export default function LoginPage() {
               Simulator Akun Demo (Uji Coba Cepat)
             </p>
             <div className="grid grid-cols-2 gap-2 w-full">
-              {(['SISWA', 'GURU', 'KEPALA_SEKOLAH', 'ADMIN_IT'] as Role[]).map((r) => (
+              {(['SISWA', 'GURU', 'KEPALA_SEKOLAH', 'ADMIN_IT', 'BENDAHARA', 'SUPER_ADMIN'] as Role[]).map((r) => (
                 <Button
                   key={r}
                   variant="outline"

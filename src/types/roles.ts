@@ -1,4 +1,5 @@
-export type Role = 'SUPER_ADMIN' | 'ADMIN_IT' | 'KEPALA_SEKOLAH' | 'GURU' | 'STAFF' | 'SISWA';
+export type Role = 'SUPER_ADMIN' | 'ADMIN_IT' | 'KEPALA_SEKOLAH' | 'BENDAHARA' | 'GURU' | 'STAFF' | 'SISWA';
+
 
 export type Permission =
   // User Management

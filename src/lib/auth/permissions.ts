@@ -28,6 +28,13 @@ export const PERMISSION_MATRIX: Record<Role, Permission[]> = {
     'notifications.broadcast', 'notifications.read',
     'dashboard.view'
   ],
+  BENDAHARA: [
+    'users.read',
+    'classes.read',
+    'payments.create', 'payments.read', 'payments.read.all', 'payments.verify',
+    'notifications.broadcast', 'notifications.read',
+    'dashboard.view'
+  ],
   GURU: [
     'users.read',
     'classes.read',

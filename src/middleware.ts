@@ -62,10 +62,15 @@ export function middleware(request: NextRequest) {
     if (pathname.startsWith('/dashboard/kepala-sekolah') && userRoleCookie !== 'KEPALA_SEKOLAH') {
       return NextResponse.redirect(new URL(getRoleDashboard(userRoleCookie || 'SISWA'), request.url));
     }
+    if (pathname.startsWith('/dashboard/bendahara') && userRoleCookie !== 'BENDAHARA') {
+      return NextResponse.redirect(new URL(getRoleDashboard(userRoleCookie || 'SISWA'), request.url));
+    }
     if (pathname.startsWith('/dashboard/guru') && userRoleCookie !== 'GURU') {
       return NextResponse.redirect(new URL(getRoleDashboard(userRoleCookie || 'SISWA'), request.url));
     }
-
+    if (pathname.startsWith('/dashboard/staff') && userRoleCookie !== 'STAFF') {
+      return NextResponse.redirect(new URL(getRoleDashboard(userRoleCookie || 'SISWA'), request.url));
+    }
     if (pathname.startsWith('/dashboard/siswa') && userRoleCookie !== 'SISWA') {
       return NextResponse.redirect(new URL(getRoleDashboard(userRoleCookie || 'SISWA'), request.url));
     }
@@ -82,9 +87,12 @@ export function middleware(request: NextRequest) {
 
 function getRoleDashboard(role: Role): string {
   switch (role) {
+    case 'SUPER_ADMIN': return '/dashboard/super-admin';
     case 'ADMIN_IT': return '/dashboard/admin';
     case 'KEPALA_SEKOLAH': return '/dashboard/kepala-sekolah';
+    case 'BENDAHARA': return '/dashboard/bendahara';
     case 'GURU': return '/dashboard/guru';
+    case 'STAFF': return '/dashboard/staff';
     case 'SISWA': return '/dashboard/siswa';
     default: return '/dashboard/siswa';
   }
