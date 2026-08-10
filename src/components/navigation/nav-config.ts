@@ -27,7 +27,6 @@ export const NAV_CONFIG: Record<Role, NavItem[]> = {
   BENDAHARA: [
     { title: 'Dashboard Keuangan', href: '/dashboard/bendahara', iconName: 'LayoutDashboard' },
     { title: 'Kelola Pembayaran', href: '/dashboard/bendahara/payments', iconName: 'CreditCard' },
-    { title: 'Pengaturan Tarif SPP', href: '/dashboard/bendahara/payments/tariffs', iconName: 'FileText' },
     { title: 'Notifikasi', href: '/dashboard/bendahara/notifications', iconName: 'Bell' },
     { title: 'Profil Saya', href: '/dashboard/bendahara/profile', iconName: 'User' },
   ],

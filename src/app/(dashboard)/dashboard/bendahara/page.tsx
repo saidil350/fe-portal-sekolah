@@ -16,7 +16,7 @@ import {
   TableHead,
   TableCell,
 } from '@/components/ui';
-import { CreditCard, FileText, TrendingUp, Plus, ArrowRight, Wallet, CheckCircle2, Clock } from 'lucide-react';
+import { CreditCard, TrendingUp, ArrowRight, Wallet, CheckCircle2, Clock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api-client';
 
@@ -45,21 +45,21 @@ export default function BendaharaDashboardPage() {
   const stats = [
     {
       title: 'Total Pemasukan Bulan Ini',
-      value: summary ? `Rp ${Number(summary.paidAmount || 0).toLocaleString('id-ID')}` : 'Rp 480.200.000',
+      value: summary?.kpiData ? `Rp ${Number(summary.kpiData.pendapatanBulanIni || 0).toLocaleString('id-ID')}` : summary ? `Rp ${Number(summary.paidAmount || 0).toLocaleString('id-ID')}` : 'Rp 480.200.000',
       icon: Wallet,
-      description: summary ? `${summary.paidCount || 0} invoice lunas` : '1.232 invoice lunas',
+      description: summary?.kpiData ? `${summary.kpiData.totalLunas || 0} invoice lunas` : summary ? `${summary.paidCount || 0} invoice lunas` : '1.232 invoice lunas',
     },
     {
       title: 'Pending Pembayaran',
-      value: summary ? `Rp ${Number(summary.pendingAmount || 0).toLocaleString('id-ID')}` : 'Rp 14.800.000',
+      value: summary?.kpiData ? `Rp ${Number(summary.kpiData.outstandingPayment || 0).toLocaleString('id-ID')}` : summary ? `Rp ${Number(summary.pendingAmount || 0).toLocaleString('id-ID')}` : 'Rp 14.800.000',
       icon: Clock,
-      description: summary ? `${summary.pendingCount || 0} invoice pending` : '8 invoice pending',
+      description: summary?.kpiData ? `${summary.kpiData.totalPending || 0} invoice pending` : summary ? `${summary.pendingCount || 0} invoice pending` : '8 invoice pending',
     },
     {
-      title: 'Tarif SPP Aktif',
-      value: summary ? `${summary.activeTariffsCount || 4} Paket` : '4 Paket Tarif',
-      icon: FileText,
-      description: 'Pengaturan nominal SPP',
+      title: 'Tingkat Kelunasan',
+      value: summary?.kpiData ? `${summary.kpiData.successRate || 0}%` : '85%',
+      icon: CheckCircle2,
+      description: 'Persentase tagihan terbayar',
     },
   ];
 
@@ -67,16 +67,11 @@ export default function BendaharaDashboardPage() {
     <div className="space-y-6 p-6 sm:p-8">
       <PageHeader
         title="Dashboard Keuangan & Bendahara Sekolah"
-        description="Pusat pengelolaan tarif SPP, pembuatan invoice tagihan, publikasi pembayaran, dan monitoring transaksi keuangan sekolah."
+        description="Pusat pengelolaan pembuatan invoice tagihan, publikasi pembayaran, dan monitoring transaksi keuangan sekolah."
         action={
-          <div className="flex items-center gap-2">
-            <Button onClick={() => router.push('/dashboard/bendahara/payments/tariffs')} className="gap-2">
-              <Plus className="h-4 w-4" /> Atur Tarif SPP
-            </Button>
-            <Button variant="outline" onClick={() => router.push('/dashboard/bendahara/payments')} className="gap-2">
-              <CreditCard className="h-4 w-4" /> Kelola Tagihan
-            </Button>
-          </div>
+          <Button onClick={() => router.push('/dashboard/bendahara/payments')} className="gap-2">
+            <CreditCard className="h-4 w-4" /> Kelola Pembayaran
+          </Button>
         }
       />
 
@@ -103,20 +98,6 @@ export default function BendaharaDashboardPage() {
 
       {/* Akses Cepat Kelola Pembayaran */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="hover:border-primary/50 transition-colors cursor-pointer" onClick={() => router.push('/dashboard/bendahara/payments/tariffs')}>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-lg font-bold flex items-center gap-2">
-              <FileText className="h-5 w-5 text-primary" /> Pengaturan Tarif & Harga SPP
-            </CardTitle>
-            <ArrowRight className="h-5 w-5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Buat nominal tarif SPP bulanan baru berdasarkan jenjang, kelas, atau khusus siswa tertentu.
-            </p>
-          </CardContent>
-        </Card>
-
         <Card className="hover:border-primary/50 transition-colors cursor-pointer" onClick={() => router.push('/dashboard/bendahara/payments')}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-lg font-bold flex items-center gap-2">
@@ -127,6 +108,20 @@ export default function BendaharaDashboardPage() {
           <CardContent>
             <p className="text-sm text-muted-foreground">
               Generate invoice massal bulanan untuk semua siswa dan publish tagihan agar siswa/orang tua dapat melakukan pembayaran.
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:border-primary/50 transition-colors cursor-pointer" onClick={() => router.push('/dashboard/bendahara/payments')}>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-lg font-bold flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-primary" /> Riwayat Transaksi & Pembayaran
+            </CardTitle>
+            <ArrowRight className="h-5 w-5 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              Lihat dan pantau riwayat pembayaran yang masuk dari siswa secara real-time.
             </p>
           </CardContent>
         </Card>
