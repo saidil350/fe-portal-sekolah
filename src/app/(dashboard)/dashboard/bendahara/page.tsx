@@ -66,7 +66,7 @@ export default function BendaharaDashboardPage() {
   return (
     <div className="space-y-6 p-6 sm:p-8">
       <PageHeader
-        title="Dashboard Keuangan & Bendahara Sekolah"
+        title="Dashboard Bendahara"
         description="Pusat pengelolaan pembuatan invoice tagihan, publikasi pembayaran, dan monitoring transaksi keuangan sekolah."
         action={
           <Button onClick={() => router.push('/dashboard/bendahara/payments')} className="gap-2">

@@ -25,7 +25,7 @@ export const NAV_CONFIG: Record<Role, NavItem[]> = {
     { title: 'Profil Saya', href: '/dashboard/kepala-sekolah/profile', iconName: 'User' },
   ],
   BENDAHARA: [
-    { title: 'Dashboard Keuangan', href: '/dashboard/bendahara', iconName: 'LayoutDashboard' },
+    { title: 'Dashboard', href: '/dashboard/bendahara', iconName: 'LayoutDashboard' },
     { title: 'Kelola Pembayaran', href: '/dashboard/bendahara/payments', iconName: 'CreditCard' },
     { title: 'Notifikasi', href: '/dashboard/bendahara/notifications', iconName: 'Bell' },
     { title: 'Profil Saya', href: '/dashboard/bendahara/profile', iconName: 'User' },
