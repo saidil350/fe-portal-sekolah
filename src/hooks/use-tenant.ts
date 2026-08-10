@@ -39,7 +39,7 @@ export function useTenant() {
   }, []);
 
   return {
-    tenantId,
+    tenantId: tenantId || 'default',
     tenantName,
     academicYear,
     semester,

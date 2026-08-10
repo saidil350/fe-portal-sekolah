@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { extractTenantFromDomain } from '@/lib/auth';
 import { Role } from '@/types';
 
 // Rute yang dilewati otentikasi
 const PUBLIC_PATHS = ['/', '/login', '/api/public'];
 
 export function middleware(request: NextRequest) {
-  const { pathname, hostname } = request.nextUrl;
+  const { pathname } = request.nextUrl;
 
   // Lewati file statis, next internal, dll
   if (
@@ -19,43 +18,21 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Ekstrak subdomain tenant (jika ada)
-  const tenantDomain = extractTenantFromDomain(hostname);
-
   // Ambil sesi user dari cookie
   const token = request.cookies.get('portal_session')?.value;
   const userRoleCookie = request.cookies.get('portal_user_role')?.value as Role | undefined;
-  const userTenantCookie = request.cookies.get('portal_user_tenant')?.value;
 
   const isPublicPath = PUBLIC_PATHS.some((path) =>
     path === '/' ? pathname === '/' : pathname.startsWith(path)
   );
 
   // 1. Jika rute dilindungi dan tidak ada token -> Arahkan ke Login
-  // Middleware hanya cek cookie existence sebagai first-pass gate.
-  // Client-side AuthProvider menangani validasi token dan redirect jika sudah login.
   if (!token && !isPublicPath) {
-    const loginUrl = new URL('/login', request.url);
-    if (tenantDomain) {
-      loginUrl.searchParams.set('tenant', tenantDomain);
-    }
-    return NextResponse.redirect(loginUrl);
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  // 2. Jika sudah punya token dan di /login, BIARKAN render login page.
-  // AuthProvider di client-side akan validate session dan redirect ke dashboard jika valid.
-  // Ini menghindari auto-skip yang terjadi karena cookie stale/expired.
-
-  // 3. Validasi Tenant Multi-Tenant untuk rute dashboard
+  // 2. Validasi Peran Rute (Role-Based Route Guard) untuk rute dashboard
   if (token && pathname.startsWith('/dashboard')) {
-    // ADMIN_IT bebas dari tenant check (karena sekarang bertindak global)
-    if (userRoleCookie !== 'ADMIN_IT') {
-      if (tenantDomain && userTenantCookie && tenantDomain !== userTenantCookie) {
-        return new NextResponse('Unauthorized: Tenant Mismatch', { status: 403 });
-      }
-    }
-
-    // 4. Validasi Peran Rute (Role-Based Route Guard)
     if (pathname.startsWith('/dashboard/admin') && userRoleCookie !== 'ADMIN_IT') {
       return NextResponse.redirect(new URL(getRoleDashboard(userRoleCookie || 'SISWA'), request.url));
     }

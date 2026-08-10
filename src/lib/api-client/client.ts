@@ -27,26 +27,21 @@ export const api: AxiosInstance = axios.create({
 });
 
 let authToken: string | null = null;
-let activeTenantId: string | null = null;
 
-// Setter untuk dynamic token dan tenant
+// Setter untuk dynamic token
 export const setAuthToken = (token: string | null) => {
   authToken = token;
 };
 
-export const setTenantId = (tenantId: string | null) => {
-  activeTenantId = tenantId;
+export const setTenantId = (_tenantId: string | null) => {
+  // Deprecated in single tenant mode
 };
 
-// Request Interceptor untuk inject token dan tenantId
+// Request Interceptor untuk inject token
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     if (authToken && config.headers) {
       config.headers.Authorization = `Bearer ${authToken}`;
-    }
-    
-    if (activeTenantId && config.headers) {
-      config.headers['X-Tenant-ID'] = activeTenantId;
     }
     
     return config;
