@@ -6,7 +6,6 @@ export const PUBLIC_ROUTES = {
 };
 
 export const DASHBOARD_ROUTES: Record<Role, string> = {
-  SUPER_ADMIN: '/dashboard/super-admin',
   ADMIN_IT: '/dashboard/admin',
   KEPALA_SEKOLAH: '/dashboard/kepala-sekolah',
   BENDAHARA: '/dashboard/bendahara',

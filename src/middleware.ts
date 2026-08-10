@@ -87,7 +87,6 @@ export function middleware(request: NextRequest) {
 
 function getRoleDashboard(role: Role): string {
   switch (role) {
-    case 'SUPER_ADMIN': return '/dashboard/super-admin';
     case 'ADMIN_IT': return '/dashboard/admin';
     case 'KEPALA_SEKOLAH': return '/dashboard/kepala-sekolah';
     case 'BENDAHARA': return '/dashboard/bendahara';

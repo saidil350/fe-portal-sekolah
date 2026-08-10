@@ -1,15 +1,6 @@
 import { Role, Permission } from '@/types';
 
 export const PERMISSION_MATRIX: Record<Role, Permission[]> = {
-  SUPER_ADMIN: [
-    'users.create', 'users.read', 'users.update', 'users.delete',
-    'classes.create', 'classes.read', 'classes.update', 'classes.delete', 'classes.assign',
-    'attendance.check_in', 'attendance.check_out', 'attendance.read', 'attendance.read.all', 'attendance.report',
-    'assignments.create', 'assignments.read', 'assignments.update', 'assignments.delete', 'assignments.submit', 'assignments.grade',
-    'payments.create', 'payments.read', 'payments.read.all', 'payments.verify',
-    'notifications.broadcast', 'notifications.read',
-    'dashboard.view'
-  ],
   ADMIN_IT: [
     'users.create', 'users.read', 'users.update', 'users.delete',
     'classes.create', 'classes.read', 'classes.update', 'classes.delete', 'classes.assign',

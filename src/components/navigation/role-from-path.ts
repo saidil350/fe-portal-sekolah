@@ -1,7 +1,6 @@
 import { Role } from '@/types';
 
 const DASHBOARD_ROLE_SEGMENTS: Array<{ segment: string; role: Role }> = [
-  { segment: 'super-admin', role: 'SUPER_ADMIN' },
   { segment: 'admin', role: 'ADMIN_IT' },
   { segment: 'kepala-sekolah', role: 'KEPALA_SEKOLAH' },
   { segment: 'bendahara', role: 'BENDAHARA' },

@@ -7,9 +7,6 @@ export interface NavItem {
 }
 
 export const NAV_CONFIG: Record<Role, NavItem[]> = {
-  SUPER_ADMIN: [
-    { title: 'Dashboard Platform', href: '/dashboard/super-admin', iconName: 'LayoutDashboard' },
-  ],
   ADMIN_IT: [
     { title: 'Dashboard', href: '/dashboard/admin', iconName: 'LayoutDashboard' },
     { title: 'Kelola Pengguna', href: '/dashboard/admin/users', iconName: 'Users' },

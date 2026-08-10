@@ -5,7 +5,7 @@ export interface User {
   email: string;
   name: string;
   role: Role;
-  tenantId?: string; // Nullable hanya untuk ADMIN_IT (sebelumnya SUPER_ADMIN)
+  tenantId?: string; // Nullable hanya untuk ADMIN_IT
   avatarUrl?: string | null;
   isActive: boolean;
   createdAt: string;

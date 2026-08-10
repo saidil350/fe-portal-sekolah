@@ -12,7 +12,7 @@ export default function AdminClassesPage() {
           <h2 className="text-lg font-semibold">Fitur Tidak Tersedia</h2>
           <p className="text-sm text-muted-foreground">
             Halaman manajemen kelas telah dihapus sesuai pembaruan sistem.
-            Silakan hubungi Super Admin untuk informasi lebih lanjut.
+            Silakan hubungi Admin IT untuk informasi lebih lanjut.
           </p>
         </CardContent>
       </Card>
